@@ -192,6 +192,17 @@
       new Promise((_, reject) => setTimeout(() => reject(new Error(label + " timed out after " + (ms / 1000) + "s — likely a blocked request (domain not allowed, ad-blocker, or network issue)")), ms))
     ]);
   }
+  let clerkLoadPromise = null;
+  function clerkLoad() {
+    if (!clerkLoadPromise) {
+      clerkLoadPromise = withTimeout(
+        window.Clerk.load({ ui: { ClerkUI: window.__internal_ClerkUICtor } }),
+        8000,
+        "Clerk.load()"
+      );
+    }
+    return clerkLoadPromise;
+  }
 
   const signInBtn = document.getElementById("signInBtn");
   signInBtn.addEventListener("click", async () => {
@@ -199,7 +210,7 @@
     signInBtn.textContent = "Loading…";
     try {
       if (!window.Clerk) throw new Error("Clerk script did not load at all (check network/ad-blocker/browser extensions).");
-      await withTimeout(window.Clerk.load(), 8000, "Clerk.load()");
+      await clerkLoad();
       await window.Clerk.openSignIn({ appearance: clerkAppearance });
     } catch (err) {
       console.error(err);
@@ -212,7 +223,7 @@
   window.addEventListener("load", async function () {
     try {
       if (!window.Clerk) return;
-      await withTimeout(window.Clerk.load(), 8000, "Clerk.load()");
+      await clerkLoad();
       const userButtonEl = document.getElementById("userButton");
       function updateNav() {
         userButtonEl.innerHTML = "";
