@@ -186,13 +186,34 @@
     }
   };
 
-  window.addEventListener("load", async function () {
-    const signInBtn = document.getElementById("signInBtn");
-    try {
-      if (!window.Clerk) throw new Error("Clerk script did not load (check network/ad-blocker).");
-      await window.Clerk.load();
-      const userButtonEl = document.getElementById("userButton");
+  function withTimeout(promise, ms, label) {
+    return Promise.race([
+      promise,
+      new Promise((_, reject) => setTimeout(() => reject(new Error(label + " timed out after " + (ms / 1000) + "s — likely a blocked request (domain not allowed, ad-blocker, or network issue)")), ms))
+    ]);
+  }
 
+  const signInBtn = document.getElementById("signInBtn");
+  signInBtn.addEventListener("click", async () => {
+    const originalLabel = signInBtn.textContent;
+    signInBtn.textContent = "Loading…";
+    try {
+      if (!window.Clerk) throw new Error("Clerk script did not load at all (check network/ad-blocker/browser extensions).");
+      await withTimeout(window.Clerk.load(), 8000, "Clerk.load()");
+      await window.Clerk.openSignIn({ appearance: clerkAppearance });
+    } catch (err) {
+      console.error(err);
+      alert("Sign-in error: " + err.message);
+    } finally {
+      signInBtn.textContent = originalLabel;
+    }
+  });
+
+  window.addEventListener("load", async function () {
+    try {
+      if (!window.Clerk) return;
+      await withTimeout(window.Clerk.load(), 8000, "Clerk.load()");
+      const userButtonEl = document.getElementById("userButton");
       function updateNav() {
         userButtonEl.innerHTML = "";
         if (window.Clerk.user) {
@@ -204,10 +225,8 @@
       }
       updateNav();
       window.Clerk.addListener(updateNav);
-      signInBtn.addEventListener("click", () => window.Clerk.openSignIn({ appearance: clerkAppearance }));
     } catch (err) {
-      console.error(err);
-      signInBtn.title = "Sign-in unavailable: " + err.message;
+      console.error("Session check failed:", err);
     }
   });
 </script>
