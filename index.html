@@ -1,977 +1,208 @@
-<title>COBRA & State Continuation — Process Map</title>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>VESTED — Benefits Administration Intelligence</title>
 <style>
   :root {
-    --bg: #eef1ee;
-    --surface: #ffffff;
-    --surface-alt: #e3e7e1;
-    --ink: #1a2420;
-    --ink-soft: #55635a;
-    --ink-faint: #9aa79d;
-    --line-neutral: #a9b3ac;
-    --federal: #2f5d8a;    --federal-soft: #e2ebf3;
-    --maryland: #2f6459;   --maryland-soft: #dceae6;
-    --dc: #8a3a52;         --dc-soft: #f5e5ea;
-    --virginia: #6a4f8a;   --virginia-soft: #ece6f5;
-    --manager: #9c6a1f;    --manager-soft: #f5ead9;
-    --warn: #a63b2e;       --warn-soft: #f8e2df;
-    --border: #d8dcd5;
-    --shadow: 0 1px 2px rgba(20, 30, 25, 0.07), 0 10px 28px rgba(20, 30, 25, 0.07);
+    --page: #f7f5f0; --surface: #ffffff;
+    --ink: #14140f; --ink-soft: #5c5a52; --ink-muted: #8f8c81;
+    --accent: #4d6b5e; --accent-ink: #ffffff;
+    --border: rgba(20,20,15,0.12);
+    --hero-bg: #0d0f0d;
   }
   @media (prefers-color-scheme: dark) {
-    :root {
-      --bg: #141917; --surface: #1c2320; --surface-alt: #232b27;
-      --ink: #e7ece8; --ink-soft: #9fada4; --ink-faint: #566159;
-      --line-neutral: #495750;
-      --federal: #8bb4dd; --federal-soft: #1e2a35;
-      --maryland: #7ec2b1; --maryland-soft: #1c2e2a;
-      --dc: #d98aa5; --dc-soft: #2e1f24;
-      --virginia: #b6a0e0; --virginia-soft: #26213a;
-      --manager: #e2b46e; --manager-soft: #33291a;
-      --warn: #e08a7a; --warn-soft: #33201c;
-      --border: #2e3733;
-      --shadow: 0 1px 2px rgba(0,0,0,.35), 0 10px 28px rgba(0,0,0,.3);
-    }
+    :root { --page: #0d0f0d; --surface: #161815; --ink: #f3f2ee; --ink-soft: #b8b6ad; --ink-muted: #7c7a71; --accent: #8fae9e; --accent-ink: #0d0f0d; --border: rgba(255,255,255,0.12); }
   }
-  :root[data-theme="dark"] {
-    --bg: #141917; --surface: #1c2320; --surface-alt: #232b27;
-    --ink: #e7ece8; --ink-soft: #9fada4; --ink-faint: #566159;
-    --line-neutral: #495750;
-    --federal: #8bb4dd; --federal-soft: #1e2a35;
-    --maryland: #7ec2b1; --maryland-soft: #1c2e2a;
-    --dc: #d98aa5; --dc-soft: #2e1f24;
-    --virginia: #b6a0e0; --virginia-soft: #26213a;
-    --manager: #e2b46e; --manager-soft: #33291a;
-    --warn: #e08a7a; --warn-soft: #33201c;
-    --border: #2e3733;
-    --shadow: 0 1px 2px rgba(0,0,0,.35), 0 10px 28px rgba(0,0,0,.3);
-  }
-  :root[data-theme="light"] {
-    --bg: #eef1ee; --surface: #ffffff; --surface-alt: #e3e7e1;
-    --ink: #1a2420; --ink-soft: #55635a; --ink-faint: #9aa79d;
-    --line-neutral: #a9b3ac;
-    --federal: #2f5d8a; --federal-soft: #e2ebf3;
-    --maryland: #2f6459; --maryland-soft: #dceae6;
-    --dc: #8a3a52; --dc-soft: #f5e5ea;
-    --virginia: #6a4f8a; --virginia-soft: #ece6f5;
-    --manager: #9c6a1f; --manager-soft: #f5ead9;
-    --warn: #a63b2e; --warn-soft: #f8e2df;
-    --border: #d8dcd5;
-    --shadow: 0 1px 2px rgba(20,30,25,.07), 0 10px 28px rgba(20,30,25,.07);
-  }
+  :root[data-theme="dark"] { --page: #0d0f0d; --surface: #161815; --ink: #f3f2ee; --ink-soft: #b8b6ad; --ink-muted: #7c7a71; --accent: #8fae9e; --accent-ink: #0d0f0d; --border: rgba(255,255,255,0.12); }
+  :root[data-theme="light"] { --page: #f7f5f0; --surface: #ffffff; --ink: #14140f; --ink-soft: #5c5a52; --ink-muted: #8f8c81; --accent: #4d6b5e; --accent-ink: #ffffff; --border: rgba(20,20,15,0.12); }
 
   * { box-sizing: border-box; }
-  html, body {
-    background: var(--bg); color: var(--ink); margin: 0;
-    font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
-  }
-  body { padding: 30px clamp(16px, 4vw, 52px) 76px; }
-  h1, h2, h3 {
-    font-family: "Bahnschrift", "Segoe UI Semibold", "Segoe UI", sans-serif;
-    font-weight: 600; text-wrap: balance; margin: 0;
-  }
-  .mono { font-family: "Cascadia Code", "Consolas", monospace; font-variant-numeric: tabular-nums; }
+  html, body { margin: 0; background: var(--page); color: var(--ink); font-family: "Segoe UI", system-ui, -apple-system, sans-serif; }
+  a { color: inherit; }
+  .wordmark { font-family: "Bahnschrift", "Segoe UI Semibold", sans-serif; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; }
 
-  header.top { max-width: 78ch; margin-bottom: 20px; }
-  header.top h1 { font-size: 1.7rem; letter-spacing: 0.1px; }
-  header.top p { color: var(--ink-soft); font-size: 0.96rem; margin: 10px 0 0; line-height: 1.55; }
-  header.top .howto {
-    margin-top: 12px; font-size: 0.86rem; color: var(--ink-soft);
-    background: var(--surface); border: 1px solid var(--border); border-radius: 8px;
-    padding: 10px 14px; display: inline-block;
+  /* ---- Nav ---- */
+  nav.site {
+    position: absolute; top: 0; left: 0; right: 0; z-index: 10;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 26px clamp(20px, 4vw, 56px); color: #fff;
   }
-  header.top .howto b { color: var(--ink); }
+  nav.site .brand { font-size: 0.95rem; }
+  nav.site .links { display: flex; align-items: center; gap: 26px; font-size: 0.82rem; letter-spacing: 0.04em; }
+  nav.site .links a { text-decoration: none; opacity: 0.88; transition: opacity .15s ease; }
+  nav.site .links a:hover { opacity: 1; }
+  nav.site .pill {
+    border: 1px solid rgba(255,255,255,0.4); border-radius: 999px; padding: 8px 18px;
+    font-size: 0.78rem; letter-spacing: 0.03em; text-decoration: none; transition: background .15s ease, color .15s ease;
+    background: none; color: #fff; font-family: inherit; cursor: pointer;
+  }
+  nav.site .pill:hover { background: #fff; color: #0d0f0d; }
+  nav.site #userButton:empty { display: none; }
 
-  /* ---- Simulator ---- */
-  .simulator {
-    margin-top: 22px; border: 1px solid var(--border); border-radius: 12px;
-    background: var(--surface); box-shadow: var(--shadow); padding: 18px 20px;
+  /* ---- Hero ---- */
+  .hero {
+    position: relative; min-height: 92vh; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; text-align: center; overflow: hidden;
+    background: var(--hero-bg); color: #fff; padding: 0 20px;
   }
-  .simulator h2 { font-size: 1.05rem; margin-bottom: 3px; }
-  .simulator .hint { color: var(--ink-soft); font-size: 0.82rem; margin: 0 0 14px; }
-  .sim-grid {
-    display: grid; grid-template-columns: repeat(5, 1fr) auto; gap: 12px; align-items: end;
+  .hero .blob {
+    position: absolute; border-radius: 50%; filter: blur(70px); opacity: 0.55;
+    animation: drift 26s ease-in-out infinite alternate;
   }
-  @media (max-width: 980px) { .sim-grid { grid-template-columns: repeat(2, 1fr); } }
-  .sim-field label {
-    display: block; font-size: 0.7rem; text-transform: uppercase; letter-spacing: .05em;
-    color: var(--ink-soft); margin-bottom: 5px;
+  .hero .blob.b1 { width: 46vw; height: 46vw; background: #3f5b4f; top: -12%; left: -8%; }
+  .hero .blob.b2 { width: 38vw; height: 38vw; background: #24473c; bottom: -14%; right: -6%; animation-delay: -8s; }
+  .hero .blob.b3 { width: 26vw; height: 26vw; background: #5c7d6d; top: 30%; right: 18%; animation-delay: -16s; opacity: 0.35; }
+  @keyframes drift {
+    from { transform: translate(0, 0) scale(1); }
+    to   { transform: translate(3%, 4%) scale(1.08); }
   }
-  .sim-field select, .sim-field input {
-    width: 100%; font: inherit; font-size: 0.87rem; padding: 8px 9px; border-radius: 6px;
-    border: 1px solid var(--border); background: var(--bg); color: var(--ink);
-  }
-  .sim-field.checkbox { display: flex; align-items: center; gap: 7px; padding-bottom: 8px; }
-  .sim-field.checkbox input { width: auto; }
-  .sim-field.checkbox label { margin: 0; text-transform: none; font-size: 0.83rem; letter-spacing: 0; }
-  #traceBtn {
-    font: inherit; font-size: 0.88rem; font-weight: 600; padding: 9px 18px; border-radius: 7px;
-    border: none; background: var(--manager); color: #fff; cursor: pointer; white-space: nowrap;
-    transition: filter .15s ease;
-  }
-  #traceBtn:hover { filter: brightness(1.08); }
+  @media (prefers-reduced-motion: reduce) { .hero .blob { animation: none; } }
 
-  #simResult {
-    margin-top: 16px; border-top: 1px solid var(--border); padding-top: 14px; display: none;
+  .hero .mark { position: relative; width: 38px; height: 38px; margin-bottom: 26px; }
+  .hero .mark svg { width: 100%; height: 100%; }
+  .hero h1 {
+    position: relative; margin: 0; font-size: clamp(3.2rem, 11vw, 8.5rem); line-height: 0.95;
+    letter-spacing: 0.06em;
   }
-  #simResult.show { display: block; }
-  #simResult .route { font-size: 0.95rem; font-weight: 600; margin-bottom: 10px; }
-  #simResult .route .mono { font-weight: 400; }
-  .sim-dates { display: flex; gap: 22px; flex-wrap: wrap; }
-  .sim-dates .d { min-width: 140px; }
-  .sim-dates .d .l { font-size: 0.7rem; text-transform: uppercase; letter-spacing: .05em; color: var(--ink-soft); }
-  .sim-dates .d .v { font-size: 1.02rem; font-weight: 600; margin-top: 2px; }
-  #simResult .caveat { margin-top: 12px; font-size: 0.78rem; color: var(--ink-soft); }
-  #simResult.none-track .route, #simResult.unmapped-track .route { color: var(--warn); }
-
-  .controls {
-    display: flex; align-items: center; justify-content: space-between; gap: 14px; flex-wrap: wrap;
-    margin: 22px 0 6px;
+  .hero .tagline {
+    position: relative; margin-top: 20px; font-size: 0.92rem; letter-spacing: 0.28em;
+    text-transform: uppercase; color: rgba(255,255,255,0.72); font-weight: 300;
   }
-  .toggle-group { display: flex; flex-wrap: wrap; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; background: var(--surface); }
-  .toggle-group button {
-    font: inherit; font-size: 0.82rem; padding: 8px 13px; border: none; cursor: pointer;
-    background: transparent; color: var(--ink-soft); border-right: 1px solid var(--border);
-    transition: background .15s ease, color .15s ease;
-  }
-  .toggle-group button:last-child { border-right: none; }
-  .toggle-group button.active { background: var(--ink); color: var(--surface); }
-  .toggle-group button.active.fed { background: var(--federal); color: #fff; }
-  .toggle-group button.active.md { background: var(--maryland); color: #fff; }
-  .toggle-group button.active.dc { background: var(--dc); color: #fff; }
-  .toggle-group button.active.va { background: var(--virginia); color: #fff; }
-
-  .legend { display: flex; gap: 14px; flex-wrap: wrap; font-size: 0.78rem; color: var(--ink-soft); align-items: center; }
-  .legend .swatch { display: inline-flex; align-items: center; gap: 6px; }
-  .legend .ln { width: 16px; height: 3px; border-radius: 2px; display: inline-block; }
-  .legend .ring { width: 12px; height: 12px; border-radius: 50%; border: 2px solid var(--manager); display: inline-block; }
-
-  /* ---- Diagram ---- */
-  .diagram-scroll { overflow-x: auto; margin-top: 20px; padding-bottom: 6px; }
-  .diagram { position: relative; width: 100%; min-width: 980px; aspect-ratio: 1300 / 640; }
-  .diagram svg.lines { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
-  .diagram svg.lines path.line { fill: none; stroke-width: 5; stroke-linecap: round; transition: opacity .25s ease; }
-  .diagram svg.lines path.dashed { stroke-dasharray: 2 8; stroke-width: 2.5; stroke: var(--line-neutral); }
-
-  .station {
-    position: absolute; transform: translate(-50%, -50%);
-    display: flex; flex-direction: column; align-items: center; width: 152px;
-    cursor: pointer; user-select: none; transition: opacity .25s ease;
-  }
-  .station .node {
-    width: 42px; height: 42px; border-radius: 50%;
-    background: var(--surface); border: 3px solid var(--ink);
-    display: flex; align-items: center; justify-content: center;
-    box-shadow: var(--shadow); position: relative; z-index: 2;
-    transition: transform .16s ease, box-shadow .16s ease;
-  }
-  .station.fed .node { border-color: var(--federal); color: var(--federal); }
-  .station.md .node  { border-color: var(--maryland); color: var(--maryland); }
-  .station.dc .node  { border-color: var(--dc); color: var(--dc); }
-  .station.va .node  { border-color: var(--virginia); color: var(--virginia); }
-  .station.neutral .node { color: var(--ink); }
-  .station .node svg { width: 19px; height: 19px; }
-  .station.interchange .node {
-    width: 50px; height: 50px;
-    box-shadow: var(--shadow), 0 0 0 4px var(--manager-soft);
-    border-color: var(--manager); color: var(--manager);
-  }
-  .station:hover .node, .station:focus-visible .node { transform: translateY(-3px) scale(1.05); }
-  .station.open .node { box-shadow: var(--shadow), 0 0 0 5px var(--manager-soft); }
-  .station .num {
-    position: absolute; top: -6px; right: -6px; width: 17px; height: 17px; border-radius: 50%;
-    background: var(--ink); color: var(--surface); font-size: 0.58rem; font-weight: 700;
-    display: flex; align-items: center; justify-content: center; font-family: "Cascadia Code", monospace;
-    z-index: 3;
-  }
-  .station .caption { margin-top: 8px; text-align: center; }
-  .station .caption .title { font-size: 0.8rem; font-weight: 600; line-height: 1.2; }
-  .station .caption .tagline { font-size: 0.7rem; color: var(--ink-soft); line-height: 1.25; margin-top: 2px; }
-  .station:focus-visible { outline: 2px solid var(--manager); outline-offset: 4px; border-radius: 12px; }
-
-  .compliance-marker {
-    position: absolute; transform: translate(0, -50%);
-    display: flex; align-items: center; gap: 8px; cursor: pointer;
-  }
-  .compliance-marker .node {
-    width: 29px; height: 29px; border-radius: 50%; background: var(--surface);
-    border: 3px solid var(--manager); color: var(--manager); display: flex; align-items: center;
-    justify-content: center; box-shadow: var(--shadow); flex: none; transition: transform .16s ease;
-  }
-  .compliance-marker:hover .node, .compliance-marker.open .node { transform: scale(1.08); }
-  .compliance-marker .lbl { font-size: 0.76rem; font-weight: 600; white-space: nowrap; }
-  .compliance-marker .lbl span { display: block; font-weight: 400; color: var(--ink-soft); font-size: 0.68rem; }
-
-  @media (prefers-reduced-motion: reduce) {
-    .station .node, .compliance-marker .node, .diagram svg.lines path.line, .station { transition: none; }
+  .hero .scrollcue {
+    position: absolute; bottom: 34px; left: 50%; transform: translateX(-50%);
+    font-size: 0.7rem; letter-spacing: 0.12em; color: rgba(255,255,255,0.55); text-transform: uppercase;
   }
 
-  /* ---- Detail drawer ---- */
-  #drawer {
-    margin-top: 14px; border: 1px solid var(--border); border-radius: 14px;
-    background: var(--surface); box-shadow: var(--shadow); overflow: hidden;
-    max-height: 0; opacity: 0; transition: max-height .35s ease, opacity .25s ease;
+  /* ---- Intro / featured ---- */
+  .intro { max-width: 1180px; margin: 0 auto; padding: 90px clamp(20px, 4vw, 56px) 100px; }
+  .intro-grid { display: grid; grid-template-columns: 280px 1px 1fr; gap: 46px; align-items: start; }
+  @media (max-width: 860px) { .intro-grid { grid-template-columns: 1fr; } .intro-grid .divider { display: none; } }
+  .featured {
+    display: block; text-decoration: none; color: inherit; border: 1px solid var(--border); border-radius: 12px;
+    overflow: hidden; background: var(--surface); transition: transform .15s ease;
   }
-  #drawer.show { max-height: 1800px; opacity: 1; }
-  .drawer-inner { padding: 20px 22px; }
-  .drawer-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; margin-bottom: 16px; }
-  .drawer-head h2 { font-size: 1.15rem; }
-  .drawer-head p { margin: 5px 0 0; color: var(--ink-soft); font-size: 0.88rem; max-width: 64ch; }
-  #closeDrawer {
-    background: transparent; border: 1px solid var(--border); border-radius: 6px;
-    color: var(--ink-soft); font: inherit; font-size: 0.8rem; padding: 5px 10px; cursor: pointer; flex: none;
+  .featured:hover { transform: translateY(-2px); }
+  .featured .thumb {
+    height: 130px; background:
+      radial-gradient(circle at 30% 30%, color-mix(in srgb, var(--accent) 55%, transparent), transparent 60%),
+      radial-gradient(circle at 70% 70%, color-mix(in srgb, var(--accent) 35%, transparent), transparent 65%),
+      var(--ink);
   }
-  #closeDrawer:hover { background: var(--surface-alt); }
+  .featured .body { padding: 16px 18px 20px; }
+  .featured .eyebrow { font-size: 0.68rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent); font-weight: 700; }
+  .featured h3 { font-size: 1rem; margin: 8px 0 6px; line-height: 1.3; }
+  .featured p { font-size: 0.82rem; color: var(--ink-soft); margin: 0; }
 
-  .tracks { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
-  @media (max-width: 720px) { .tracks { grid-template-columns: 1fr; } }
-  .track { border-radius: 10px; padding: 14px; border: 1px solid var(--border); }
-  .track.fed { background: var(--federal-soft); }
-  .track.md  { background: var(--maryland-soft); }
-  .track.dc  { background: var(--dc-soft); }
-  .track.va  { background: var(--virginia-soft); }
-  .track h4 {
-    font-family: "Bahnschrift", "Segoe UI Semibold", sans-serif; font-size: 0.75rem; text-transform: uppercase;
-    letter-spacing: .05em; margin: 0 0 9px; font-weight: 700;
-  }
-  .track.fed h4 { color: var(--federal); }
-  .track.md h4  { color: var(--maryland); }
-  .track.dc h4  { color: var(--dc); }
-  .track.va h4  { color: var(--virginia); }
-  dl.spec { margin: 0; display: grid; grid-template-columns: auto 1fr; gap: 6px 12px; font-size: 0.85rem; }
-  dl.spec dt { color: var(--ink-soft); font-size: 0.7rem; text-transform: uppercase; letter-spacing: .04em; padding-top: 2px; }
-  dl.spec dd { margin: 0; }
-  .single-track dl.spec { grid-template-columns: 150px 1fr; }
+  .divider { background: var(--border); width: 1px; height: 100%; min-height: 220px; }
 
-  .subblock { margin-top: 16px; }
-  .subblock h4 {
-    font-size: 0.72rem; text-transform: uppercase; letter-spacing: .05em; color: var(--ink-soft);
-    margin: 0 0 8px; font-weight: 700;
+  .mission h2 { font-size: 1.5rem; max-width: 26ch; letter-spacing: 0.01em; margin: 0 0 22px; font-weight: 600; }
+  .mission-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 34px; }
+  @media (max-width: 600px) { .mission-cols { grid-template-columns: 1fr; } }
+  .mission-cols p { color: var(--ink-soft); font-size: 0.94rem; line-height: 1.7; margin: 0; }
+  .cta {
+    display: inline-flex; align-items: center; gap: 8px; margin-top: 30px; text-decoration: none;
+    color: var(--ink); font-weight: 600; font-size: 0.92rem; border-bottom: 1px solid var(--ink); padding-bottom: 3px;
   }
-  .subblock ol { margin: 0; padding-left: 20px; font-size: 0.87rem; line-height: 1.6; }
-  .subblock ol li { margin-bottom: 2px; }
+  .cta svg { width: 16px; height: 16px; transition: transform .15s ease; }
+  .cta:hover svg { transform: translateX(4px); }
 
-  .callout { margin-top: 12px; padding: 12px 14px; border-radius: 8px; font-size: 0.86rem; }
-  .callout.pitfall { background: var(--warn-soft); border-left: 3px solid var(--warn); }
-  .callout.pitfall b { color: var(--warn); }
-  .callout.escalation { background: var(--surface-alt); border-left: 3px solid var(--ink-faint); }
-  .callout.escalation b { color: var(--ink); }
-  .manager-note { margin-top: 14px; padding: 13px 15px; border-radius: 8px; background: var(--manager-soft); border-left: 3px solid var(--manager); font-size: 0.87rem; color: var(--ink); }
-  .manager-note b { color: var(--manager); }
-
-  footer { margin-top: 30px; color: var(--ink-soft); font-size: 0.78rem; max-width: 76ch; line-height: 1.5; }
-
-  /* ---- Site nav ---- */
-  nav.sitenav {
-    display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap;
-    padding-bottom: 16px; border-bottom: 1px solid var(--border); margin-bottom: 26px;
-  }
-  nav.sitenav .brand { font-family: "Bahnschrift", "Segoe UI Semibold", sans-serif; font-weight: 700; font-size: 1.05rem; }
-  nav.sitenav .tabs { display: flex; gap: 4px; background: var(--surface-alt); border-radius: 9px; padding: 4px; }
-  nav.sitenav .tabs button {
-    font: inherit; font-size: 0.86rem; font-weight: 600; padding: 8px 15px; border: none; border-radius: 6px;
-    background: transparent; color: var(--ink-soft); cursor: pointer; transition: background .15s ease, color .15s ease;
-  }
-  nav.sitenav .tabs button.active { background: var(--surface); color: var(--ink); box-shadow: var(--shadow); }
-  nav.sitenav .tabs button:hover:not(.active) { color: var(--ink); }
-
-  .view { display: none; }
-  .view.active { display: block; }
-
-  /* ---- Overview ---- */
-  .hero-ov { max-width: 78ch; margin-bottom: 26px; }
-  .hero-ov h1 { font-size: 1.9rem; }
-  .hero-ov p { color: var(--ink-soft); font-size: 1rem; margin: 12px 0 0; line-height: 1.6; }
-  .ov-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 16px; }
-  .ov-card {
-    background: var(--surface); border: 1px solid var(--border); border-radius: 12px; box-shadow: var(--shadow);
-    padding: 20px; cursor: pointer; transition: transform .15s ease, border-color .15s ease; text-align: left;
-    font: inherit; color: inherit; text-decoration: none; display: block; width: 100%;
-    appearance: none; -webkit-appearance: none;
-  }
-  .ov-card:hover { transform: translateY(-2px); border-color: var(--manager); }
-  .ov-card .eyebrow { font-size: 0.68rem; text-transform: uppercase; letter-spacing: .06em; color: var(--manager); font-weight: 700; }
-  .ov-card h3 { font-size: 1.05rem; margin: 6px 0 6px; }
-  .ov-card p { color: var(--ink-soft); font-size: 0.86rem; line-height: 1.5; margin: 0; }
-  .ov-card.ext { border-style: dashed; }
-  .ov-note { margin-top: 24px; font-size: 0.84rem; color: var(--ink-soft); background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 12px 16px; max-width: 78ch; }
-  .ov-note b { color: var(--ink); }
-
-  /* ---- Insights ---- */
-  .insights-head { max-width: 78ch; margin-bottom: 18px; }
-  .insights-head h1 { font-size: 1.6rem; }
-  .insights-head p { color: var(--ink-soft); font-size: 0.94rem; margin: 8px 0 0; line-height: 1.55; }
-  .refresh-badge {
-    display: inline-flex; align-items: center; gap: 6px; margin-top: 10px; font-size: 0.78rem; color: var(--ink-soft);
-    background: var(--surface); border: 1px solid var(--border); border-radius: 999px; padding: 5px 12px;
-  }
-  .refresh-badge .pulse { width: 7px; height: 7px; border-radius: 50%; background: var(--maryland); flex: none; }
-  .cat-filters { display: flex; gap: 8px; flex-wrap: wrap; margin: 18px 0; }
-  .cat-chip {
-    font: inherit; font-size: 0.8rem; font-weight: 600; padding: 6px 13px; border-radius: 999px;
-    border: 1px solid var(--border); background: var(--surface); color: var(--ink-soft); cursor: pointer;
-    transition: background .15s ease, color .15s ease;
-  }
-  .cat-chip.active { background: var(--ink); color: var(--surface); border-color: var(--ink); }
-  .feed { display: flex; flex-direction: column; gap: 14px; max-width: 82ch; }
-  .entry { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; box-shadow: var(--shadow); padding: 18px 20px; }
-  .entry .meta { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; flex-wrap: wrap; }
-  .entry .tag { font-size: 0.68rem; text-transform: uppercase; letter-spacing: .05em; font-weight: 700; padding: 3px 9px; border-radius: 5px; }
-  .entry .tag.reg { background: var(--federal-soft); color: var(--federal); }
-  .entry .tag.trend { background: var(--virginia-soft); color: var(--virginia); }
-  .entry .tag.tip { background: var(--maryland-soft); color: var(--maryland); }
-  .entry .date { font-size: 0.78rem; color: var(--ink-faint); font-family: "Cascadia Code", monospace; }
-  .entry h3 { font-size: 1.02rem; margin-bottom: 6px; }
-  .entry p { color: var(--ink-soft); font-size: 0.9rem; line-height: 1.55; margin: 0; }
-  .entry .srcs { margin-top: 10px; display: flex; gap: 12px; flex-wrap: wrap; }
-  .entry .srcs a { font-size: 0.78rem; color: var(--manager); text-decoration: none; }
-  .entry .srcs a:hover { text-decoration: underline; }
+  footer { border-top: 1px solid var(--border); padding: 24px clamp(20px, 4vw, 56px); display: flex; justify-content: space-between; flex-wrap: wrap; gap: 10px; font-size: 0.78rem; color: var(--ink-muted); }
 </style>
+</head>
+<body>
 
-<nav class="sitenav">
-  <div class="brand">COBRA Ops Knowledge Site</div>
-  <div class="tabs" id="siteTabs">
-    <button data-view="overview" class="active">Overview</button>
-    <button data-view="map">Process Map</button>
-    <button data-view="insights">Industry Insights</button>
+<nav class="site">
+  <div class="brand wordmark">Vested</div>
+  <div class="links">
+    <a href="insights.html">Insights</a>
+    <button class="pill" id="signInBtn">Sign In</button>
+    <div id="userButton"></div>
   </div>
 </nav>
 
-<section class="view active" id="view-overview">
-  <div class="hero-ov">
-    <h1>How COBRA and state continuation actually run at a TPA</h1>
-    <p>A working reference built from real case work — how Kelly Benefits (or any TPA) carries a qualifying event from intake to case closure across federal, Maryland, D.C., and Virginia rules, plus what's currently moving in the industry around it.</p>
+<section class="hero">
+  <div class="blob b1"></div>
+  <div class="blob b2"></div>
+  <div class="blob b3"></div>
+  <div class="mark">
+    <svg viewBox="0 0 40 40" fill="none"><circle cx="16" cy="20" r="13" stroke="white" stroke-width="1.4" opacity="0.85"/><circle cx="24" cy="20" r="13" stroke="white" stroke-width="1.4" opacity="0.85"/></svg>
   </div>
-  <div class="ov-cards">
-    <button class="ov-card" data-goto="map">
-      <div class="eyebrow">Reference</div>
-      <h3>Process Map</h3>
-      <p>An interactive transit-style diagram of the six-stage workflow, with real sub-steps, common pitfalls, and a simulator that traces a real case to real deadline dates.</p>
-    </button>
-    <button class="ov-card" data-goto="insights">
-      <div class="eyebrow">Updated automatically</div>
-      <h3>Industry Insights</h3>
-      <p>Regulatory changes, TPA industry trends, and practical tips — refreshed on a recurring schedule so this stays current without manual upkeep.</p>
-    </button>
-    <a class="ov-card ext" href="ledger.html">
-      <div class="eyebrow">Companion tool</div>
-      <h3>Case Ledger ↗</h3>
-      <p>The case-tracking prototype this project started from — one entry per case instead of re-typing it into a separate tracking sheet.</p>
-    </a>
-  </div>
-  <div class="ov-note"><b>Status —</b> personal reference project, not an official Kelly Benefits system. Roles, deadlines and figures are sourced from public statutes and DOL/agency guidance; confirm anything client-facing with compliance/legal first.</div>
+  <h1 class="wordmark">Vested</h1>
+  <div class="tagline">Benefits Administration Intelligence</div>
+  <div class="scrollcue">Scroll</div>
 </section>
 
-<section class="view" id="view-map">
-<header class="top">
-  <h1>COBRA &amp; State Continuation — Process Map</h1>
-  <p>Read this the way you'd read a transit map: a case boards at the left and travels station to station. Where the line splits, federal and each jurisdiction's rules diverge; they merge again once the beneficiary has elected coverage. The dotted line underneath runs the whole way — it never gets off.</p>
-  <div class="howto">Click any station for what happens there. <b>Rings</b> mark the two stops where management judgment matters most. Use the simulator below to trace one real case through the map.</div>
-</header>
-
-<div class="simulator">
-  <h2>Trace a case</h2>
-  <p class="hint">Pick a scenario and the map will highlight the actual line it rides, with real calculated dates.</p>
-  <div class="sim-grid">
-    <div class="sim-field">
-      <label for="simState">Insured plan issued in</label>
-      <select id="simState">
-        <option value="MD">Maryland</option>
-        <option value="DC">District of Columbia</option>
-        <option value="VA">Virginia</option>
-        <option value="OTHER">Another state</option>
-      </select>
-    </div>
-    <div class="sim-field">
-      <label for="simEmployees">Employees on the plan</label>
-      <input id="simEmployees" type="number" min="1" value="14" />
-    </div>
-    <div class="sim-field">
-      <label for="simFunding">Plan funding</label>
-      <select id="simFunding">
-        <option value="insured">Insured</option>
-        <option value="self-funded">Self-funded (ASO)</option>
-      </select>
-    </div>
-    <div class="sim-field">
-      <label for="simEvent">Qualifying event</label>
-      <select id="simEvent">
-        <option>Termination</option>
-        <option>Reduction in hours</option>
-        <option>Divorce / legal separation</option>
-        <option>Death of employee</option>
-        <option>Loss of dependent status</option>
-      </select>
-    </div>
-    <div class="sim-field">
-      <label for="simDate">Event date</label>
-      <input id="simDate" type="date" />
-    </div>
-    <button id="traceBtn">Trace this case</button>
-  </div>
-  <div class="sim-grid" style="margin-top:2px;">
-    <div class="sim-field checkbox">
-      <input type="checkbox" id="simDisability" />
-      <label for="simDisability">Beneficiary has an SSA disability determination</label>
-    </div>
-  </div>
-
-  <div id="simResult">
-    <div class="route" id="simRoute"></div>
-    <div class="sim-dates" id="simDates"></div>
-    <div class="caveat" id="simCaveat"></div>
-  </div>
-</div>
-
-<div class="controls">
-  <div class="toggle-group" id="filterGroup">
-    <button data-filter="all" class="active">All lines</button>
-    <button data-filter="fed" class="fed">Federal</button>
-    <button data-filter="md" class="md">Maryland</button>
-    <button data-filter="dc" class="dc">D.C.</button>
-    <button data-filter="va" class="va">Virginia</button>
-  </div>
-  <div class="legend">
-    <span class="swatch"><span class="ln" style="background:var(--federal)"></span>Federal</span>
-    <span class="swatch"><span class="ln" style="background:var(--maryland)"></span>Maryland</span>
-    <span class="swatch"><span class="ln" style="background:var(--dc)"></span>D.C.</span>
-    <span class="swatch"><span class="ln" style="background:var(--virginia)"></span>Virginia</span>
-    <span class="swatch"><span class="ring"></span>Interchange</span>
-  </div>
-</div>
-
-<div class="diagram-scroll">
-  <div class="diagram" id="diagram">
-    <svg class="lines" viewBox="0 0 1300 640" preserveAspectRatio="none" aria-hidden="true">
-      <path class="line trunk"  d="M 80 300 L 280 300" stroke="var(--ink-faint)" />
-      <path class="line split-fed" d="M 280 300 C 400 300 460 80  580 80"  stroke="var(--federal)" />
-      <path class="line split-md"  d="M 280 300 C 400 300 460 190 580 190" stroke="var(--maryland)" />
-      <path class="line split-dc"  d="M 280 300 C 400 300 460 410 580 410" stroke="var(--dc)" />
-      <path class="line split-va"  d="M 280 300 C 400 300 460 520 580 520" stroke="var(--virginia)" />
-      <path class="line merge-fed" d="M 580 80  C 700 80  760 300 880 300" stroke="var(--federal)" />
-      <path class="line merge-md"  d="M 580 190 C 700 190 760 300 880 300" stroke="var(--maryland)" />
-      <path class="line merge-dc"  d="M 580 410 C 700 410 760 300 880 300" stroke="var(--dc)" />
-      <path class="line merge-va"  d="M 580 520 C 700 520 760 300 880 300" stroke="var(--virginia)" />
-      <path class="line trunk2" d="M 880 300 L 1060 300" stroke="var(--ink-faint)" />
-      <path class="line trunk3" d="M 1060 300 L 1240 300" stroke="var(--ink-faint)" />
-      <path class="dashed" d="M 60 600 L 1240 600" />
-      <path class="dashed" d="M 80 326 L 80 592" />
-      <path class="dashed" d="M 280 326 L 280 592" />
-      <path class="dashed" d="M 580 546 L 580 592" />
-      <path class="dashed" d="M 880 326 L 880 592" />
-      <path class="dashed" d="M 1060 326 L 1060 592" />
-      <path class="dashed" d="M 1240 326 L 1240 592" />
-    </svg>
-  </div>
-</div>
-
-<div id="drawer">
-  <div class="drawer-inner">
-    <div class="drawer-head">
-      <div>
-        <h2 id="drawerTitle"></h2>
-        <p id="drawerSub"></p>
+<section class="intro">
+  <div class="intro-grid">
+    <a class="featured" href="insights.html">
+      <div class="thumb"></div>
+      <div class="body">
+        <div class="eyebrow">Featured insight</div>
+        <h3>D.C.'s continuation coverage runs three months — a third of Maryland's</h3>
+        <p>Why a jurisdiction most TPAs treat as an afterthought is also the one that surprises clients most.</p>
       </div>
-      <button id="closeDrawer">Close ✕</button>
+    </a>
+    <div class="divider"></div>
+    <div class="mission">
+      <h2>Where the benefits administration industry gets read straight.</h2>
+      <div class="mission-cols">
+        <p>COBRA and state continuation coverage sit at the intersection of federal law, state insurance codes, and whatever a given TPA's operations happen to look like that quarter. Most of what gets written about it is either a law firm's compliance alert or a vendor's sales page.</p>
+        <p>Vested is neither. It's a running account of what's actually changing in regulation, in the industry's technology and consolidation, and in the day-to-day mechanics of running cases — read by the people doing the work, not selling around it.</p>
+      </div>
+      <a class="cta" href="insights.html">Explore Industry Insights <svg viewBox="0 0 24 24"><path d="M4 12h15M13 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg></a>
     </div>
-    <div id="drawerBody"></div>
   </div>
-</div>
-</section>
-
-<section class="view" id="view-insights">
-  <div class="insights-head">
-    <h1>Industry Insights</h1>
-    <p>Regulatory changes, TPA industry trends, and practical tips relevant to running COBRA and state continuation cases. New entries are added on a recurring schedule.</p>
-    <div class="refresh-badge"><span class="pulse"></span><span id="lastUpdated">Last updated —</span></div>
-  </div>
-  <div class="cat-filters" id="catFilters">
-    <button class="cat-chip active" data-cat="all">All</button>
-    <button class="cat-chip" data-cat="reg">Regulatory</button>
-    <button class="cat-chip" data-cat="trend">Industry trends</button>
-    <button class="cat-chip" data-cat="tip">Practical tips</button>
-  </div>
-  <div class="feed" id="insightsFeed"></div>
 </section>
 
 <footer>
-  Roles shown (Intake, Notices &amp; Compliance, Enrollment, Billing) are generic TPA function names, not Kelly Benefits' actual org chart — swap in your team's real structure once you know it. Deadlines reflect the federal COBRA statute, Md. Insurance Article §15-409, D.C. Code §32-732, and Va. Code §38.2-3541 as understood at time of writing, and the simulator's dates are estimates built on the fastest common reading of each deadline. Confirm current specifics and any edge case with compliance/legal before relying on this for real client work.
+  <span>Vested — a personal industry-intelligence project, not affiliated with or endorsed by any employer.</span>
+  <span>© 2026</span>
 </footer>
 
-<script>
-  const ICONS = {
-    fork: '<path d="M12 3 L12 10 M12 10 L6 17 M12 10 L18 17" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>',
-    inbox: '<path d="M12 3 L12 13 M7 9 L12 14 L17 9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/><rect x="4" y="15" width="16" height="6" rx="1.5" stroke="currentColor" stroke-width="2" fill="none"/>',
-    envelope: '<rect x="3" y="6" width="18" height="13" rx="2" stroke="currentColor" stroke-width="2" fill="none"/><path d="M4 7.5 L12 14 L20 7.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>',
-    check: '<circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2" fill="none"/><path d="M7.5 12.5 L10.5 15.5 L16.5 8.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>',
-    dollar: '<circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2" fill="none"/><text x="12" y="16.5" text-anchor="middle" font-size="11" font-family="Segoe UI, sans-serif" font-weight="700" fill="currentColor">$</text>',
-    flag: '<path d="M6 3 L6 21" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M6 4 L18 4 L15 8 L18 12 L6 12 Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round" fill="currentColor" fill-opacity="0.15"/>',
-    check2: '<path d="M4 12 L9 17 L20 5" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" fill="none"/>'
-  };
-
-  const stations = [
-    {
-      id: "classify", x: 80, y: 300, num: 1, cls: "neutral", interchange: true, icon: "fork",
-      title: "Classify the Plan", tagline: "Figure out which rulebook applies",
-      role: "Client / Producer Team", timing: "Set once, at onboarding",
-      sub: "Before any event happens, every plan a client offers gets tagged — this tag decides which clock and which notice template apply to every future case on it.",
-      single: {
-        items: [
-          ["Question 1", "Is the group fully insured, or self-funded (ASO)?"],
-          ["Question 2", "How many employees participate in the plan, and in what state was the contract issued?"],
-          ["Outcome — Federal", "20+ employees, insured or self-funded"],
-          ["Outcome — Maryland / D.C. / Virginia", "Fully insured, under 20 employees, contract issued in that jurisdiction"],
-          ["Outcome — Both", "20+ employees with some lines insured locally (e.g. dental/vision) while medical is self-funded — each line classified separately"],
-          ["Outcome — Neither", "Self-funded, under 20 employees — no statutory duty at all unless the plan opts in"]
-        ]
-      },
-      steps: [
-        "Confirm plan funding type from the ASO/administration agreement — never assume from the quote",
-        "Pull current headcount from payroll/HRIS, not the original sold-case numbers",
-        "Tag the plan and every insured line separately in the case management system",
-        "Re-check the tag whenever headcount moves near the 20-employee line, not just at renewal"
-      ],
-      pitfall: "A group hovering right around 20 employees gets classified once at renewal and drifts wrong mid-year as headcount changes — nobody revisits the tag until a case already fails.",
-      escalation: "Any group within 3 employees of the 20-employee threshold is flagged for a mid-year headcount recheck, not just an annual one."
-    },
-    {
-      id: "intake", x: 280, y: 300, num: 2, cls: "neutral", icon: "inbox",
-      title: "Event Intake", tagline: "Someone has a coverage-triggering event",
-      role: "Intake / Case Setup", timing: "Ongoing, as events occur",
-      single: {
-        items: [
-          ["Trigger", "Employer reports a qualifying event: termination, reduced hours, divorce, death, or a dependent aging out"],
-          ["Comes in via", "HRIS feed, employer portal submission, or a manual notice from HR"],
-          ["Case setup", "Beneficiary, employer and plan(s) are logged against the classification from Station 1"],
-          ["Output", "An open case with its deadline clock started"]
-        ]
-      },
-      steps: [
-        "Case opens and immediately inherits the plan's classification tag — no manual re-classification per case",
-        "System calculates the applicable notice and election deadlines the moment the case opens",
-        "Case is routed to the queue matching its track (Federal / Maryland / D.C. / Virginia)"
-      ],
-      pitfall: "The clock starts on the actual event date, not the date you found out about it — a slow employer eats directly into your notice window before the case even reaches you.",
-      escalation: "Any case opened with fewer than 20 days left on its notice clock routes straight to a senior specialist, skipping the standard queue."
-    },
-    { id: "notice-fed", group: "notice", x: 580, y: 80,  num: 3, cls: "fed", icon: "envelope", title: "Notice & Election", tagline: "Federal rules", role: "Notices & Compliance", timing: "14–44 days, 60-day election" },
-    { id: "notice-md",  group: "notice", x: 580, y: 190, num: 3, cls: "md",  icon: "envelope", title: "Notice & Election", tagline: "Maryland rules", role: "Notices & Compliance", timing: "14 days, 45-day election" },
-    { id: "notice-dc",  group: "notice", x: 580, y: 410, num: 3, cls: "dc",  icon: "envelope", title: "Notice & Election", tagline: "D.C. rules", role: "Notices & Compliance", timing: "15 days, 45-day election" },
-    { id: "notice-va",  group: "notice", x: 580, y: 520, num: 3, cls: "va",  icon: "envelope", title: "Notice & Election", tagline: "Virginia rules", role: "Notices & Compliance", timing: "14 days, 31/60-day election" },
-    {
-      id: "enroll", x: 880, y: 300, num: 4, cls: "neutral", icon: "check",
-      title: "Enrollment", tagline: "They pay, coverage turns back on",
-      role: "Enrollment", timing: "45 days after election (Fed/D.C.) / with election (MD) / 31–60 days (VA)",
-      single: {
-        items: [
-          ["Trigger", "Beneficiary returns the signed election"],
-          ["Initial payment", "Timing varies by track — see Notice & Election for the exact window"],
-          ["Premium cap", "102% of the group rate on every track"],
-          ["Output", "Enrollment sent to the carrier; coverage reinstated back to the qualifying event date"]
-        ]
-      },
-      steps: [
-        "Verify the signed election is complete and dated within the applicable window",
-        "Reconcile the first payment against the 102% cap for that track",
-        "Transmit the enrollment file to the carrier and confirm acknowledgment"
-      ],
-      pitfall: "A payment that's short by a few dollars technically doesn't satisfy the election — whether to cure-and-accept or reject needs to be an explicit policy, not an ad hoc call each time.",
-      escalation: "Any enrollment not confirmed by the carrier within 5 business days gets a manual follow-up, not a wait-and-see."
-    },
-    {
-      id: "billing", x: 1060, y: 300, num: 5, cls: "neutral", icon: "dollar",
-      title: "Ongoing Billing", tagline: "Collect payment every month",
-      role: "Billing & Collections", timing: "Monthly, 30-day grace",
-      single: {
-        items: [
-          ["Cycle", "Monthly premium invoicing straight to the beneficiary"],
-          ["Grace period", "30 days past due before coverage can be cut for non-payment"],
-          ["Termination triggers", "Non-payment, new group coverage, Medicare entitlement, plan discontinued"],
-          ["Output", "Carrier kept in sync each cycle; termination processed the moment a trigger is confirmed"]
-        ]
-      },
-      steps: [
-        "Monthly invoice generated and sent",
-        "Payment reconciled against the account within the grace period",
-        "Non-payment past the grace period triggers a termination notice to the carrier"
-      ],
-      pitfall: "A payment that arrives during the grace period but isn't reconciled promptly can cause a wrongful termination of active coverage.",
-      escalation: "Accounts entering the grace period get a proactive reminder before the cutoff date, not just a termination notice after it's already passed."
-    },
-    {
-      id: "exit", x: 1240, y: 300, num: 6, cls: "neutral", icon: "flag",
-      title: "Duration & Exit", tagline: "Coverage ends, case closed",
-      role: "Case Management", timing: "3 / 12 / 18 / 29 / 36 mo. depending on track",
-      single: {
-        items: [
-          ["Federal", "18 months standard; 36 for a second qualifying event; 29 with a disability determination"],
-          ["Maryland", "18 months standard; 29 with a disability determination"],
-          ["D.C.", "3 months — notably shorter than every other track"],
-          ["Virginia", "12 months, flat"],
-          ["Case closure reasons", "Term expired, non-payment, new coverage obtained, or plan discontinued"]
-        ]
-      },
-      steps: [
-        "Confirm the exit trigger before closing the case",
-        "Process disability-extension paperwork if applicable (SSA award letter)",
-        "Close and archive the case record for audit"
-      ],
-      pitfall: "A disability-extension request gets missed because the SSA determination arrives after the case was already closed out in the system.",
-      escalation: "Cases approaching their standard-duration end date get a 60-day-out reminder to check for a pending disability extension before closing."
-    }
-  ];
-
-  const noticeTracks = {
-    title: "3. Notice & Election",
-    sub: "Owned by Notices & Compliance. This is where the lines genuinely diverge — same intent, four different clocks and forms.",
-    tracks: {
-      fed: { heading: "Federal COBRA", items: [
-        ["Employer notifies TPA", "Within 30 days of the qualifying event"],
-        ["TPA sends notice", "Within 14 days after that (44 days combined, in practice)"],
-        ["Notice form", "DOL model COBRA election notice"],
-        ["Election window", "60 days from the notice date"]
-      ]},
-      md: { heading: "Maryland mini-COBRA", items: [
-        ["Employer notifies employee", "At the time of termination"],
-        ["Election form provided", "Within 14 days of request"],
-        ["Notice form", "Maryland Continuation Election Form"],
-        ["Election window", "45 days from the termination date"]
-      ]},
-      dc: { heading: "D.C. mini-COBRA", items: [
-        ["Employer notifies employee", "Within 15 days after coverage would otherwise terminate"],
-        ["Applies only if", "Beneficiary is not eligible for federal COBRA"],
-        ["Notice form", "D.C. continuation coverage notice"],
-        ["Election + payment window", "45 days after coverage would otherwise terminate"]
-      ]},
-      va: { heading: "Virginia mini-COBRA", items: [
-        ["Employer notifies employee", "Within 14 days of the employer learning of the loss of eligibility"],
-        ["Applies only if", "Beneficiary is not eligible for federal COBRA"],
-        ["Election window", "31 days after notice — but never later than 60 days after termination"],
-        ["Premium", "Group rate + up to 2% admin fee, billed monthly"]
-      ]}
-    },
-    steps: [
-      "Generate the correct model notice from the template library for the case's assigned track",
-      "Send by the method the client requires (first-class mail, or certified for higher-risk cases)",
-      "Log the send date, method, and template version in the audit system immediately — not at end of day"
-    ],
-    pitfall: "Templates built for the wrong track because a case was mis-tagged upstream at Classification — the notice itself is correct, just for the wrong law.",
-    note: "A missed or late notice is the single most common source of client E&amp;O exposure in this business. D.C.'s 3-month duration is also a frequent client-confusion point worth flagging proactively — it's dramatically shorter than the other three tracks, and clients with a small D.C. office often assume it matches their Maryland headquarters' 18 months."
-  };
-
-  const compliance = {
-    title: "Compliance & Audit Trail",
-    sub: "Not a station on the line — a service that runs underneath all six, from intake through exit.",
-    single: {
-      items: [
-        ["Every notice", "Timestamped record of what was sent, by what method, and on what date — this is what gets produced in a client audit or dispute"],
-        ["Every deadline", "Logged against the classification from Station 1, so a late notice is flagged automatically instead of discovered after the fact"],
-        ["Every payment", "Reconciled against the grace-period clock at Billing"],
-        ["Reporting rollup", "Aggregated views — cases at risk, overdue notices, upcoming expirations — are what a manager reviews day to day; the six stations are what a specialist executes"]
-      ]
-    },
-    steps: [
-      "Every notice logged with date, method and template version at the moment it's sent",
-      "Deadlines auto-flag at a configurable T-minus-X days, not just on the due date itself",
-      "A monthly QA sample of closed cases checks that documented process actually matches what happened",
-      "A client-facing compliance dashboard gets reviewed by a manager weekly, not assembled from scratch when a client asks"
-    ],
-    note: "This is the second highest-leverage point in the process. A specialist executes one case correctly; a manager makes sure the audit trail proves thousands of cases were executed correctly. That shift — from doing the step to guaranteeing the step — is the core of what changes when you move into management."
-  };
-
-  const diagram = document.getElementById("diagram");
-  const drawer = document.getElementById("drawer");
-  const drawerTitle = document.getElementById("drawerTitle");
-  const drawerSub = document.getElementById("drawerSub");
-  const drawerBody = document.getElementById("drawerBody");
-  let openId = null;
-
-  function pct(v, total) { return (v / total) * 100 + "%"; }
-  function specList(items) { return `<dl class="spec">` + items.map(([k, v]) => `<dt>${k}</dt><dd>${v}</dd>`).join("") + `</dl>`; }
-  function stepsBlock(steps) {
-    if (!steps) return "";
-    return `<div class="subblock"><h4>How it actually runs</h4><ol>${steps.map(s => `<li>${s}</li>`).join("")}</ol></div>`;
-  }
-  function pitfallBlock(text) { return text ? `<div class="callout pitfall"><b>Common pitfall —</b> ${text}</div>` : ""; }
-  function escalationBlock(text) { return text ? `<div class="callout escalation"><b>Escalation rule —</b> ${text}</div>` : ""; }
-
-  function renderStations() {
-    stations.forEach(s => {
-      const el = document.createElement("div");
-      el.className = `station ${s.cls}${s.interchange ? " interchange" : ""}${openId === (s.group || s.id) ? " open" : ""}`;
-      el.style.left = pct(s.x, 1300);
-      el.style.top = pct(s.y, 640);
-      el.tabIndex = 0;
-      el.setAttribute("role", "button");
-      el.innerHTML = `
-        <div class="node"><svg viewBox="0 0 24 24">${ICONS[s.icon]}</svg><span class="num">${s.num}</span></div>
-        <div class="caption"><div class="title">${s.title}</div><div class="tagline">${s.tagline}</div></div>
-      `;
-      const key = s.group || s.id;
-      el.addEventListener("click", () => openStation(key));
-      el.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); openStation(key); } });
-      diagram.appendChild(el);
-    });
-
-    const cm = document.createElement("div");
-    cm.className = "compliance-marker" + (openId === "compliance" ? " open" : "");
-    cm.style.left = pct(60, 1300);
-    cm.style.top = pct(600, 640);
-    cm.tabIndex = 0;
-    cm.setAttribute("role", "button");
-    cm.innerHTML = `<div class="node">${ICONS.check2}</div><div class="lbl">Compliance &amp; Audit<span>runs the whole way</span></div>`;
-    cm.addEventListener("click", () => openStation("compliance"));
-    cm.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); openStation("compliance"); } });
-    diagram.appendChild(cm);
-  }
-
-  function openStation(key) {
-    if (openId === key) { closeDrawer(); return; }
-    openId = key;
-    refresh();
-
-    if (key === "compliance") {
-      drawerTitle.textContent = compliance.title;
-      drawerSub.textContent = compliance.sub;
-      drawerBody.innerHTML = `<div class="single-track">${specList(compliance.single.items)}</div>
-        ${stepsBlock(compliance.steps)}
-        <div class="manager-note"><b>Why it matters —</b> ${compliance.note}</div>`;
-    } else if (key === "notice") {
-      drawerTitle.textContent = noticeTracks.title;
-      drawerSub.textContent = noticeTracks.sub;
-      const t = noticeTracks.tracks;
-      drawerBody.innerHTML = `
-        <div class="tracks">
-          <div class="track fed"><h4>${t.fed.heading}</h4>${specList(t.fed.items)}</div>
-          <div class="track md"><h4>${t.md.heading}</h4>${specList(t.md.items)}</div>
-          <div class="track dc"><h4>${t.dc.heading}</h4>${specList(t.dc.items)}</div>
-          <div class="track va"><h4>${t.va.heading}</h4>${specList(t.va.items)}</div>
-        </div>
-        ${stepsBlock(noticeTracks.steps)}
-        ${pitfallBlock(noticeTracks.pitfall)}
-        <div class="manager-note"><b>Why it matters —</b> ${noticeTracks.note}</div>`;
-    } else {
-      const s = stations.find(x => x.id === key);
-      drawerTitle.textContent = `${s.num}. ${s.title}`;
-      drawerSub.textContent = s.sub || `Owned by ${s.role}. Typical timing: ${s.timing}.`;
-      drawerBody.innerHTML = `<div class="single-track">${specList(s.single.items)}</div>
-        ${stepsBlock(s.steps)}
-        ${pitfallBlock(s.pitfall)}
-        ${escalationBlock(s.escalation)}
-        ${s.pitfall && s.id === "classify" ? `<div class="manager-note"><b>Why it matters —</b> A wrong classification here silently sets every downstream deadline wrong. A manager's real value is building the checklist that makes this call repeatable instead of resting on one person's memory.</div>` : ""}`;
-    }
-    drawer.classList.add("show");
-  }
-
-  function closeDrawer() { openId = null; refresh(); drawer.classList.remove("show"); }
-  function refresh() { diagram.querySelectorAll(".station, .compliance-marker").forEach(el => el.remove()); renderStations(); }
-
-  document.getElementById("closeDrawer").addEventListener("click", closeDrawer);
-
-  const TRACK_CLASSES = ["fed", "md", "dc", "va"];
-  function setTrackEmphasis(activeTrack) {
-    TRACK_CLASSES.forEach(t => {
-      const dim = activeTrack && activeTrack !== "all" && activeTrack !== t;
-      document.querySelectorAll(`.station.${t}, .line.split-${t}, .line.merge-${t}`).forEach(el => { el.style.opacity = dim ? 0.22 : 1; });
-    });
-  }
-
-  document.getElementById("filterGroup").addEventListener("click", (e) => {
-    const btn = e.target.closest("button");
-    if (!btn) return;
-    document.querySelectorAll("#filterGroup button").forEach(b => b.classList.remove("active"));
-    btn.classList.add("active");
-    setTrackEmphasis(btn.dataset.filter);
-  });
-
-  renderStations();
-
-  const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  if (!reduceMotion) {
-    document.querySelectorAll("svg.lines path.line").forEach((path, i) => {
-      const len = path.getTotalLength();
-      path.style.strokeDasharray = len;
-      path.style.strokeDashoffset = len;
-      path.getBoundingClientRect();
-      path.style.transition = `stroke-dashoffset 0.9s ease ${i * 0.05}s`;
-      requestAnimationFrame(() => { path.style.strokeDashoffset = 0; });
-    });
-    document.querySelectorAll(".station").forEach((el, i) => {
-      el.style.opacity = 0;
-      el.style.transition = `opacity 0.5s ease ${0.25 + i * 0.04}s, transform 0.16s ease`;
-      requestAnimationFrame(() => { el.style.opacity = 1; });
-    });
-  }
-
-  /* ---- Simulator ---- */
-  function addDays(date, n) { const d = new Date(date); d.setDate(d.getDate() + n); return d; }
-  function addMonths(date, n) { const d = new Date(date); d.setMonth(d.getMonth() + n); return d; }
-  function fmt(d) { return d.toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" }); }
-
-  function computeCase() {
-    const state = document.getElementById("simState").value;
-    const employees = parseInt(document.getElementById("simEmployees").value, 10) || 0;
-    const funding = document.getElementById("simFunding").value;
-    const eventType = document.getElementById("simEvent").value;
-    const dateVal = document.getElementById("simDate").value;
-    const disability = document.getElementById("simDisability").checked;
-    if (!dateVal) return null;
-    const eventDate = new Date(dateVal + "T00:00:00");
-
-    const longEvents = ["Divorce / legal separation", "Death of employee", "Loss of dependent status"];
-
-    if (employees >= 20) {
-      const noticeDeadline = addDays(eventDate, 44);
-      const electionDeadline = addDays(noticeDeadline, 60);
-      const months = disability ? 29 : (longEvents.includes(eventType) ? 36 : 18);
-      return { track: "fed", label: "Federal COBRA", noticeDeadline, electionDeadline, durationEnd: addMonths(eventDate, months) };
-    }
-    if (funding === "self-funded") {
-      return { track: "none" };
-    }
-    if (state === "MD") {
-      const months = disability ? 29 : 18;
-      return { track: "md", label: "Maryland mini-COBRA", noticeDeadline: addDays(eventDate, 14), electionDeadline: addDays(eventDate, 45), durationEnd: addMonths(eventDate, months) };
-    }
-    if (state === "DC") {
-      return { track: "dc", label: "D.C. mini-COBRA", noticeDeadline: addDays(eventDate, 15), electionDeadline: addDays(eventDate, 45), durationEnd: addMonths(eventDate, 3) };
-    }
-    if (state === "VA") {
-      const noticeDeadline = addDays(eventDate, 14);
-      const electOption1 = addDays(noticeDeadline, 31);
-      const electOption2 = addDays(eventDate, 60);
-      const electionDeadline = electOption1 < electOption2 ? electOption1 : electOption2;
-      return { track: "va", label: "Virginia mini-COBRA", noticeDeadline, electionDeadline, durationEnd: addMonths(eventDate, 12) };
-    }
-    return { track: "unmapped" };
-  }
-
-  (function initDate() {
-    const el = document.getElementById("simDate");
-    if (!el.value) el.value = new Date().toISOString().slice(0, 10);
-  })();
-
-  document.getElementById("traceBtn").addEventListener("click", () => {
-    const result = computeCase();
-    const box = document.getElementById("simResult");
-    const routeEl = document.getElementById("simRoute");
-    const datesEl = document.getElementById("simDates");
-    const caveatEl = document.getElementById("simCaveat");
-    box.classList.remove("none-track", "unmapped-track");
-
-    if (!result) {
-      routeEl.textContent = "Pick an event date to trace a case.";
-      datesEl.innerHTML = "";
-      caveatEl.textContent = "";
-      box.classList.add("show");
-      setTrackEmphasis("all");
-      return;
-    }
-
-    if (result.track === "none") {
-      box.classList.add("none-track");
-      routeEl.textContent = "Classify → no statutory continuation duty applies";
-      datesEl.innerHTML = "";
-      caveatEl.textContent = "Self-funded plan under 20 employees: neither federal COBRA nor any of the three mapped state laws reaches it. Coverage only continues if the plan voluntarily offers it.";
-      setTrackEmphasis(null);
-      TRACK_CLASSES.forEach(t => document.querySelectorAll(`.station.${t}, .line.split-${t}, .line.merge-${t}`).forEach(el => el.style.opacity = 0.22));
-      return;
-    }
-    if (result.track === "unmapped") {
-      box.classList.add("unmapped-track");
-      routeEl.textContent = "Classify → Intake → Notice (state not mapped in this tool)";
-      datesEl.innerHTML = "";
-      caveatEl.textContent = "This map only covers Federal, Maryland, D.C. and Virginia. For another state, check that state's own mini-COBRA law separately.";
-      setTrackEmphasis(null);
-      return;
-    }
-
-    routeEl.innerHTML = `Classify → Intake → <span class="mono">Notice (${result.label})</span> → Enroll → Bill → Exit`;
-    datesEl.innerHTML = `
-      <div class="d"><div class="l">Notice due by</div><div class="v mono">${fmt(result.noticeDeadline)}</div></div>
-      <div class="d"><div class="l">Election due by</div><div class="v mono">${fmt(result.electionDeadline)}</div></div>
-      <div class="d"><div class="l">Coverage ends</div><div class="v mono">${fmt(result.durationEnd)}</div></div>
-    `;
-    caveatEl.textContent = "Dates are illustrative estimates using the fastest common reading of each deadline (e.g. federal notice assumed sent right at day 44) — confirm exact language against the statute or plan document before use.";
-    box.classList.add("show");
-    setTrackEmphasis(result.track);
-    document.getElementById("diagram").scrollIntoView({ behavior: "smooth", block: "center" });
-  });
-
-  /* ---- Site nav ---- */
-  function showView(name) {
-    document.querySelectorAll(".view").forEach(v => v.classList.remove("active"));
-    document.getElementById("view-" + name).classList.add("active");
-    document.querySelectorAll("#siteTabs button").forEach(b => b.classList.toggle("active", b.dataset.view === name));
-    window.scrollTo(0, 0);
-  }
-  document.getElementById("siteTabs").addEventListener("click", (e) => {
-    const btn = e.target.closest("button");
-    if (btn) showView(btn.dataset.view);
-  });
-  document.querySelectorAll("[data-goto]").forEach(el => {
-    el.addEventListener("click", () => showView(el.dataset.goto));
-  });
-
-  /* ---- Industry Insights ---- */
-  const insights = [
-    { date: "2026-07-05", cat: "reg", title: "DOL model COBRA notices needed a refresh by Jan 31, 2026",
-      body: "The Department of Labor's model COBRA election and general notices carried an expiration date of January 31, 2026. Using an expired model past that date forfeits the “good faith compliance” safe harbor that comes from using the model language as-is — worth a one-time sweep to confirm every active template has actually been migrated.",
-      sources: [{ title: "DOL — An Employer's Guide to COBRA", url: "https://www.dol.gov/agencies/ebsa/about-ebsa/our-activities/resource-center/publications/an-employers-guide-to-group-health-continuation-coverage-under-cobra" }] },
-    { date: "2026-07-05", cat: "reg", title: "Penalty exposure is bigger than most people assume",
-      body: "DOL can assess up to $110/day/participant for missed COBRA notices. The IRS adds a parallel excise tax — $100/day per beneficiary, or $200/day per family — and if non-compliance surfaces during an IRS audit uncorrected, the minimum penalty is $2,500 per beneficiary, scaling to $15,000 per violation if it's judged “more than trivial,” capped annually at the lesser of $500,000 or 10% of the prior year's health costs. Clean, timestamped documentation is the practical difference between “trivial” and not.",
-      sources: [] },
-    { date: "2026-07-05", cat: "reg", title: "Multi-state complexity is the norm, not the exception",
-      body: "44 states now maintain some form of their own continuation-coverage (“mini-COBRA”) law. A TPA operating across the DMV region alone is running at least four separate rulebooks — federal plus Maryland, D.C., and Virginia — per client roster, which is exactly what the four-line process map on this site is built to track.",
-      sources: [] },
-    { date: "2026-07-05", cat: "trend", title: "TPA / claims-services consolidation is accelerating",
-      body: "The insurance TPA market is valued around $592B in 2026 and projected to reach roughly $845B by 2031 (~7.4% CAGR), and regional or specialty firms are increasingly being acquired by larger platforms chasing scale, geographic reach, and broader service offerings. Scale is shifting from a strategic advantage to a baseline requirement.",
-      sources: [{ title: "Mordor Intelligence — Insurance TPA Market", url: "https://www.mordorintelligence.com/industry-reports/global-insurance-third-party-administrators-market" }] },
-    { date: "2026-07-05", cat: "trend", title: "AI has moved from “emerging” to core infrastructure",
-      body: "Automation and AI adoption inside benefits administration are accelerating fast, aimed at cutting administrative cost while improving accuracy and the member experience. Cloud platforms and generative AI are now considered mainstream tooling rather than experimental add-ons.",
-      sources: [] },
-    { date: "2026-07-05", cat: "trend", title: "The TPA value proposition is shifting from processor to advisor",
-      body: "Employers increasingly expect TPAs to act as strategic advisors delivering actionable insight, not just administrative processing. Being the person who can explain why a rule applies — not just execute it — is directly aligned with where the industry is headed, and is a concrete way to differentiate inside a specialist role.",
-      sources: [] },
-    { date: "2026-07-05", cat: "tip", title: "Self-funded vs. insured is the single fact that decides everything downstream",
-      body: "Before any qualifying event happens, knowing whether a plan is insured or self-funded (ASO) — confirmed from the actual administration agreement, not the sales quote — determines which law applies at all. State mini-COBRA laws can't reach self-funded plans regardless of group size; that's Station 1 on the process map for a reason.",
-      sources: [] },
-    { date: "2026-07-05", cat: "tip", title: "D.C.'s 3-month continuation surprises people",
-      body: "D.C.'s mini-COBRA runs just 3 months — dramatically shorter than Maryland's 18 or Virginia's 12. Clients with a small D.C. office often assume it matches their Maryland headquarters' duration; flagging this proactively avoids an uncomfortable conversation later.",
-      sources: [] },
-    { date: "2026-07-05", cat: "tip", title: "Documentation beats memory in an audit",
-      body: "The gap between a $2,500 minimum penalty and a $15,000 “more than trivial” penalty often comes down to whether the notice trail is documented and timestamped, or reconstructed from memory after the fact. Treat the audit trail as a deliverable, not a byproduct.",
-      sources: [] }
-  ];
-
-  const CAT_LABEL = { reg: "Regulatory", trend: "Industry trend", tip: "Practical tip" };
-
-  function renderInsights(filter) {
-    const feed = document.getElementById("insightsFeed");
-    const sorted = [...insights].sort((a, b) => new Date(b.date) - new Date(a.date));
-    const filtered = filter === "all" ? sorted : sorted.filter(i => i.cat === filter);
-    feed.innerHTML = filtered.map(i => `
-      <div class="entry">
-        <div class="meta"><span class="tag ${i.cat}">${CAT_LABEL[i.cat]}</span><span class="date">${i.date}</span></div>
-        <h3>${i.title}</h3>
-        <p>${i.body}</p>
-        ${i.sources.length ? `<div class="srcs">${i.sources.map(s => `<a href="${s.url}" target="_blank" rel="noopener">${s.title} ↗</a>`).join("")}</div>` : ""}
-      </div>
-    `).join("");
-
-    const latest = sorted[0];
-    if (latest) {
-      document.getElementById("lastUpdated").textContent = `Last updated — ${latest.date}`;
-    }
-  }
-
-  document.getElementById("catFilters").addEventListener("click", (e) => {
-    const btn = e.target.closest("button");
-    if (!btn) return;
-    document.querySelectorAll("#catFilters .cat-chip").forEach(b => b.classList.remove("active"));
-    btn.classList.add("active");
-    renderInsights(btn.dataset.cat);
-  });
-
-  renderInsights("all");
+<script
+  defer
+  crossorigin="anonymous"
+  src="https://deciding-oyster-21.clerk.accounts.dev/npm/@clerk/ui@1/dist/ui.browser.js"
+  type="text/javascript">
 </script>
+<script
+  defer
+  crossorigin="anonymous"
+  data-clerk-publishable-key="pk_test_ZGVjaWRpbmctb3lzdGVyLTIxLmNsZXJrLmFjY291bnRzLmRldiQ"
+  src="https://deciding-oyster-21.clerk.accounts.dev/npm/@clerk/clerk-js@6/dist/clerk.browser.js"
+  type="text/javascript">
+</script>
+<script>
+  const clerkAppearance = {
+    variables: {
+      colorPrimary: "#4d6b5e",
+      colorText: "#14140f",
+      colorBackground: "#ffffff",
+      fontFamily: '"Segoe UI", system-ui, sans-serif',
+      borderRadius: "8px"
+    }
+  };
+
+  window.addEventListener("load", async function () {
+    await window.Clerk.load();
+    const signInBtn = document.getElementById("signInBtn");
+    const userButtonEl = document.getElementById("userButton");
+
+    function updateNav() {
+      if (window.Clerk.user) {
+        signInBtn.style.display = "none";
+        window.Clerk.mountUserButton(userButtonEl, { appearance: clerkAppearance });
+      } else {
+        signInBtn.style.display = "inline-block";
+        userButtonEl.innerHTML = "";
+      }
+    }
+    updateNav();
+    window.Clerk.addListener(updateNav);
+    signInBtn.addEventListener("click", () => window.Clerk.openSignIn({ appearance: clerkAppearance }));
+  });
+</script>
+</body>
+</html>
