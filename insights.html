@@ -116,6 +116,7 @@
   <a class="wordmark" href="index.html" style="text-decoration:none; font-size:0.95rem;">Vested</a>
   <div class="links">
     <a class="current" href="insights.html">Insights</a>
+    <a href="landscape.html">Landscape</a>
     <div id="userButton"></div>
   </div>
 </nav>
@@ -123,8 +124,9 @@
 <div id="gate">
   <h1>Industry Insights</h1>
   <p class="sub">Free account required — regulatory data, industry charts, and case-work tips for benefits administration professionals.</p>
-  <div class="authbox">
-    <div id="clerkSignIn"></div>
+  <div class="authbox" style="display:block; text-align:center;">
+    <button id="gateSignInBtn" style="font:inherit; font-size:0.95rem; font-weight:600; padding:12px 26px; border-radius:8px; border:none; background:var(--accent); color:var(--accent-ink); cursor:pointer;">Sign in to continue</button>
+    <div id="authError" style="margin-top:14px; font-size:0.82rem; color:#b23a2e;"></div>
   </div>
 </div>
 
@@ -200,11 +202,12 @@
   const gate = document.getElementById("gate");
   const content = document.getElementById("content");
   const userButtonEl = document.getElementById("userButton");
-  let mounted = false;
+  const authError = document.getElementById("authError");
 
   function showSignedIn() {
     gate.style.display = "none";
     content.style.display = "block";
+    userButtonEl.innerHTML = "";
     window.Clerk.mountUserButton(userButtonEl, { appearance: clerkAppearance });
     renderCharts();
     renderInsights("all");
@@ -213,19 +216,26 @@
     gate.style.display = "block";
     content.style.display = "none";
     userButtonEl.innerHTML = "";
-    if (!mounted) {
-      window.Clerk.mountSignIn(document.getElementById("clerkSignIn"), { appearance: clerkAppearance });
-      mounted = true;
-    }
   }
 
   window.addEventListener("load", async function () {
-    await window.Clerk.load();
-    function update() {
-      if (window.Clerk.user) showSignedIn(); else showSignedOut();
+    try {
+      if (!window.Clerk) throw new Error("Clerk script did not load (check network/ad-blocker).");
+      await window.Clerk.load();
+      function update() {
+        if (window.Clerk.user) showSignedIn(); else showSignedOut();
+      }
+      update();
+      window.Clerk.addListener(update);
+      document.getElementById("gateSignInBtn").addEventListener("click", () => {
+        window.Clerk.openSignIn({ appearance: clerkAppearance }).catch(err => {
+          authError.textContent = "Sign-in error: " + err.message;
+        });
+      });
+    } catch (err) {
+      authError.textContent = "Couldn't load sign-in: " + err.message;
+      console.error(err);
     }
-    update();
-    window.Clerk.addListener(update);
   });
 
   /* ---- Charts ---- */

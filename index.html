@@ -117,6 +117,7 @@
   <div class="brand wordmark">Vested</div>
   <div class="links">
     <a href="insights.html">Insights</a>
+    <a href="landscape.html">Landscape</a>
     <button class="pill" id="signInBtn">Sign In</button>
     <div id="userButton"></div>
   </div>
@@ -186,22 +187,28 @@
   };
 
   window.addEventListener("load", async function () {
-    await window.Clerk.load();
     const signInBtn = document.getElementById("signInBtn");
-    const userButtonEl = document.getElementById("userButton");
+    try {
+      if (!window.Clerk) throw new Error("Clerk script did not load (check network/ad-blocker).");
+      await window.Clerk.load();
+      const userButtonEl = document.getElementById("userButton");
 
-    function updateNav() {
-      if (window.Clerk.user) {
-        signInBtn.style.display = "none";
-        window.Clerk.mountUserButton(userButtonEl, { appearance: clerkAppearance });
-      } else {
-        signInBtn.style.display = "inline-block";
+      function updateNav() {
         userButtonEl.innerHTML = "";
+        if (window.Clerk.user) {
+          signInBtn.style.display = "none";
+          window.Clerk.mountUserButton(userButtonEl, { appearance: clerkAppearance });
+        } else {
+          signInBtn.style.display = "inline-block";
+        }
       }
+      updateNav();
+      window.Clerk.addListener(updateNav);
+      signInBtn.addEventListener("click", () => window.Clerk.openSignIn({ appearance: clerkAppearance }));
+    } catch (err) {
+      console.error(err);
+      signInBtn.title = "Sign-in unavailable: " + err.message;
     }
-    updateNav();
-    window.Clerk.addListener(updateNav);
-    signInBtn.addEventListener("click", () => window.Clerk.openSignIn({ appearance: clerkAppearance }));
   });
 </script>
 </body>
