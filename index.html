@@ -120,8 +120,6 @@
     <a href="landscape.html">Landscape</a>
     <a href="company.html">Kelly Benefits</a>
     <a href="study.html">Exam Prep</a>
-    <button class="pill" id="signInBtn">Sign In</button>
-    <div id="userButton"></div>
   </div>
 </nav>
 
@@ -164,84 +162,5 @@
   <span>© 2026</span>
 </footer>
 
-<script
-  defer
-  crossorigin="anonymous"
-  src="https://clerk.123456789eleven.github.io/npm/@clerk/ui@1/dist/ui.browser.js"
-  type="text/javascript">
-</script>
-<script
-  defer
-  crossorigin="anonymous"
-  data-clerk-publishable-key="pk_live_Y2xlcmsuMTIzNDU2Nzg5ZWxldmVuLmdpdGh1Yi5pbyQ"
-  src="https://clerk.123456789eleven.github.io/npm/@clerk/clerk-js@6/dist/clerk.browser.js"
-  type="text/javascript">
-</script>
-<script>
-  const clerkAppearance = {
-    variables: {
-      colorPrimary: "#4d6b5e",
-      colorText: "#14140f",
-      colorBackground: "#ffffff",
-      fontFamily: '"Segoe UI", system-ui, sans-serif',
-      borderRadius: "8px"
-    }
-  };
-
-  function withTimeout(promise, ms, label) {
-    return Promise.race([
-      promise,
-      new Promise((_, reject) => setTimeout(() => reject(new Error(label + " timed out after " + (ms / 1000) + "s — likely a blocked request (domain not allowed, ad-blocker, or network issue)")), ms))
-    ]);
-  }
-  let clerkLoadPromise = null;
-  function clerkLoad() {
-    if (!clerkLoadPromise) {
-      clerkLoadPromise = withTimeout(
-        window.Clerk.load({ ui: { ClerkUI: window.__internal_ClerkUICtor } }),
-        8000,
-        "Clerk.load()"
-      );
-    }
-    return clerkLoadPromise;
-  }
-
-  const signInBtn = document.getElementById("signInBtn");
-  signInBtn.addEventListener("click", async () => {
-    const originalLabel = signInBtn.textContent;
-    signInBtn.textContent = "Loading…";
-    try {
-      if (!window.Clerk) throw new Error("Clerk script did not load at all (check network/ad-blocker/browser extensions).");
-      await clerkLoad();
-      await window.Clerk.openSignIn({ appearance: clerkAppearance });
-    } catch (err) {
-      console.error(err);
-      alert("Sign-in error: " + err.message);
-    } finally {
-      signInBtn.textContent = originalLabel;
-    }
-  });
-
-  window.addEventListener("load", async function () {
-    try {
-      if (!window.Clerk) return;
-      await clerkLoad();
-      const userButtonEl = document.getElementById("userButton");
-      function updateNav() {
-        userButtonEl.innerHTML = "";
-        if (window.Clerk.user) {
-          signInBtn.style.display = "none";
-          window.Clerk.mountUserButton(userButtonEl, { appearance: clerkAppearance });
-        } else {
-          signInBtn.style.display = "inline-block";
-        }
-      }
-      updateNav();
-      window.Clerk.addListener(updateNav);
-    } catch (err) {
-      console.error("Session check failed:", err);
-    }
-  });
-</script>
 </body>
 </html>

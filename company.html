@@ -36,7 +36,6 @@
   #gate p.sub { color: var(--ink-soft); font-size: 0.9rem; margin: 0 0 30px; }
   .authbox { border: 1px solid var(--border); border-radius: 12px; background: var(--surface); padding: 26px; text-align: center; }
 
-  #content { display: none; }
   .page-head { max-width: 76ch; margin-bottom: 28px; }
   .page-head h1 { font-size: 2rem; }
   .page-head p { color: var(--ink-soft); font-size: 0.98rem; margin: 10px 0 0; line-height: 1.55; }
@@ -103,18 +102,8 @@
     <a href="landscape.html">Landscape</a>
     <a class="current" href="company.html">Kelly Benefits</a>
     <a href="study.html">Exam Prep</a>
-    <div id="userButton"></div>
   </div>
 </nav>
-
-<div id="gate">
-  <h1>Kelly Benefits</h1>
-  <p class="sub">Free account required — how Kelly Benefits is structured, and how each division stacks up against the market.</p>
-  <div class="authbox">
-    <button id="gateSignInBtn" style="font:inherit; font-size:0.95rem; font-weight:600; padding:12px 26px; border-radius:8px; border:none; background:var(--accent); color:var(--accent-ink); cursor:pointer;">Sign in to continue</button>
-    <div id="authError" style="margin-top:14px; font-size:0.82rem; color:#b23a2e;"></div>
-  </div>
-</div>
 
 <main id="content">
   <div class="page-head">
@@ -166,65 +155,7 @@
   Figures are drawn from company websites, SEC filings (for public competitors), and third-party revenue/AUM estimates (for private companies, including Kelly Benefits itself, which doesn't disclose divisional financials). Treat any private-company figure as an estimate, not a confirmed number — this page is a first-pass draft meant to be refined as you learn more from the inside.
 </footer>
 
-<script
-  defer
-  crossorigin="anonymous"
-  src="https://clerk.123456789eleven.github.io/npm/@clerk/ui@1/dist/ui.browser.js"
-  type="text/javascript">
-</script>
-<script
-  defer
-  crossorigin="anonymous"
-  data-clerk-publishable-key="pk_live_Y2xlcmsuMTIzNDU2Nzg5ZWxldmVuLmdpdGh1Yi5pbyQ"
-  src="https://clerk.123456789eleven.github.io/npm/@clerk/clerk-js@6/dist/clerk.browser.js"
-  type="text/javascript">
-</script>
 <script>
-  const clerkAppearance = { variables: { colorPrimary: "#4d6b5e", colorText: "#14140f", colorBackground: "#ffffff", fontFamily: '"Segoe UI", system-ui, sans-serif', borderRadius: "8px" } };
-
-  const gate = document.getElementById("gate");
-  const content = document.getElementById("content");
-  const userButtonEl = document.getElementById("userButton");
-  const authError = document.getElementById("authError");
-
-  function showSignedIn() {
-    gate.style.display = "none"; content.style.display = "block"; userButtonEl.innerHTML = "";
-    window.Clerk.mountUserButton(userButtonEl, { appearance: clerkAppearance });
-    renderCircle();
-  }
-  function showSignedOut() { gate.style.display = "block"; content.style.display = "none"; userButtonEl.innerHTML = ""; }
-
-  function withTimeout(promise, ms, label) {
-    return Promise.race([promise, new Promise((_, reject) => setTimeout(() => reject(new Error(label + " timed out after " + (ms/1000) + "s")), ms))]);
-  }
-  let clerkLoadPromise = null;
-  function clerkLoad() {
-    if (!clerkLoadPromise) clerkLoadPromise = withTimeout(window.Clerk.load({ ui: { ClerkUI: window.__internal_ClerkUICtor } }), 8000, "Clerk.load()");
-    return clerkLoadPromise;
-  }
-
-  const gateBtn = document.getElementById("gateSignInBtn");
-  gateBtn.addEventListener("click", async () => {
-    authError.textContent = ""; gateBtn.disabled = true;
-    const orig = gateBtn.textContent; gateBtn.textContent = "Loading…";
-    try {
-      if (!window.Clerk) throw new Error("Clerk script did not load at all (check network/ad-blocker).");
-      await clerkLoad();
-      await window.Clerk.openSignIn({ appearance: clerkAppearance });
-    } catch (err) { authError.textContent = "Sign-in error: " + err.message; console.error(err); }
-    finally { gateBtn.disabled = false; gateBtn.textContent = orig; }
-  });
-
-  window.addEventListener("load", async function () {
-    try {
-      if (!window.Clerk) return;
-      await clerkLoad();
-      function update() { if (window.Clerk.user) showSignedIn(); else showSignedOut(); }
-      update();
-      window.Clerk.addListener(update);
-    } catch (err) { console.error("Session check failed:", err); }
-  });
-
   /* ================= Division data ================= */
   const divisions = [
     {
@@ -330,6 +261,8 @@
   }
   function closeDivision() { openId = null; renderCircle(); document.getElementById("divisionDetail").classList.remove("show"); }
   document.getElementById("closeDivision").addEventListener("click", closeDivision);
+
+  renderCircle();
 </script>
 </body>
 </html>
