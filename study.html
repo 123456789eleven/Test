@@ -4,6 +4,11 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>MD Life &amp; Health Exam Prep</title>
+<meta name="description" content="A 30-day study plan, flashcards, and quiz mode for the Maryland Life & Health insurance producer licensing exam, weighted by the real exam blueprint." />
+<meta property="og:title" content="MD Life & Health Exam Prep — Custodian" />
+<meta property="og:description" content="A 30-day study plan weighted by the real Maryland exam blueprint." />
+<meta property="og:type" content="website" />
+<link rel="icon" href="favicon.svg" type="image/svg+xml" />
 <style>
   :root {
     --page: #f7f5f0; --surface: #ffffff; --surface-alt: #f0eee8;
@@ -68,6 +73,7 @@
     display: flex; align-items: center; justify-content: center; text-align: center; padding: 32px 28px;
     cursor: pointer; font-size: 1.15rem; line-height: 1.5; box-shadow: 0 1px 2px rgba(0,0,0,0.06), 0 8px 20px rgba(0,0,0,0.05);
   }
+  .flashcard:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; }
   .flashcard .tag { position: absolute; margin-top: -70px; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--accent); font-weight: 700; }
   .flashcard .side-label { display: block; font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--ink-muted); margin-bottom: 12px; }
   .fc-actions { display: flex; justify-content: center; gap: 12px; margin-top: 18px; }
@@ -149,7 +155,7 @@
     <span class="fc-progress" id="fcCount" style="margin:0;"></span>
   </div>
   <div class="fc-stage">
-    <div class="flashcard" id="fcCard"></div>
+    <div class="flashcard" id="fcCard" tabindex="0" role="button" aria-label="Flashcard, press Enter or Space to flip"></div>
     <div class="fc-actions">
       <button class="dontknow" id="fcDontKnow">Still learning</button>
       <button class="know" id="fcKnow">Got it</button>
@@ -446,7 +452,7 @@
     cardEl.innerHTML = `<div><span class="side-label">${sectionName(card[0])} — tap to flip</span>${card[1]}</div>`;
     document.getElementById("fcRemaining").textContent = `${fcIndex + 1} of ${fcDeck.length}`;
   }
-  document.getElementById("fcCard").addEventListener("click", () => {
+  function flipFcCard() {
     if (fcIndex >= fcDeck.length) return;
     const card = flashcards[fcDeck[fcIndex]];
     fcFlipped = !fcFlipped;
@@ -454,6 +460,10 @@
     cardEl.innerHTML = fcFlipped
       ? `<div><span class="side-label">Answer</span>${card[2]}</div>`
       : `<div><span class="side-label">${sectionName(card[0])} — tap to flip</span>${card[1]}</div>`;
+  }
+  document.getElementById("fcCard").addEventListener("click", flipFcCard);
+  document.getElementById("fcCard").addEventListener("keydown", (e) => {
+    if (e.key === "Enter" || e.key === " ") { e.preventDefault(); flipFcCard(); }
   });
   document.getElementById("fcKnow").addEventListener("click", () => { fcIndex++; showFcCard(); });
   document.getElementById("fcDontKnow").addEventListener("click", () => {

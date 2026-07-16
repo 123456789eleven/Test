@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Page not found — Custodian</title>
+<link rel="icon" href="favicon.svg" type="image/svg+xml" />
+<style>
+  :root {
+    --page: #f7f5f0; --surface: #ffffff; --ink: #14140f; --ink-soft: #5c5a52;
+    --accent: #4d6b5e; --accent-ink: #ffffff; --border: rgba(20,20,15,0.12);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --page: #0d0f0d; --surface: #161815; --ink: #f3f2ee; --ink-soft: #b8b6ad; --accent: #8fae9e; --accent-ink: #0d0f0d; --border: rgba(255,255,255,0.12); }
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; background: var(--page); color: var(--ink); font-family: "Segoe UI", system-ui, -apple-system, sans-serif; }
+  body { display: flex; align-items: center; justify-content: center; text-align: center; padding: 24px; }
+  .wordmark { font-family: "Bahnschrift", "Segoe UI Semibold", sans-serif; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; font-size: 0.9rem; color: var(--ink-soft); margin-bottom: 18px; }
+  h1 { font-family: "Bahnschrift", "Segoe UI Semibold", sans-serif; font-size: 2.2rem; margin: 0 0 12px; }
+  p { color: var(--ink-soft); font-size: 0.98rem; margin: 0 0 28px; }
+  .links { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
+  .links a {
+    text-decoration: none; color: var(--ink); border: 1px solid var(--border); border-radius: 999px;
+    padding: 9px 18px; font-size: 0.86rem; transition: background .15s ease, color .15s ease;
+  }
+  .links a:hover { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+</style>
+</head>
+<body>
+  <div>
+    <div class="wordmark">Custodian</div>
+    <h1>Page not found</h1>
+    <p>That page doesn't exist, or moved. Here's the rest of the site:</p>
+    <div class="links">
+      <a href="index.html">Overview</a>
+      <a href="insights.html">Insights</a>
+      <a href="landscape.html">Landscape</a>
+      <a href="company.html">Kelly Benefits</a>
+      <a href="study.html">Exam Prep</a>
+    </div>
+  </div>
+</body>
+</html>
