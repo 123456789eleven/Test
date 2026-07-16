@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>MD Life &amp; Health Exam Prep</title>
+<style>
+  :root {
+    --page: #f7f5f0; --surface: #ffffff; --surface-alt: #f0eee8;
+    --ink: #14140f; --ink-soft: #5c5a52; --ink-muted: #8f8c81;
+    --accent: #4d6b5e; --accent-wash: rgba(77,107,94,0.10); --accent-ink: #ffffff;
+    --border: rgba(20,20,15,0.12); --grid: #e1e0d9;
+    --warn: #a63b2e; --warn-soft: #f8e2df; --good: #3e7d4c; --good-soft: #e1f0e3;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --page: #0d0f0d; --surface: #161815; --surface-alt: #1c1f1b; --ink: #f3f2ee; --ink-soft: #b8b6ad; --ink-muted: #7c7a71; --accent: #8fae9e; --accent-wash: rgba(143,174,158,0.14); --accent-ink: #0d0f0d; --border: rgba(255,255,255,0.12); --grid: #2c2c2a; --warn: #e08a7a; --warn-soft: #33201c; --good: #5fae6e; --good-soft: #1c2b1f; }
+  }
+  :root[data-theme="dark"] { --page: #0d0f0d; --surface: #161815; --surface-alt: #1c1f1b; --ink: #f3f2ee; --ink-soft: #b8b6ad; --ink-muted: #7c7a71; --accent: #8fae9e; --accent-wash: rgba(143,174,158,0.14); --accent-ink: #0d0f0d; --border: rgba(255,255,255,0.12); --grid: #2c2c2a; --warn: #e08a7a; --warn-soft: #33201c; --good: #5fae6e; --good-soft: #1c2b1f; }
+  :root[data-theme="light"] { --page: #f7f5f0; --surface: #ffffff; --surface-alt: #f0eee8; --ink: #14140f; --ink-soft: #5c5a52; --ink-muted: #8f8c81; --accent: #4d6b5e; --accent-wash: rgba(77,107,94,0.10); --accent-ink: #ffffff; --border: rgba(20,20,15,0.12); --grid: #e1e0d9; --warn: #a63b2e; --warn-soft: #f8e2df; --good: #3e7d4c; --good-soft: #e1f0e3; }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; background: var(--page); color: var(--ink); font-family: "Segoe UI", system-ui, -apple-system, sans-serif; }
+  h1, h2, h3 { font-family: "Bahnschrift", "Segoe UI Semibold", sans-serif; font-weight: 600; margin: 0; }
+  .mono { font-variant-numeric: tabular-nums; }
+  body { padding: 24px clamp(14px, 4vw, 48px) 70px; }
+
+  header.top { max-width: 80ch; margin-bottom: 18px; }
+  header.top h1 { font-size: 1.5rem; }
+  header.top p { color: var(--ink-soft); font-size: 0.9rem; margin: 8px 0 0; line-height: 1.5; }
+
+  .countdown { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; margin: 16px 0 22px; }
+  .countdown .card { border: 1px solid var(--border); border-radius: 10px; background: var(--surface); padding: 10px 16px; display: flex; align-items: baseline; gap: 8px; }
+  .countdown .card .n { font-size: 1.4rem; font-weight: 700; }
+  .countdown .card .l { font-size: 0.76rem; color: var(--ink-soft); }
+  .countdown input[type="date"] { font: inherit; padding: 8px 10px; border-radius: 8px; border: 1px solid var(--border); background: var(--surface); color: var(--ink); }
+  .countdown label { font-size: 0.8rem; color: var(--ink-soft); }
+
+  .tabs { display: flex; gap: 4px; background: var(--surface-alt); border-radius: 9px; padding: 4px; margin-bottom: 22px; width: fit-content; flex-wrap: wrap; }
+  .tabs button { font: inherit; font-size: 0.85rem; font-weight: 600; padding: 8px 16px; border: none; border-radius: 6px; background: transparent; color: var(--ink-soft); cursor: pointer; }
+  .tabs button.active { background: var(--surface); color: var(--ink); box-shadow: 0 1px 2px rgba(0,0,0,0.08); }
+
+  .view { display: none; }
+  .view.active { display: block; }
+
+  /* Plan */
+  table.plan { width: 100%; border-collapse: collapse; font-size: 0.86rem; }
+  table.plan th, table.plan td { text-align: left; padding: 9px 10px; border-top: 1px solid var(--border); vertical-align: top; }
+  table.plan th { color: var(--ink-soft); font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.04em; }
+  table.plan tr.today { background: var(--accent-wash); }
+  table.plan tr.past td { color: var(--ink-muted); }
+  .weight-pill { display: inline-block; font-size: 0.7rem; font-weight: 700; padding: 1px 7px; border-radius: 999px; background: var(--accent-wash); color: var(--accent); margin-left: 6px; }
+
+  /* Flashcards */
+  .fc-controls { display: flex; gap: 10px; align-items: center; margin-bottom: 18px; flex-wrap: wrap; }
+  .fc-controls select { font: inherit; padding: 8px 10px; border-radius: 8px; border: 1px solid var(--border); background: var(--surface); color: var(--ink); }
+  .fc-stage { max-width: 560px; margin: 0 auto; }
+  .flashcard {
+    border: 1px solid var(--border); border-radius: 16px; background: var(--surface); min-height: 220px;
+    display: flex; align-items: center; justify-content: center; text-align: center; padding: 32px 28px;
+    cursor: pointer; font-size: 1.15rem; line-height: 1.5; box-shadow: 0 1px 2px rgba(0,0,0,0.06), 0 8px 20px rgba(0,0,0,0.05);
+  }
+  .flashcard .tag { position: absolute; margin-top: -70px; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--accent); font-weight: 700; }
+  .flashcard .side-label { display: block; font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--ink-muted); margin-bottom: 12px; }
+  .fc-actions { display: flex; justify-content: center; gap: 12px; margin-top: 18px; }
+  .fc-actions button { font: inherit; font-size: 0.86rem; font-weight: 600; padding: 10px 20px; border-radius: 8px; border: 1px solid var(--border); background: var(--surface); color: var(--ink); cursor: pointer; }
+  .fc-actions button.know { border-color: var(--good); color: var(--good); }
+  .fc-actions button.dontknow { border-color: var(--warn); color: var(--warn); }
+  .fc-progress { text-align: center; color: var(--ink-soft); font-size: 0.82rem; margin-top: 10px; }
+
+  /* Quiz */
+  .quiz-setup { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-bottom: 20px; }
+  .quiz-setup select, .quiz-setup button.start { font: inherit; padding: 9px 14px; border-radius: 8px; border: 1px solid var(--border); background: var(--surface); color: var(--ink); cursor: pointer; }
+  .quiz-setup button.start { background: var(--accent); color: var(--accent-ink); border: none; font-weight: 600; }
+  .quiz-card { max-width: 640px; }
+  .quiz-q { font-size: 1.05rem; font-weight: 600; margin-bottom: 16px; line-height: 1.5; }
+  .quiz-opt { display: block; width: 100%; text-align: left; font: inherit; font-size: 0.92rem; padding: 12px 16px; margin-bottom: 10px; border-radius: 8px; border: 1px solid var(--border); background: var(--surface); color: var(--ink); cursor: pointer; }
+  .quiz-opt:hover { border-color: var(--accent); }
+  .quiz-opt.correct { background: var(--good-soft); border-color: var(--good); }
+  .quiz-opt.incorrect { background: var(--warn-soft); border-color: var(--warn); }
+  .quiz-explain { margin-top: 8px; padding: 12px 14px; border-radius: 8px; background: var(--surface-alt); font-size: 0.86rem; color: var(--ink-soft); display: none; }
+  .quiz-explain.show { display: block; }
+  .quiz-next { margin-top: 16px; font: inherit; font-size: 0.88rem; font-weight: 600; padding: 10px 20px; border-radius: 8px; border: none; background: var(--accent); color: var(--accent-ink); cursor: pointer; display: none; }
+  .quiz-next.show { display: inline-block; }
+  .quiz-score { font-size: 0.86rem; color: var(--ink-soft); margin-bottom: 14px; }
+  .quiz-result { text-align: center; padding: 40px 20px; }
+  .quiz-result .big { font-size: 2.4rem; font-weight: 700; }
+
+  /* Progress */
+  .prog-row { display: grid; grid-template-columns: 220px 1fr 90px 70px; align-items: center; gap: 12px; margin-bottom: 12px; font-size: 0.86rem; }
+  @media (max-width: 700px) { .prog-row { grid-template-columns: 140px 1fr 60px; } .prog-row .flag { display: none; } }
+  .prog-track { position: relative; height: 20px; background: var(--surface-alt); border-radius: 4px; overflow: hidden; }
+  .prog-fill { position: absolute; left: 0; top: 0; height: 100%; background: var(--accent); }
+  .prog-fill.low { background: var(--warn); }
+  .prog-row .flag { font-size: 0.72rem; font-weight: 700; color: var(--warn); }
+  .prog-legend { font-size: 0.8rem; color: var(--ink-soft); margin-bottom: 16px; }
+
+  footer { margin-top: 40px; border-top: 1px solid var(--border); padding-top: 16px; font-size: 0.78rem; color: var(--ink-muted); max-width: 80ch; line-height: 1.5; }
+</style>
+</head>
+<body>
+
+<header class="top">
+  <h1>Maryland Life &amp; Health — Exam Prep</h1>
+  <p>Built around the actual Prometric/MIA content outline, weighted by what's actually tested — not spread evenly. Insurance Regulation is 30% of the exam, the single largest section, so it gets the most time here.</p>
+</header>
+
+<div class="countdown">
+  <label for="examDate">Exam date:</label>
+  <input type="date" id="examDate" />
+  <div class="card"><span class="n mono" id="daysLeft">—</span><span class="l">days left</span></div>
+  <div class="card"><span class="n mono" id="todayDay">—</span><span class="l">of 30-day plan</span></div>
+</div>
+
+<div class="tabs" id="tabs">
+  <button data-view="plan" class="active">Study Plan</button>
+  <button data-view="flashcards">Flashcards</button>
+  <button data-view="quiz">Quiz</button>
+  <button data-view="progress">Progress</button>
+</div>
+
+<div class="view active" id="view-plan">
+  <div class="table-wrap" style="overflow-x:auto;">
+    <table class="plan" id="planTable"></table>
+  </div>
+</div>
+
+<div class="view" id="view-flashcards">
+  <div class="fc-controls">
+    <select id="fcSection"></select>
+    <span class="fc-progress" id="fcCount" style="margin:0;"></span>
+  </div>
+  <div class="fc-stage">
+    <div class="flashcard" id="fcCard"></div>
+    <div class="fc-actions">
+      <button class="dontknow" id="fcDontKnow">Still learning</button>
+      <button class="know" id="fcKnow">Got it</button>
+    </div>
+    <div class="fc-progress" id="fcRemaining"></div>
+  </div>
+</div>
+
+<div class="view" id="view-quiz">
+  <div id="quizSetup" class="quiz-setup">
+    <select id="quizSection"></select>
+    <button class="start" id="quizStart">Start quiz (10 questions)</button>
+  </div>
+  <div id="quizArea" class="quiz-card"></div>
+</div>
+
+<div class="view" id="view-progress">
+  <p class="prog-legend">Exam weight vs. your quiz accuracy so far. <span style="color:var(--warn); font-weight:600;">Flagged</span> sections are heavily weighted (≥8%) but under 70% accuracy — study these first.</p>
+  <div id="progList"></div>
+</div>
+
+<footer>
+  This is a first-pass study scaffold built from the official Prometric/Maryland Insurance Administration content outline plus standard life &amp; health insurance licensing concepts — not a substitute for your A.D. Banker course materials. Cross-check anything numeric (fees, day counts, percentages) against your ADB textbook and the current MIA candidate handbook before the exam, since state requirements do get updated.
+</footer>
+
+<script>
+  /* ================= DATA ================= */
+  const sections = [
+    { id: "reg", name: "Insurance Regulation (MD)", weight: 30, group: "Core" },
+    { id: "gen", name: "General Insurance", weight: 10, group: "Core" },
+    { id: "lifebasics", name: "Life Insurance Basics", weight: 18, group: "Life" },
+    { id: "lifepolicies", name: "Life Insurance Policies", weight: 10, group: "Life" },
+    { id: "riders", name: "Policy Provisions, Options & Riders", weight: 14, group: "Life" },
+    { id: "annuities", name: "Annuities", weight: 9, group: "Life" },
+    { id: "lifetax", name: "Federal Tax — Life & Qualified Plans", weight: 11, group: "Life" },
+    { id: "healthbasics", name: "Health Insurance Basics", weight: 11, group: "Health" },
+    { id: "healthprov", name: "Individual Health Policy Provisions", weight: 8, group: "Health" },
+    { id: "disability", name: "Disability Income & Related", weight: 9, group: "Health" },
+    { id: "medplans", name: "Medical Plans (HMO/PPO/Medicare)", weight: 14, group: "Health" },
+    { id: "grouphealth", name: "Group Health & Dental", weight: 6, group: "Health" },
+    { id: "seniors", name: "Seniors & Special Needs", weight: 9, group: "Health" },
+    { id: "healthtax", name: "Federal Tax — Health (HSA/FSA)", weight: 5, group: "Health" }
+  ];
+
+  const studyPlan = [
+    [1, "reg", "MD Insurance Administration, Commissioner's powers, producer licensing basics"],
+    [2, "reg", "License renewal (biennial, birth month), CE requirements (24 hrs/3 ethics)"],
+    [3, "reg", "Free look periods (10-day / 30-day replacement), reinstatement"],
+    [4, "reg", "Unfair trade practices: twisting, rebating, misrepresentation"],
+    [5, "reg", "Guaranty Corporation, appointments, producer conduct"],
+    [6, "reg", "Review + quiz: Insurance Regulation"],
+    [7, "gen", "Elements of insurable risk, law of large numbers, adverse selection"],
+    [8, "gen", "Contract law basics: offer/acceptance/consideration, aleatory, adhesion"],
+    [9, "lifebasics", "Term vs. whole vs. universal vs. variable life"],
+    [10, "lifebasics", "Underwriting factors, human life value vs. needs approach"],
+    [11, "lifebasics", "Beneficiaries, incontestability, suicide clause, grace period"],
+    [12, "lifepolicies", "Whole life variants: limited-pay, single premium, modified, adjustable"],
+    [13, "lifepolicies", "Joint life, survivorship life, group & industrial life"],
+    [14, "riders", "Waiver of premium, ADB rider, guaranteed insurability, accelerated benefit"],
+    [15, "riders", "Nonforfeiture options, settlement options"],
+    [16, "riders", "Policy loans, automatic premium loan, reinstatement"],
+    [17, "annuities", "Accumulation vs. payout phase, fixed vs. variable annuities"],
+    [18, "annuities", "Immediate vs. deferred, life with period certain, joint & survivor"],
+    [19, "lifetax", "Death benefit & cash value taxation, MEC, qualified vs. nonqualified plans"],
+    [20, "healthbasics", "Managed care basics: HMO/PPO/POS, deductibles, coinsurance"],
+    [21, "healthprov", "Policy provisions: grace period, reinstatement, notice of claim, proof of loss"],
+    [22, "disability", "Own-occ vs. any-occ, presumptive & residual disability, BOE insurance"],
+    [23, "medplans", "HMO/PPO/POS deep dive"],
+    [24, "medplans", "Medicare Parts A/B/C/D, Medigap"],
+    [25, "grouphealth", "Master contract, COBRA continuation, coordination of benefits, dental plans"],
+    [26, "seniors", "Medicare eligibility & enrollment windows, LTC insurance, ADLs"],
+    [27, "healthtax", "HSA vs. FSA, taxation of premiums & disability benefits"],
+    [28, "reg", "Full practice exam #1 — review every miss"],
+    [29, "medplans", "Full practice exam #2 — focus on flagged weak sections"],
+    [30, "reg", "Final review of flagged weak topics only — light day, get sleep"]
+  ];
+
+  const flashcards = [
+    // Insurance Regulation
+    ["reg","Who regulates insurance in Maryland?","The Maryland Insurance Administration (MIA), headed by the Insurance Commissioner."],
+    ["reg","Core powers of the Insurance Commissioner","Licenses/appoints producers & insurers, approves policy forms & rates, enforces insurance laws, examines insurers."],
+    ["reg","How often does an individual producer license renew in MD?","Biennially (every 2 years) — expires on the last day of the producer's birth month."],
+    ["reg","MD producer license renewal fee","$69 total ($54 renewal + $15 fraud prevention fee)."],
+    ["reg","CE requirement per 2-year renewal period","24 total hours, including 3 hours of ethics/consumer protection. Health license holders also need 2 hours of long-term care."],
+    ["reg","CE deadline before license expiration","Must be completed no later than 15 days before expiration — there is no CE grace period."],
+    ["reg","What is a producer appointment?","Authorization from an insurer allowing a producer to represent them; required for each insurer represented, in each line sold."],
+    ["reg","Free look period — new individual life policy","10 days from delivery to review and return for a full refund."],
+    ["reg","Free look period — replacement life policy","30 days from delivery (longer, to protect against unsuitable replacements)."],
+    ["reg","Purpose of the MD Life & Health Insurance Guaranty Corporation","Protects policyholders if a member insurer becomes insolvent; supervised by the Commissioner."],
+    ["reg","Twisting","Inducing a policyholder to lapse, surrender, or exchange a policy through misrepresentation — illegal."],
+    ["reg","Rebating","Giving anything of value not stated in the policy as an inducement to buy — generally illegal."],
+    ["reg","What triggers the need for a producer license?","Selling, soliciting, or negotiating insurance for compensation."],
+    // General Insurance
+    ["gen","Elements of an insurable risk","Fortuitous (accidental), measurable financial loss, large number of similar exposures, not against public policy."],
+    ["gen","Law of large numbers","The more exposures pooled together, the more predictable the losses become."],
+    ["gen","Adverse selection","The tendency of higher-risk individuals to seek insurance more than lower-risk individuals."],
+    ["gen","Elements of a legal contract","Offer, acceptance, consideration, legal purpose, competent parties."],
+    ["gen","Insurable interest — life insurance","Must exist at the time of application, not necessarily at the time of claim."],
+    ["gen","Aleatory contract","An unequal exchange of value depending on chance — small premium, potentially large benefit."],
+    ["gen","Adhesion contract","One party (the insurer) writes the contract; ambiguities are interpreted against the insurer."],
+    ["gen","Warranty vs. representation","A warranty must be exactly true; a representation must be true to the best of the applicant's knowledge."],
+    // Life Basics
+    ["lifebasics","Term life insurance","Pure protection for a specific period, no cash value."],
+    ["lifebasics","Whole life insurance","Permanent coverage with cash value and level premiums for life."],
+    ["lifebasics","Universal life insurance","Flexible-premium permanent insurance with an adjustable death benefit."],
+    ["lifebasics","Variable life insurance","Cash value invested in separate accounts; the policyowner bears the investment risk."],
+    ["lifebasics","Human life value approach","Estimates insurance need based on the insured's future earning potential."],
+    ["lifebasics","Needs approach","Estimates insurance need based on specific financial obligations (debt, income replacement, final expenses)."],
+    ["lifebasics","Incontestability clause","After a set period (commonly 2 years), the insurer can no longer contest the policy for misstatements (except fraud)."],
+    ["lifebasics","Suicide clause","Typically excludes suicide within the first 2 years; premiums are refunded instead of paying the death benefit."],
+    ["lifebasics","Grace period (life insurance)","Typically 30–31 days to pay an overdue premium before the policy lapses."],
+    // Life Policies
+    ["lifepolicies","Limited-pay whole life","Premiums are paid for a set number of years (e.g. 20-pay life), but coverage lasts for life."],
+    ["lifepolicies","Single premium whole life","One lump-sum premium purchases lifetime coverage immediately."],
+    ["lifepolicies","Adjustable life","Policyowner can change the premium, face amount, or protection period."],
+    ["lifepolicies","Survivorship life (second-to-die)","Covers two lives, pays on the death of the last survivor — common for estate planning."],
+    ["lifepolicies","Group life insurance","One master contract covers multiple people, typically issued through an employer."],
+    // Riders
+    ["riders","Waiver of premium rider","Waives premiums if the insured becomes totally disabled."],
+    ["riders","Accidental death benefit rider","Pays an extra benefit (often double) if death is accidental."],
+    ["riders","Guaranteed insurability rider","Allows buying additional coverage at set future points without new medical underwriting."],
+    ["riders","Accelerated death benefit","Allows accessing part of the death benefit while living, if terminally ill."],
+    ["riders","Nonforfeiture options","Cash surrender, reduced paid-up insurance, or extended term insurance."],
+    ["riders","Settlement options","Lump sum, interest only, fixed period, fixed amount, or life income."],
+    ["riders","Automatic premium loan provision","Uses available cash value to automatically pay an overdue premium."],
+    ["riders","Reinstatement provision","Allows restoring a lapsed policy, usually with proof of insurability plus back premiums and interest."],
+    // Annuities
+    ["annuities","Purpose of an annuity","Provides income, typically for retirement — the opposite function of life insurance."],
+    ["annuities","Accumulation phase","The period when money is paid into the annuity and grows."],
+    ["annuities","Fixed annuity","Guaranteed rate of return and fixed payments."],
+    ["annuities","Variable annuity","Payments vary with the performance of separate account investments; regulated as a security."],
+    ["annuities","Immediate annuity","Income payments begin within one payment interval of purchase."],
+    ["annuities","Deferred annuity","Has an accumulation period before payout begins."],
+    ["annuities","Life annuity with period certain","Pays for life, but guarantees payments for a minimum period even if the annuitant dies early."],
+    ["annuities","Surrender charge","A fee for withdrawing money from an annuity early, during the surrender period."],
+    // Tax / Qualified Plans
+    ["lifetax","Life insurance death benefit taxation","Generally income-tax-free to the beneficiary."],
+    ["lifetax","Cash value growth taxation","Tax-deferred while it remains inside the policy."],
+    ["lifetax","MEC (Modified Endowment Contract)","A life policy that fails the 7-pay test; loses favorable tax treatment (LIFO, taxable, possible penalty before 59½)."],
+    ["lifetax","Qualified retirement plan","Meets IRS requirements for tax-favored treatment; contributions are generally tax-deductible."],
+    ["lifetax","Nonqualified plan","Doesn't meet IRS requirements for special tax treatment; more flexible, but no upfront deduction."],
+    // Health basics
+    ["healthbasics","Managed care","Coordinates care to control cost and quality — HMO, PPO, POS models."],
+    ["healthbasics","Deductible","The amount the insured pays out of pocket before insurance starts paying."],
+    ["healthbasics","Coinsurance","The percentage of costs the insured shares with the insurer after the deductible."],
+    ["healthbasics","Pre-existing condition","A condition that existed before a policy's effective date."],
+    // Health provisions
+    ["healthprov","Insuring clause","States what the insurer promises to do — pay benefits for covered losses."],
+    ["healthprov","Grace period (health insurance)","Typically 7, 10, or 31 days, depending on the premium payment mode."],
+    ["healthprov","Time limit on certain defenses (health)","After 2 years, the insurer generally can't deny a claim based on application misstatements, except fraud."],
+    ["healthprov","Notice of claim requirement","Insured must generally notify the insurer of a claim within about 20 days."],
+    ["healthprov","Proof of loss requirement","Must generally be submitted within about 90 days of the loss."],
+    // Disability
+    ["disability","Disability income insurance","Replaces a portion of lost income when the insured can't work due to disability."],
+    ["disability","Own-occupation definition","Considered disabled if unable to perform the duties of one's own specific occupation."],
+    ["disability","Any-occupation definition","Considered disabled only if unable to perform any occupation suited to education/experience."],
+    ["disability","Presumptive disability","Automatic total disability for specific losses (e.g. sight, hearing, limbs), regardless of ability to work."],
+    ["disability","Residual disability benefit","A partial benefit if the insured can work, but at reduced income or capacity."],
+    ["disability","Business overhead expense (BOE) insurance","Covers a business's operating expenses while the owner is disabled."],
+    // Medical plans
+    ["medplans","HMO","Requires network providers and PCP referrals; typically lower cost, less flexibility."],
+    ["medplans","PPO","Offers a network plus out-of-network option at higher cost; referrals usually not required."],
+    ["medplans","POS","A hybrid of HMO and PPO — PCP referrals required, but some out-of-network flexibility."],
+    ["medplans","Medicare Part A","Hospital insurance — inpatient care, skilled nursing, hospice."],
+    ["medplans","Medicare Part B","Medical insurance — doctor visits and outpatient care; requires a premium."],
+    ["medplans","Medicare Part C","Medicare Advantage — private plans bundling Parts A & B (often D too)."],
+    ["medplans","Medicare Part D","Prescription drug coverage."],
+    ["medplans","Medicare Supplement (Medigap)","A private policy that fills gaps in Original Medicare; standardized plans A through N."],
+    // Group/Dental
+    ["grouphealth","Master contract (group insurance)","The employer holds the master policy; employees receive certificates of insurance."],
+    ["grouphealth","COBRA continuation","Federal law requiring 18/29/36-month continuation of group health coverage after a qualifying event, for employers with 20+ employees."],
+    ["grouphealth","Coordination of benefits (COB)","Prevents overpayment when a person is covered under more than one group plan; sets which plan pays first."],
+    ["grouphealth","Scheduled dental plan","Pays a fixed amount per procedure, regardless of the actual charge."],
+    // Seniors
+    ["seniors","Medicare eligibility","Age 65+, or under 65 with certain disabilities or end-stage renal disease."],
+    ["seniors","Medicare annual open enrollment","October 15 – December 7 each year."],
+    ["seniors","Medigap open enrollment","A 6-month guaranteed-issue window starting when turning 65 and enrolled in Part B."],
+    ["seniors","Long-term care (LTC) insurance","Covers custodial/skilled care (nursing home, assisted living, home care) not covered by Medicare."],
+    ["seniors","LTC benefit triggers","Typically inability to perform a set number of Activities of Daily Living (ADLs), or cognitive impairment."],
+    // Health tax
+    ["healthtax","HSA (Health Savings Account)","Tax-deductible contributions, tax-free growth, tax-free withdrawals for qualified expenses; must pair with a high-deductible health plan."],
+    ["healthtax","FSA (Flexible Spending Account)","Pre-tax employee contributions for medical expenses; generally \"use it or lose it\" with limited carryover."],
+    ["healthtax","Employer-paid health premiums","Generally tax-deductible to the employer and tax-free to the employee."],
+    ["healthtax","Disability benefit taxation","Taxable if the employer paid the premiums; tax-free if the employee paid with after-tax dollars."]
+  ];
+
+  const quiz = [
+    ["reg","How often must an individual producer license be renewed in Maryland?",["Annually","Every 2 years (biennially)","Every 3 years","It never expires"],1,"MD individual producer licenses renew biennially, expiring on the last day of the producer's birth month."],
+    ["reg","How many total CE hours are required per MD renewal period?",["12 hours","18 hours","24 hours","30 hours"],2,"24 total hours per 2-year period, including 3 hours of ethics/consumer protection."],
+    ["reg","What is the free look period for a new individual life policy in Maryland?",["5 days","10 days","20 days","30 days"],1,"10 days from policy delivery for a new individual life policy (30 days for a replacement)."],
+    ["reg","Inducing a client to drop one policy and buy another through misrepresentation is called:",["Rebating","Twisting","Coercion","Churning"],1,"Twisting — illegal because it's driven by misrepresentation rather than the client's actual interest."],
+    ["reg","What does the MD Life & Health Insurance Guaranty Corporation do?",["Sets premium rates","Protects policyholders if a member insurer becomes insolvent","Issues producer licenses","Investigates consumer complaints only"],1,"It protects policyholders against insurer insolvency and operates under Commissioner supervision."],
+    ["gen","The tendency of higher-risk individuals to seek insurance more than lower-risk individuals is:",["Moral hazard","Adverse selection","Law of large numbers","Res ipsa loquitur"],1,"Adverse selection — a core underwriting concern."],
+    ["gen","An insurance contract where one party writes all the terms is called a(n):",["Aleatory contract","Unilateral contract","Adhesion contract","Conditional contract"],2,"Adhesion contract — ambiguities are construed against the insurer, who wrote it."],
+    ["lifebasics","A life insurance clause that prevents the insurer from contesting a policy after it's been in force 2 years (barring fraud) is the:",["Suicide clause","Incontestability clause","Grace period","Reinstatement clause"],1,"Incontestability clause — protects the policyholder from denial over old application misstatements."],
+    ["lifebasics","Which policy type has no cash value and covers a specific period?",["Whole life","Universal life","Term life","Variable life"],2,"Term life — pure protection, no cash value, fixed period."],
+    ["lifepolicies","A policy covering two lives that pays out only after the last insured dies is:",["Joint life","Survivorship life","Group life","Industrial life"],1,"Survivorship (second-to-die) life — commonly used for estate planning."],
+    ["riders","A rider that lets the policyholder buy more coverage later without proving insurability is:",["Waiver of premium","Accidental death benefit","Guaranteed insurability","Accelerated death benefit"],2,"Guaranteed insurability rider — locks in future purchase options regardless of health changes."],
+    ["riders","Which nonforfeiture option keeps the full original face amount but only for a limited time?",["Reduced paid-up insurance","Extended term insurance","Cash surrender","Automatic premium loan"],1,"Extended term insurance — uses cash value to buy term coverage at the full face amount for as long as it lasts."],
+    ["annuities","During which phase does money grow inside an annuity before payout begins?",["Payout phase","Annuitization phase","Accumulation phase","Settlement phase"],2,"Accumulation phase — funds are deposited and grow before annuitization."],
+    ["annuities","A variable annuity is regulated as a:",["Life insurance policy only","Security","Health insurance product","Property contract"],1,"Because payments depend on investment performance, variable annuities are regulated as securities."],
+    ["lifetax","A life insurance policy that fails the 7-pay test becomes a:",["Qualified plan","MEC","Nonforfeiture option","Rider"],1,"Modified Endowment Contract (MEC) — loses favorable withdrawal tax treatment."],
+    ["healthbasics","The amount an insured pays out of pocket before insurance starts paying is the:",["Coinsurance","Copay","Deductible","Premium"],2,"Deductible — paid before the insurer's obligation begins."],
+    ["healthprov","How long does an insured typically have to submit proof of loss on a health claim?",["10 days","20 days","90 days","1 year"],2,"About 90 days from the date of loss, per standard policy provisions."],
+    ["disability","A disability definition requiring inability to perform one's own specific job is:",["Any-occupation","Own-occupation","Presumptive disability","Residual disability"],1,"Own-occupation — generally the more generous, pricier definition."],
+    ["disability","A benefit paid automatically for specific losses like sight or a limb, regardless of ability to work, is:",["Residual disability","Presumptive disability","Waiver of premium","Elimination period benefit"],1,"Presumptive disability — total disability is presumed regardless of actual work capacity."],
+    ["medplans","Which Medicare part covers prescription drugs?",["Part A","Part B","Part C","Part D"],3,"Medicare Part D — prescription drug coverage."],
+    ["medplans","A plan requiring a primary care physician and referrals, usually with the lowest cost, is a(n):",["PPO","HMO","POS","Indemnity plan"],1,"HMO — network-based with PCP referrals required."],
+    ["grouphealth","Under COBRA, how long can continuation coverage typically last after a standard qualifying event?",["6 months","12 months","18 months","5 years"],2,"18 months is the standard federal COBRA period for most qualifying events."],
+    ["seniors","When does the annual Medicare open enrollment period run?",["Jan 1 – Mar 31","Oct 15 – Dec 7","Jul 1 – Sep 30","It's year-round"],1,"October 15 through December 7 each year."],
+    ["seniors","LTC insurance benefit triggers are typically based on:",["Credit score","Inability to perform Activities of Daily Living (ADLs)","Employer status","Marital status"],1,"Inability to perform a set number of ADLs, or cognitive impairment, typically triggers LTC benefits."],
+    ["healthtax","An HSA must be paired with what kind of health plan?",["Any HMO","A high-deductible health plan (HDHP)","A Medicare Advantage plan","A group dental plan"],1,"HSAs require enrollment in a qualifying high-deductible health plan."]
+  ];
+
+  /* ================= STATE / STORAGE ================= */
+  const store = {
+    get(k, d) { try { return JSON.parse(localStorage.getItem(k)) ?? d; } catch { return d; } },
+    set(k, v) { localStorage.setItem(k, JSON.stringify(v)); }
+  };
+
+  /* ================= Countdown ================= */
+  const examDateInput = document.getElementById("examDate");
+  examDateInput.value = store.get("examDate", "");
+  function updateCountdown() {
+    const val = examDateInput.value;
+    if (!val) { document.getElementById("daysLeft").textContent = "—"; document.getElementById("todayDay").textContent = "—"; return; }
+    store.set("examDate", val);
+    const exam = new Date(val + "T00:00:00");
+    const today = new Date(); today.setHours(0,0,0,0);
+    const days = Math.round((exam - today) / 86400000);
+    document.getElementById("daysLeft").textContent = days >= 0 ? days : "0";
+    const dayOfPlan = 30 - days;
+    document.getElementById("todayDay").textContent = (dayOfPlan >= 1 && dayOfPlan <= 30) ? dayOfPlan : (dayOfPlan < 1 ? "—" : "30+");
+    renderPlan(dayOfPlan);
+  }
+  examDateInput.addEventListener("change", updateCountdown);
+
+  /* ================= Tabs ================= */
+  document.getElementById("tabs").addEventListener("click", (e) => {
+    const btn = e.target.closest("button");
+    if (!btn) return;
+    document.querySelectorAll(".tabs button").forEach(b => b.classList.remove("active"));
+    btn.classList.add("active");
+    document.querySelectorAll(".view").forEach(v => v.classList.remove("active"));
+    document.getElementById("view-" + btn.dataset.view).classList.add("active");
+  });
+
+  /* ================= Plan ================= */
+  function sectionName(id) { const s = sections.find(x => x.id === id); return s ? s.name : id; }
+  function sectionWeight(id) { const s = sections.find(x => x.id === id); return s ? s.weight : 0; }
+
+  function renderPlan(currentDay) {
+    const table = document.getElementById("planTable");
+    table.innerHTML = `<thead><tr><th>Day</th><th>Focus</th><th>What to cover</th></tr></thead><tbody>` +
+      studyPlan.map(([day, sid, note]) => {
+        const cls = currentDay === day ? "today" : (currentDay && day < currentDay ? "past" : "");
+        return `<tr class="${cls}"><td class="mono">${day}</td><td>${sectionName(sid)}<span class="weight-pill">${sectionWeight(sid)}%</span></td><td>${note}</td></tr>`;
+      }).join("") + `</tbody>`;
+  }
+  renderPlan(null);
+  updateCountdown();
+
+  /* ================= Flashcards ================= */
+  const fcSectionSel = document.getElementById("fcSection");
+  fcSectionSel.innerHTML = `<option value="all">All sections</option>` + sections.map(s => `<option value="${s.id}">${s.name}</option>`).join("");
+  let fcDeck = [], fcIndex = 0, fcFlipped = false, fcMissed = [];
+
+  function buildFcDeck() {
+    const sel = fcSectionSel.value;
+    const pool = sel === "all" ? flashcards : flashcards.filter(c => c[0] === sel);
+    fcDeck = pool.map((c, i) => i).sort(() => Math.random() - 0.5);
+    fcIndex = 0; fcMissed = [];
+    showFcCard();
+  }
+  function showFcCard() {
+    const cardEl = document.getElementById("fcCard");
+    fcFlipped = false;
+    if (fcIndex >= fcDeck.length) {
+      cardEl.innerHTML = fcMissed.length
+        ? `Deck complete. ${fcMissed.length} card(s) marked "still learning" — click below to redo just those.`
+        : `Deck complete — nice work.`;
+      document.getElementById("fcRemaining").textContent = "";
+      if (fcMissed.length) {
+        const btn = document.createElement("button");
+        btn.textContent = "Review missed cards";
+        btn.style.cssText = "margin-top:12px;font:inherit;padding:8px 16px;border-radius:8px;border:1px solid var(--border);background:var(--surface);cursor:pointer;";
+        btn.addEventListener("click", () => { fcDeck = fcMissed.slice(); fcMissed = []; fcIndex = 0; showFcCard(); });
+        cardEl.appendChild(document.createElement("br"));
+        cardEl.appendChild(btn);
+      }
+      return;
+    }
+    const card = flashcards[fcDeck[fcIndex]];
+    cardEl.innerHTML = `<div><span class="side-label">${sectionName(card[0])} — tap to flip</span>${card[1]}</div>`;
+    document.getElementById("fcRemaining").textContent = `${fcIndex + 1} of ${fcDeck.length}`;
+  }
+  document.getElementById("fcCard").addEventListener("click", () => {
+    if (fcIndex >= fcDeck.length) return;
+    const card = flashcards[fcDeck[fcIndex]];
+    fcFlipped = !fcFlipped;
+    const cardEl = document.getElementById("fcCard");
+    cardEl.innerHTML = fcFlipped
+      ? `<div><span class="side-label">Answer</span>${card[2]}</div>`
+      : `<div><span class="side-label">${sectionName(card[0])} — tap to flip</span>${card[1]}</div>`;
+  });
+  document.getElementById("fcKnow").addEventListener("click", () => { fcIndex++; showFcCard(); });
+  document.getElementById("fcDontKnow").addEventListener("click", () => {
+    if (fcIndex < fcDeck.length) fcMissed.push(fcDeck[fcIndex]);
+    fcIndex++; showFcCard();
+  });
+  fcSectionSel.addEventListener("change", buildFcDeck);
+  buildFcDeck();
+
+  /* ================= Quiz ================= */
+  const quizSectionSel = document.getElementById("quizSection");
+  quizSectionSel.innerHTML = `<option value="all">All sections</option>` + sections.map(s => `<option value="${s.id}">${s.name}</option>`).join("");
+  let quizSet = [], quizIdx = 0, quizScore = 0, quizAnswered = false;
+  const quizResults = store.get("quizResults", {});
+
+  document.getElementById("quizStart").addEventListener("click", () => {
+    const sel = quizSectionSel.value;
+    const pool = sel === "all" ? quiz : quiz.filter(q => q[0] === sel);
+    const shuffled = pool.slice().sort(() => Math.random() - 0.5);
+    quizSet = shuffled.slice(0, Math.min(10, shuffled.length));
+    quizIdx = 0; quizScore = 0;
+    if (quizSet.length === 0) {
+      document.getElementById("quizArea").innerHTML = "No questions in this section yet.";
+      return;
+    }
+    showQuizQ();
+  });
+
+  function showQuizQ() {
+    quizAnswered = false;
+    const area = document.getElementById("quizArea");
+    if (quizIdx >= quizSet.length) {
+      const pct = Math.round((quizScore / quizSet.length) * 100);
+      area.innerHTML = `<div class="quiz-result"><div class="big mono">${pct}%</div><div>${quizScore} of ${quizSet.length} correct</div></div>`;
+      return;
+    }
+    const [sid, q, opts, correct, explain] = quizSet[quizIdx];
+    area.innerHTML = `
+      <div class="quiz-score">Question ${quizIdx + 1} of ${quizSet.length} — ${sectionName(sid)}</div>
+      <div class="quiz-q">${q}</div>
+      ${opts.map((o, i) => `<button class="quiz-opt" data-i="${i}">${o}</button>`).join("")}
+      <div class="quiz-explain" id="quizExplain">${explain}</div>
+      <button class="quiz-next" id="quizNext">Next question</button>
+    `;
+    area.querySelectorAll(".quiz-opt").forEach(btn => {
+      btn.addEventListener("click", () => {
+        if (quizAnswered) return;
+        quizAnswered = true;
+        const i = parseInt(btn.dataset.i, 10);
+        const correctBtn = area.querySelector(`.quiz-opt[data-i="${correct}"]`);
+        correctBtn.classList.add("correct");
+        if (i !== correct) btn.classList.add("incorrect");
+        else quizScore++;
+        recordQuizResult(sid, i === correct);
+        document.getElementById("quizExplain").classList.add("show");
+        document.getElementById("quizNext").classList.add("show");
+      });
+    });
+    document.getElementById("quizNext").addEventListener("click", () => { quizIdx++; showQuizQ(); });
+  }
+
+  function recordQuizResult(sid, correct) {
+    if (!quizResults[sid]) quizResults[sid] = { correct: 0, total: 0 };
+    quizResults[sid].total++;
+    if (correct) quizResults[sid].correct++;
+    store.set("quizResults", quizResults);
+  }
+
+  /* ================= Progress ================= */
+  function renderProgress() {
+    const list = document.getElementById("progList");
+    const sorted = sections.slice().sort((a, b) => b.weight - a.weight);
+    list.innerHTML = sorted.map(s => {
+      const r = quizResults[s.id];
+      const acc = r && r.total ? Math.round((r.correct / r.total) * 100) : null;
+      const flagged = s.weight >= 8 && acc !== null && acc < 70;
+      const barPct = acc === null ? 0 : acc;
+      return `
+        <div class="prog-row">
+          <div>${s.name} <span class="weight-pill">${s.weight}%</span></div>
+          <div class="prog-track"><div class="prog-fill ${acc !== null && acc < 70 ? 'low' : ''}" style="width:${barPct}%"></div></div>
+          <div class="mono">${acc === null ? "no data" : acc + "%"}</div>
+          <div class="flag">${flagged ? "FOCUS" : ""}</div>
+        </div>`;
+    }).join("");
+  }
+  document.getElementById("tabs").addEventListener("click", (e) => {
+    if (e.target.closest("button")?.dataset.view === "progress") renderProgress();
+  });
+  renderProgress();
+</script>
+</body>
+</html>
