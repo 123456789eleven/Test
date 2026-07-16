@@ -76,6 +76,18 @@
 
   .caveat { font-size: 0.8rem; color: var(--ink-muted); margin-top: 14px; line-height: 1.5; }
 
+  .timeline-card { border: 1px solid var(--border); border-radius: 12px; background: var(--surface); padding: 22px 24px; margin-bottom: 26px; }
+  .timeline-card h3 { font-size: 1rem; margin-bottom: 4px; }
+  .timeline-card .cap { color: var(--ink-soft); font-size: 0.85rem; line-height: 1.5; margin: 6px 0 22px; max-width: 68ch; }
+  .timeline { position: relative; padding-left: 26px; border-left: 2px solid var(--grid); }
+  .tl-item { position: relative; padding-bottom: 22px; }
+  .tl-item:last-child { padding-bottom: 0; }
+  .tl-item::before { content: ""; position: absolute; left: -32px; top: 3px; width: 10px; height: 10px; border-radius: 50%; background: var(--accent); border: 2px solid var(--surface); }
+  .tl-item .tl-date { font-size: 0.74rem; font-weight: 700; color: var(--accent); text-transform: uppercase; letter-spacing: 0.04em; }
+  .tl-item .tl-deal { font-size: 0.94rem; font-weight: 600; margin-top: 3px; }
+  .tl-item .tl-value { font-size: 0.78rem; color: var(--ink-muted); margin-top: 2px; }
+  .tl-item .tl-sig { font-size: 0.86rem; color: var(--ink-soft); margin-top: 6px; line-height: 1.5; max-width: 70ch; }
+
   footer { border-top: 1px solid var(--border); padding: 24px clamp(20px, 4vw, 56px); font-size: 0.78rem; color: var(--ink-muted); }
 </style>
 </head>
@@ -118,7 +130,13 @@
   <div class="profile-card">
     <h3>Company profiles</h3>
     <div class="table-wrap" id="profileTable"></div>
-    <div class="caveat">HealthEquity's FY2026 revenue mix is a tell for where this industry's money actually sits: of its $1.31B, more came from custodial interest on HSA balances ($636.8M) than from service fees ($485M) — administration is increasingly a wrapper around asset custody, not a pure fee-for-service business. Figures are the most recent publicly reported annual results as of this writing (public company filings; Businessolver's are third-party estimates since it's private) and will drift out of date — treat this as a snapshot, not a live feed.</div>
+    <div class="caveat">HealthEquity's FY2026 revenue mix is a tell for where this industry's money actually sits: of its $1.31B, more came from custodial interest on HSA balances ($636.8M) than from service fees ($485M) — administration is increasingly a wrapper around asset custody, not a pure fee-for-service business. Figures are the most recent publicly reported annual results as of this writing (public company filings; Businessolver's, Empyrean's, and TriNet's professional-service-revenue figures carry varying degrees of estimation, as noted above) and will drift out of date — treat this as a snapshot, not a live feed.</div>
+  </div>
+
+  <div class="timeline-card">
+    <h3>Consolidation timeline, 2023–2025</h3>
+    <p class="cap">The market-growth chart on Insights and the "regional player among giants" framing on this page are both symptoms of the same thing: this industry is actively consolidating. These are real, dated deals — not a general trend statement.</p>
+    <div class="timeline" id="mnaTimeline"></div>
   </div>
 </main>
 
@@ -128,12 +146,25 @@
   const companies = [
     { name: "ADP", status: "public", ticker: "NASDAQ: ADP", model: "Diversified payroll & HR platform — benefits administration is one line among many", revenue: 20561, employees: 67000 },
     { name: "WEX Inc.", status: "public", ticker: "NYSE: WEX", model: "Payments company with a benefits-accounts segment (HSA/FSA/COBRA)", revenue: 2661, employees: 6600 },
-    { name: "Alight Solutions", status: "public", ticker: "NYSE: ALIT", model: "HR & benefits outsourcing at enterprise scale", revenue: 2300, employees: 10000 },
+    { name: "Alight Solutions", status: "public", ticker: "NYSE: ALIT", model: "HR & benefits outsourcing at enterprise scale", revenue: 2300, employees: 9500, note: "Divested its Payroll & Professional Services business to H.I.G. Capital (now \"Strada\") for up to $1.2B in mid-2024 — now a purer benefits-admin play than before." },
     { name: "HealthEquity", status: "public", ticker: "NASDAQ: HQY", model: "HSA custodian and consumer-directed benefits administrator, incl. COBRA", revenue: 1310, employees: 3120 },
-    { name: "Businessolver", status: "private", ticker: "Private", model: "Pure-play benefits administration SaaS platform", revenue: 210, employees: 1565 }
+    { name: "TriNet Group", status: "public", ticker: "NYSE: TNET", model: "PEO co-employing client staff to deliver outsourced payroll, HR, compliance & benefits (incl. COBRA)", revenue: 719, employees: 3600, note: "Revenue shown is \"professional service revenue,\" the figure comparable to the others — TriNet's total GAAP revenue is ~$5.0B, but ~$4.28B of that is pass-through insurance premiums, not retained revenue." },
+    { name: "Businessolver", status: "private", ticker: "Private", model: "Pure-play benefits administration SaaS platform", revenue: 210, employees: 1565 },
+    { name: "Empyrean Benefit Solutions", status: "private", ticker: "Private (Securian Financial subsidiary)", model: "Benefits administration & enrollment tech for large employers, brokers, and private exchanges, incl. COBRA", revenue: 209, employees: 575, note: "Moderate-confidence estimate — Empyrean doesn't file separate financials since its 2019 acquisition by Securian." }
   ];
 
   function fmtM(v) { return v >= 1000 ? "$" + (v / 1000).toFixed(2) + "B" : "$" + v + "M"; }
+
+  const mnaDeals = [
+    { date: "January 2023", deal: "Voya Financial acquired Benefitfocus", value: "~$570M ($10.50/share, all-cash)", sig: "The deal that kicked off the current consolidation wave — took a public benefits-admin SaaS platform private under an insurer's ownership." },
+    { date: "Sep 2023 – May 2024", deal: "HealthEquity acquired the BenefitWallet HSA portfolio from Conduent", value: "$425.0M", sig: "Added ~616,000 HSAs and $2.7B in HSA assets, pushing HealthEquity past 9 million HSA members — direct consolidation at the HSA-custodian tier." },
+    { date: "Feb 15, 2024", deal: "Businessolver acquired The Capstone Group", value: "Undisclosed", sig: "Bolted on employee-benefits outsourcing, risk management, and compliance capability." },
+    { date: "Feb 2024", deal: "Navia Benefit Solutions acquired Nexus Administrators", value: "Undisclosed", sig: "Continued Navia's roll-up strategy in the regional COBRA/FSA/HSA TPA space." },
+    { date: "Mar – Jul 2024", deal: "H.I.G. Capital (\"Strada\") acquired Alight's Payroll & Professional Services business", value: "Up to $1.2B", sig: "Major structural event — Alight shed its payroll/HCM-outsourcing arm to refocus purely on benefits administration, which is why its post-2024 revenue and headcount (shown above) are smaller than before." },
+    { date: "Apr 12, 2024", deal: "bswift acquired Davis & Company", value: "Undisclosed", sig: "A smaller bolt-on (internal communications/engagement firm) by another major benefits-admin platform player." },
+    { date: "Apr 2025", deal: "Navia Benefit Solutions acquired Flex-Plan Retirement Services", value: "Undisclosed", sig: "Navia expanded from health/FSA/COBRA into retirement-plan TPA services — cross-category consolidation." },
+    { date: "Jul 1, 2025", deal: "Businessolver acquired the assets of ProView Global", value: "Undisclosed", sig: "Brought an existing back-office/BPO partner in-house, expanding 24/7 administrative support — TPAs vertically integrating service delivery rather than outsourcing it." }
+  ];
 
   function renderAll() {
     const specialists = companies.filter(c => c.name !== "ADP");
@@ -164,7 +195,7 @@
       return `<tr>
         <td><strong>${c.name}</strong><div style="color:var(--ink-muted); font-size:0.76rem;">${c.ticker}</div></td>
         <td class="status"><span class="status-pill ${c.status === "private" ? "private" : ""}">${c.status === "public" ? "Public" : "Private"}</span></td>
-        <td>${c.model}</td>
+        <td>${c.model}${c.note ? `<div style="color:var(--ink-muted); font-size:0.76rem; margin-top:4px;">${c.note}</div>` : ""}</td>
         <td class="mono">${fmtM(c.revenue)}</td>
         <td class="mono">${c.employees.toLocaleString()}</td>
         <td class="mono">$${(revPerEmp / 1000).toFixed(0)}K</td>
@@ -175,6 +206,15 @@
         <thead><tr><th>Company</th><th>Status</th><th>Business model</th><th>Revenue</th><th>Employees</th><th>Revenue / employee</th></tr></thead>
         <tbody>${rows}</tbody>
       </table>`;
+
+    // M&A timeline
+    document.getElementById("mnaTimeline").innerHTML = mnaDeals.map(d => `
+      <div class="tl-item">
+        <div class="tl-date mono">${d.date}</div>
+        <div class="tl-deal">${d.deal}</div>
+        <div class="tl-value mono">${d.value}</div>
+        <div class="tl-sig">${d.sig}</div>
+      </div>`).join("");
   }
 
   renderAll();

@@ -45,11 +45,21 @@
   .page-head h1 { font-size: 2rem; }
   .page-head p { color: var(--ink-soft); font-size: 0.98rem; margin: 10px 0 0; line-height: 1.55; }
 
-  .snapshot { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 30px; }
+  .snapshot { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 30px; }
   @media (max-width: 800px) { .snapshot { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 480px) { .snapshot { grid-template-columns: 1fr; } }
   .snap-card { border: 1px solid var(--border); border-radius: 10px; background: var(--surface); padding: 14px 16px; }
   .snap-card .l { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--ink-soft); }
-  .snap-card .v { font-size: 1.05rem; font-weight: 700; margin-top: 4px; }
+  .snap-card .v { font-size: 0.92rem; font-weight: 700; margin-top: 4px; line-height: 1.4; }
+
+  .section-label { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--ink-soft); font-weight: 700; margin: 0 0 12px; }
+  .leadership { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; margin-bottom: 30px; }
+  @media (max-width: 900px) { .leadership { grid-template-columns: repeat(3, 1fr); } }
+  @media (max-width: 560px) { .leadership { grid-template-columns: repeat(2, 1fr); } }
+  .leader-card { border: 1px solid var(--border); border-radius: 10px; background: var(--surface); padding: 14px 15px; }
+  .leader-card .name { font-weight: 700; font-size: 0.9rem; }
+  .leader-card .title { font-size: 0.78rem; color: var(--accent); margin-top: 3px; font-weight: 600; }
+  .leader-card .note { font-size: 0.76rem; color: var(--ink-muted); margin-top: 6px; line-height: 1.4; }
 
   /* Circle diagram */
   .circle-wrap { display: flex; justify-content: center; margin: 10px 0 30px; }
@@ -118,10 +128,21 @@
   </div>
 
   <div class="snapshot">
-    <div class="snap-card"><div class="l">Founded</div><div class="v">1976</div></div>
-    <div class="snap-card"><div class="l">Structure</div><div class="v">Privately held, family-owned</div></div>
+    <div class="snap-card"><div class="l">Founded</div><div class="v">1976 — 50th anniversary this year</div></div>
+    <div class="snap-card"><div class="l">Scale</div><div class="v">~10,000 corporate clients · 600,000+ covered lives</div></div>
+    <div class="snap-card"><div class="l">Structure</div><div class="v">Privately held, 4th-generation family leadership</div></div>
+    <div class="snap-card"><div class="l">Recognition</div><div class="v">Baltimore Business Journal's #1 MD benefits administrator, 23 years running (2002–2024)</div></div>
     <div class="snap-card"><div class="l">Headquarters</div><div class="v">Sparks / Hunt Valley, MD</div></div>
     <div class="snap-card"><div class="l">Other offices</div><div class="v">Wilmington DE · Rockville MD · Philadelphia · D.C.</div></div>
+  </div>
+
+  <p class="section-label">Leadership — split along the same circle</p>
+  <div class="leadership">
+    <div class="leader-card"><div class="name">Frank Kelly III</div><div class="title">CEO</div><div class="note">President since 1994, CEO since 2007. CLU, RHU, REBC — past president, Maryland &amp; Baltimore Associations of Health Underwriters.</div></div>
+    <div class="leader-card"><div class="name">John Kelly</div><div class="title">Chief Innovation &amp; Strategy Officer</div><div class="note">President of Strategies and Advisory — the "front half" of the circle: sell and invest.</div></div>
+    <div class="leader-card"><div class="name">David Kelly</div><div class="title">Chief Organizational Officer</div><div class="note">President of Payroll and Advantage — the "back half" of the circle: administer and process.</div></div>
+    <div class="leader-card"><div class="name">Bryan Kelly</div><div class="title">EVP, Kelly Benefits &amp; Advantage</div><div class="note">Fourth brother in the family leadership team.</div></div>
+    <div class="leader-card"><div class="name">Katherine Vahdani</div><div class="title">Chief Technology Officer</div><div class="note">Joined April 2026 — leads a 70-person tech team; first non-family C-suite technology hire.</div></div>
   </div>
 
   <div class="circle-wrap">
