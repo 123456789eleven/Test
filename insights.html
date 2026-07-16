@@ -31,10 +31,10 @@
   .mono { font-variant-numeric: tabular-nums; }
 
   nav.site {
-    display: flex; align-items: center; justify-content: space-between;
+    display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; row-gap: 10px;
     padding: 22px clamp(20px, 4vw, 56px); border-bottom: 1px solid var(--border);
   }
-  nav.site .links { display: flex; align-items: center; gap: 24px; font-size: 0.82rem; }
+  nav.site .links { display: flex; align-items: center; flex-wrap: wrap; gap: 12px 24px; font-size: 0.82rem; }
   nav.site .links a { text-decoration: none; color: var(--ink-soft); }
   nav.site .links a.current { color: var(--ink); font-weight: 600; }
   nav.site .pill {

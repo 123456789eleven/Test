@@ -30,11 +30,11 @@
   body { padding: 24px clamp(14px, 4vw, 48px) 70px; }
 
   nav.site {
-    display: flex; align-items: center; justify-content: space-between;
+    display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; row-gap: 10px;
     padding: 0 0 22px; margin-bottom: 22px; border-bottom: 1px solid var(--border);
   }
   nav.site .wordmark { font-family: "Bahnschrift", "Segoe UI Semibold", sans-serif; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; text-decoration: none; color: var(--ink); font-size: 0.95rem; }
-  nav.site .links { display: flex; align-items: center; gap: 22px; font-size: 0.82rem; }
+  nav.site .links { display: flex; align-items: center; flex-wrap: wrap; gap: 12px 22px; font-size: 0.82rem; }
   nav.site .links a { text-decoration: none; color: var(--ink-soft); }
   nav.site .links a.current { color: var(--ink); font-weight: 600; }
 
