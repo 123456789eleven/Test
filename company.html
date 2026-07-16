@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Kelly Benefits — Custodian</title>
+<style>
+  :root {
+    --page: #f7f5f0; --surface: #ffffff; --surface-alt: #f0eee8;
+    --ink: #14140f; --ink-soft: #5c5a52; --ink-muted: #8f8c81;
+    --accent: #4d6b5e; --accent-wash: rgba(77,107,94,0.10); --accent-ink: #ffffff;
+    --border: rgba(20,20,15,0.12); --grid: #e1e0d9; --manager: #9c6a1f; --manager-soft: #f5ead9;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --page: #0d0f0d; --surface: #161815; --surface-alt: #1c1f1b; --ink: #f3f2ee; --ink-soft: #b8b6ad; --ink-muted: #7c7a71; --accent: #8fae9e; --accent-wash: rgba(143,174,158,0.14); --accent-ink: #0d0f0d; --border: rgba(255,255,255,0.12); --grid: #2c2c2a; --manager: #e2b46e; --manager-soft: #33291a; }
+  }
+  :root[data-theme="dark"] { --page: #0d0f0d; --surface: #161815; --surface-alt: #1c1f1b; --ink: #f3f2ee; --ink-soft: #b8b6ad; --ink-muted: #7c7a71; --accent: #8fae9e; --accent-wash: rgba(143,174,158,0.14); --accent-ink: #0d0f0d; --border: rgba(255,255,255,0.12); --grid: #2c2c2a; --manager: #e2b46e; --manager-soft: #33291a; }
+  :root[data-theme="light"] { --page: #f7f5f0; --surface: #ffffff; --surface-alt: #f0eee8; --ink: #14140f; --ink-soft: #5c5a52; --ink-muted: #8f8c81; --accent: #4d6b5e; --accent-wash: rgba(77,107,94,0.10); --accent-ink: #ffffff; --border: rgba(20,20,15,0.12); --grid: #e1e0d9; --manager: #9c6a1f; --manager-soft: #f5ead9; }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; background: var(--page); color: var(--ink); font-family: "Segoe UI", system-ui, -apple-system, sans-serif; }
+  a { color: inherit; }
+  h1, h2, h3 { font-family: "Bahnschrift", "Segoe UI Semibold", sans-serif; font-weight: 600; margin: 0; }
+  .wordmark { font-family: "Bahnschrift", "Segoe UI Semibold", sans-serif; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; }
+  .mono { font-variant-numeric: tabular-nums; }
+
+  nav.site { display: flex; align-items: center; justify-content: space-between; padding: 22px clamp(20px, 4vw, 56px); border-bottom: 1px solid var(--border); }
+  nav.site .links { display: flex; align-items: center; gap: 22px; font-size: 0.82rem; }
+  nav.site .links a { text-decoration: none; color: var(--ink-soft); }
+  nav.site .links a.current { color: var(--ink); font-weight: 600; }
+
+  main { max-width: 1180px; margin: 0 auto; padding: 60px clamp(20px, 4vw, 56px) 100px; }
+
+  #gate { max-width: 400px; margin: 90px auto; text-align: center; }
+  #gate h1 { font-size: 1.5rem; margin-bottom: 8px; }
+  #gate p.sub { color: var(--ink-soft); font-size: 0.9rem; margin: 0 0 30px; }
+  .authbox { border: 1px solid var(--border); border-radius: 12px; background: var(--surface); padding: 26px; text-align: center; }
+
+  #content { display: none; }
+  .page-head { max-width: 76ch; margin-bottom: 28px; }
+  .page-head h1 { font-size: 2rem; }
+  .page-head p { color: var(--ink-soft); font-size: 0.98rem; margin: 10px 0 0; line-height: 1.55; }
+
+  .snapshot { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 30px; }
+  @media (max-width: 800px) { .snapshot { grid-template-columns: repeat(2, 1fr); } }
+  .snap-card { border: 1px solid var(--border); border-radius: 10px; background: var(--surface); padding: 14px 16px; }
+  .snap-card .l { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--ink-soft); }
+  .snap-card .v { font-size: 1.05rem; font-weight: 700; margin-top: 4px; }
+
+  /* Circle diagram */
+  .circle-wrap { display: flex; justify-content: center; margin: 10px 0 30px; }
+  .circle-diagram { position: relative; width: 100%; max-width: 560px; aspect-ratio: 1/1; }
+  .circle-diagram svg.lines { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+  .circle-diagram svg.lines path { fill: none; stroke: var(--ink-muted); stroke-width: 2.5; marker-end: url(#arrowhead); opacity: 0.55; }
+  .circle-center {
+    position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+    width: 42%; text-align: center; font-size: 0.78rem; color: var(--ink-soft); line-height: 1.4;
+  }
+  .circle-center b { display: block; color: var(--ink); font-size: 0.88rem; margin-bottom: 3px; }
+  .division-node {
+    position: absolute; transform: translate(-50%, -50%); width: 168px;
+    display: flex; flex-direction: column; align-items: center; text-align: center; cursor: pointer;
+  }
+  .division-node .node-circle {
+    width: 78px; height: 78px; border-radius: 50%; background: var(--surface); border: 3px solid var(--accent);
+    display: flex; align-items: center; justify-content: center; box-shadow: 0 1px 2px rgba(0,0,0,0.06), 0 8px 20px rgba(0,0,0,0.06);
+    transition: transform .15s ease; font-size: 0.72rem; font-weight: 700; color: var(--accent); padding: 6px; line-height: 1.15;
+  }
+  .division-node:hover .node-circle, .division-node.open .node-circle { transform: scale(1.07); box-shadow: 0 0 0 4px var(--accent-wash); }
+  .division-node .node-sub { font-size: 0.72rem; color: var(--ink-soft); margin-top: 8px; line-height: 1.3; }
+
+  #divisionDetail { display: none; border: 1px solid var(--border); border-radius: 14px; background: var(--surface); padding: 26px 28px; margin-bottom: 30px; }
+  #divisionDetail.show { display: block; }
+  .dd-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; margin-bottom: 6px; }
+  .dd-head h2 { font-size: 1.3rem; }
+  #divisionDetail p.desc { color: var(--ink-soft); font-size: 0.94rem; line-height: 1.6; max-width: 74ch; margin: 8px 0 20px; }
+  #closeDivision { background: none; border: 1px solid var(--border); border-radius: 6px; color: var(--ink-soft); font: inherit; font-size: 0.8rem; padding: 5px 10px; cursor: pointer; }
+
+  .scale-note { border: 1px solid var(--border); border-radius: 10px; background: var(--surface-alt); padding: 14px 18px; margin-bottom: 20px; font-size: 0.88rem; }
+  .scale-note b { color: var(--accent); }
+
+  .hbar-row { display: grid; grid-template-columns: 150px 1fr 90px; align-items: center; gap: 10px; margin-bottom: 12px; }
+  .hbar-row .lbl { font-size: 0.84rem; }
+  .hbar-row .lbl .sub { display: block; color: var(--ink-muted); font-size: 0.72rem; }
+  .hbar-track { position: relative; height: 22px; background: var(--surface-alt); border-radius: 4px; }
+  .hbar-fill { position: absolute; left: 0; top: 0; height: 100%; background: var(--accent); border-radius: 4px 2px 2px 4px; }
+  .hbar-fill.kelly { background: var(--manager); }
+  .hbar-row .val { font-size: 0.82rem; font-weight: 600; text-align: right; }
+  .chart-caption { font-size: 0.8rem; color: var(--ink-muted); margin-top: 10px; }
+
+  .integration-box { border-left: 3px solid var(--manager); background: var(--manager-soft); border-radius: 8px; padding: 16px 18px; margin-bottom: 30px; font-size: 0.92rem; line-height: 1.6; }
+  .integration-box b { color: var(--manager); }
+
+  footer { border-top: 1px solid var(--border); padding: 24px clamp(20px, 4vw, 56px); font-size: 0.78rem; color: var(--ink-muted); line-height: 1.5; }
+</style>
+</head>
+<body>
+
+<nav class="site">
+  <a class="wordmark" href="index.html" style="text-decoration:none; font-size:0.95rem;">Custodian</a>
+  <div class="links">
+    <a href="insights.html">Insights</a>
+    <a href="landscape.html">Landscape</a>
+    <a class="current" href="company.html">Kelly Benefits</a>
+    <a href="study.html">Exam Prep</a>
+    <div id="userButton"></div>
+  </div>
+</nav>
+
+<div id="gate">
+  <h1>Kelly Benefits</h1>
+  <p class="sub">Free account required — how Kelly Benefits is structured, and how each division stacks up against the market.</p>
+  <div class="authbox">
+    <button id="gateSignInBtn" style="font:inherit; font-size:0.95rem; font-weight:600; padding:12px 26px; border-radius:8px; border:none; background:var(--accent); color:var(--accent-ink); cursor:pointer;">Sign in to continue</button>
+    <div id="authError" style="margin-top:14px; font-size:0.82rem; color:#b23a2e;"></div>
+  </div>
+</div>
+
+<main id="content">
+  <div class="page-head">
+    <h1>Kelly Benefits — The Full Circle</h1>
+    <p>A privately-held, family-owned benefits company built around four connected divisions — each one sells into (or draws from) the next, forming a closed loop of the client relationship rather than a single-service business.</p>
+  </div>
+
+  <div class="snapshot">
+    <div class="snap-card"><div class="l">Founded</div><div class="v">1976</div></div>
+    <div class="snap-card"><div class="l">Structure</div><div class="v">Privately held, family-owned</div></div>
+    <div class="snap-card"><div class="l">Headquarters</div><div class="v">Sparks / Hunt Valley, MD</div></div>
+    <div class="snap-card"><div class="l">Other offices</div><div class="v">Wilmington DE · Rockville MD · Philadelphia · D.C.</div></div>
+  </div>
+
+  <div class="circle-wrap">
+    <div class="circle-diagram" id="circleDiagram">
+      <svg class="lines" viewBox="0 0 600 600">
+        <defs>
+          <marker id="arrowhead" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="var(--ink-muted)" opacity="0.7"/></marker>
+        </defs>
+        <path d="M 300 130 A 170 170 0 0 1 470 300" marker-end="url(#arrowhead)"></path>
+        <path d="M 470 300 A 170 170 0 0 1 300 470" marker-end="url(#arrowhead)"></path>
+        <path d="M 300 470 A 170 170 0 0 1 130 300" marker-end="url(#arrowhead)"></path>
+        <path d="M 130 300 A 170 170 0 0 1 300 130" marker-end="url(#arrowhead)"></path>
+      </svg>
+      <div class="circle-center"><b>One client relationship</b>Sold, administered, paid, and invested — through a shared Total Benefits Solution® platform.</div>
+    </div>
+  </div>
+
+  <div id="divisionDetail">
+    <div class="dd-head">
+      <div>
+        <h2 id="ddTitle"></h2>
+      </div>
+      <button id="closeDivision">Close ✕</button>
+    </div>
+    <p class="desc" id="ddDesc"></p>
+    <div class="scale-note" id="ddScale"></div>
+    <div id="ddChart"></div>
+    <div class="chart-caption" id="ddCaption"></div>
+  </div>
+
+  <div class="integration-box">
+    <b>Why the circle matters —</b> each division individually competes against specialists that are often dramatically larger — Gallagher in consulting, WEX/Alight in administration, ADP/Paychex in payroll, CAPTRUST/OneDigital in retirement. Almost none of those specialists connect all four under one client relationship and one technology platform the way Kelly does. If there's a strategic edge here, it's integration, not any single division's scale — and OneDigital (health + wealth convergence) is the one competitor pursuing the same idea, just at a much larger scale.
+  </div>
+</main>
+
+<footer>
+  Figures are drawn from company websites, SEC filings (for public competitors), and third-party revenue/AUM estimates (for private companies, including Kelly Benefits itself, which doesn't disclose divisional financials). Treat any private-company figure as an estimate, not a confirmed number — this page is a first-pass draft meant to be refined as you learn more from the inside.
+</footer>
+
+<script
+  defer
+  crossorigin="anonymous"
+  src="https://clerk.123456789eleven.github.io/npm/@clerk/ui@1/dist/ui.browser.js"
+  type="text/javascript">
+</script>
+<script
+  defer
+  crossorigin="anonymous"
+  data-clerk-publishable-key="pk_live_Y2xlcmsuMTIzNDU2Nzg5ZWxldmVuLmdpdGh1Yi5pbyQ"
+  src="https://clerk.123456789eleven.github.io/npm/@clerk/clerk-js@6/dist/clerk.browser.js"
+  type="text/javascript">
+</script>
+<script>
+  const clerkAppearance = { variables: { colorPrimary: "#4d6b5e", colorText: "#14140f", colorBackground: "#ffffff", fontFamily: '"Segoe UI", system-ui, sans-serif', borderRadius: "8px" } };
+
+  const gate = document.getElementById("gate");
+  const content = document.getElementById("content");
+  const userButtonEl = document.getElementById("userButton");
+  const authError = document.getElementById("authError");
+
+  function showSignedIn() {
+    gate.style.display = "none"; content.style.display = "block"; userButtonEl.innerHTML = "";
+    window.Clerk.mountUserButton(userButtonEl, { appearance: clerkAppearance });
+    renderCircle();
+  }
+  function showSignedOut() { gate.style.display = "block"; content.style.display = "none"; userButtonEl.innerHTML = ""; }
+
+  function withTimeout(promise, ms, label) {
+    return Promise.race([promise, new Promise((_, reject) => setTimeout(() => reject(new Error(label + " timed out after " + (ms/1000) + "s")), ms))]);
+  }
+  let clerkLoadPromise = null;
+  function clerkLoad() {
+    if (!clerkLoadPromise) clerkLoadPromise = withTimeout(window.Clerk.load({ ui: { ClerkUI: window.__internal_ClerkUICtor } }), 8000, "Clerk.load()");
+    return clerkLoadPromise;
+  }
+
+  const gateBtn = document.getElementById("gateSignInBtn");
+  gateBtn.addEventListener("click", async () => {
+    authError.textContent = ""; gateBtn.disabled = true;
+    const orig = gateBtn.textContent; gateBtn.textContent = "Loading…";
+    try {
+      if (!window.Clerk) throw new Error("Clerk script did not load at all (check network/ad-blocker).");
+      await clerkLoad();
+      await window.Clerk.openSignIn({ appearance: clerkAppearance });
+    } catch (err) { authError.textContent = "Sign-in error: " + err.message; console.error(err); }
+    finally { gateBtn.disabled = false; gateBtn.textContent = orig; }
+  });
+
+  window.addEventListener("load", async function () {
+    try {
+      if (!window.Clerk) return;
+      await clerkLoad();
+      function update() { if (window.Clerk.user) showSignedIn(); else showSignedOut(); }
+      update();
+      window.Clerk.addListener(update);
+    } catch (err) { console.error("Session check failed:", err); }
+  });
+
+  /* ================= Division data ================= */
+  const divisions = [
+    {
+      id: "strategies", name: "Strategies", role: "Sell & Consult", x: 300, y: 130,
+      desc: "Employee benefits consulting and brokerage — the front door of the client relationship. Covers the full benefits lifecycle: consulting, plan design, implementation, and ongoing support across medical, dental, vision, and Medicare options.",
+      scale: "Kelly Benefits Strategies' revenue is estimated around <b>$250M</b> (third-party estimate, private company) — a genuine regional player standing next to firms valued at 20–100× its size.",
+      unit: "Annual revenue ($B)",
+      competitors: [
+        { name: "Marsh & McLennan", value: 25.3 },
+        { name: "Aon", value: 15.4 },
+        { name: "Arthur J. Gallagher", value: 13.8 },
+        { name: "Hub International", value: 4.8 },
+        { name: "Brown & Brown", value: 4.7 },
+        { name: "Kelly Benefits Strategies (est.)", value: 0.25, kelly: true }
+      ],
+      caption: "Figures: public company revenue (SEC/annual reports) for the national brokers; Kelly Benefits Strategies is a third-party revenue estimate since it's privately held."
+    },
+    {
+      id: "advantage", name: "Advantage", role: "Administer", x: 470, y: 300,
+      desc: "Benefits administration and technology — compliance solutions, COBRA & state continuation administration (2% premium admin fee model), a call center for employers and participants, and broker technology licensed out to other brokerages.",
+      scale: "Kelly doesn't disclose Advantage's standalone revenue. Shown here is the competitive field it operates in — TPAs and benefits-admin platforms of very different scales.",
+      unit: "Annual revenue ($B)",
+      competitors: [
+        { name: "WEX Inc.", value: 2.66 },
+        { name: "Alight Solutions", value: 2.3 },
+        { name: "HealthEquity", value: 1.31 },
+        { name: "Businessolver", value: 0.21 }
+      ],
+      caption: "All four figures from the Industry Landscape page — SEC filings for public companies, third-party estimate for privately-held Businessolver."
+    },
+    {
+      id: "payroll", name: "Payroll", role: "Process", x: 300, y: 470,
+      desc: "Full-service payroll administration across all 50 states — pay processing, new hire registry, garnishments, and electronic tax filing — integrated with benefits deductions through the shared Total Benefits Solution® platform.",
+      scale: "ADP alone processes payroll at roughly <b>80× Kelly's estimated total company scale</b> — payroll is the division where Kelly competes hardest against sheer size.",
+      unit: "Annual revenue ($B)",
+      competitors: [
+        { name: "ADP", value: 20.6 },
+        { name: "Paychex", value: 5.57, note: "acquired Paycor for $4.1B in 2025" },
+        { name: "Gusto", value: null, note: "private, 400,000+ SMB clients, revenue undisclosed" }
+      ],
+      caption: "ADP and Paychex from SEC filings. Gusto is private and doesn't disclose revenue — shown for competitive context only."
+    },
+    {
+      id: "advisory", name: "Advisory", role: "Invest", x: 130, y: 300,
+      desc: "401(k) and retirement plan consulting and investment advisory. Operates as Global Retirement Partners, LLC dba Kelly Benefits Advisory — an SEC-registered investment advisor. Notably, this is the one division that runs under a larger outside aggregator's regulatory umbrella rather than standing fully independent.",
+      scale: "Measured in assets under management (AUM), not revenue — a different yardstick from the other three divisions, since this is an investment advisory business.",
+      unit: "Assets under management ($B)",
+      competitors: [
+        { name: "CAPTRUST", value: 1240 },
+        { name: "OneDigital", value: 137, note: "closest model parallel: health + wealth convergence" },
+        { name: "Cerity Partners", value: 122.8 },
+        { name: "Mercer Advisors", value: 84.4 },
+        { name: "Beacon Pointe Advisors", value: 62 }
+      ],
+      caption: "AUM figures from firm disclosures / SEC ADV filings as reported in trade press. Nearly 20 similar retirement-advisory aggregators exist — this is a sample, not exhaustive."
+    }
+  ];
+
+  const diagram = document.getElementById("circleDiagram");
+  let openId = null;
+
+  function renderCircle() {
+    diagram.querySelectorAll(".division-node").forEach(el => el.remove());
+    divisions.forEach(d => {
+      const el = document.createElement("div");
+      el.className = "division-node" + (openId === d.id ? " open" : "");
+      el.style.left = (d.x / 600 * 100) + "%";
+      el.style.top = (d.y / 600 * 100) + "%";
+      el.innerHTML = `<div class="node-circle">${d.name}</div><div class="node-sub">${d.role}</div>`;
+      el.addEventListener("click", () => openDivision(d.id));
+      diagram.appendChild(el);
+    });
+  }
+
+  function fmtVal(v, unit) {
+    if (v === null) return "n/a";
+    return unit.includes("AUM") ? "$" + v + "B" : "$" + v + "B";
+  }
+
+  function openDivision(id) {
+    if (openId === id) { closeDivision(); return; }
+    openId = id;
+    renderCircle();
+    const d = divisions.find(x => x.id === id);
+    document.getElementById("ddTitle").textContent = `Kelly Benefits ${d.name} — ${d.role}`;
+    document.getElementById("ddDesc").textContent = d.desc;
+    document.getElementById("ddScale").innerHTML = d.scale;
+    document.getElementById("ddCaption").textContent = d.caption;
+
+    const withVals = d.competitors.filter(c => c.value !== null);
+    const max = Math.max(...withVals.map(c => c.value));
+    const chartHtml = d.competitors.map(c => `
+      <div class="hbar-row">
+        <div class="lbl">${c.name}${c.note ? `<span class="sub">${c.note}</span>` : ""}</div>
+        <div class="hbar-track">${c.value !== null ? `<div class="hbar-fill ${c.kelly ? 'kelly' : ''}" style="width:${(c.value / max) * 100}%"></div>` : ""}</div>
+        <div class="val mono">${fmtVal(c.value, d.unit)}</div>
+      </div>
+    `).join("");
+    document.getElementById("ddChart").innerHTML = `<div style="font-size:0.72rem; text-transform:uppercase; letter-spacing:0.05em; color:var(--ink-soft); margin-bottom:10px;">${d.unit}</div>` + chartHtml;
+
+    document.getElementById("divisionDetail").classList.add("show");
+    document.getElementById("divisionDetail").scrollIntoView({ behavior: "smooth", block: "nearest" });
+  }
+  function closeDivision() { openId = null; renderCircle(); document.getElementById("divisionDetail").classList.remove("show"); }
+  document.getElementById("closeDivision").addEventListener("click", closeDivision);
+</script>
+</body>
+</html>

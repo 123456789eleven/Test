@@ -24,6 +24,15 @@
   .mono { font-variant-numeric: tabular-nums; }
   body { padding: 24px clamp(14px, 4vw, 48px) 70px; }
 
+  nav.site {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 0 22px; margin-bottom: 22px; border-bottom: 1px solid var(--border);
+  }
+  nav.site .wordmark { font-family: "Bahnschrift", "Segoe UI Semibold", sans-serif; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; text-decoration: none; color: var(--ink); font-size: 0.95rem; }
+  nav.site .links { display: flex; align-items: center; gap: 22px; font-size: 0.82rem; }
+  nav.site .links a { text-decoration: none; color: var(--ink-soft); }
+  nav.site .links a.current { color: var(--ink); font-weight: 600; }
+
   header.top { max-width: 80ch; margin-bottom: 18px; }
   header.top h1 { font-size: 1.5rem; }
   header.top p { color: var(--ink-soft); font-size: 0.9rem; margin: 8px 0 0; line-height: 1.5; }
@@ -98,6 +107,16 @@
 </style>
 </head>
 <body>
+
+<nav class="site">
+  <a class="wordmark" href="index.html">Custodian</a>
+  <div class="links">
+    <a href="insights.html">Insights</a>
+    <a href="landscape.html">Landscape</a>
+    <a href="company.html">Kelly Benefits</a>
+    <a class="current" href="study.html">Exam Prep</a>
+  </div>
+</nav>
 
 <header class="top">
   <h1>Maryland Life &amp; Health — Exam Prep</h1>
