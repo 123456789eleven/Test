@@ -171,14 +171,38 @@
   .note-item { border: 1px solid var(--border); border-radius: 8px; padding: 12px 14px; background: var(--surface-alt); position: relative; }
   .note-item .nmeta { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; flex-wrap: wrap; }
   .note-tag { font-size: 0.66rem; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 700; padding: 2px 8px; border-radius: 5px; }
-  .note-tag.idea { background: var(--manager-soft); color: var(--manager); }
-  .note-tag.division { background: var(--accent-wash); color: var(--accent); }
+  .note-tag.impact-high { background: var(--good-soft); color: var(--good); }
+  .note-tag.impact-med { background: var(--surface-alt); color: var(--ink-soft); }
+  .note-tag.impact-low { background: var(--surface-alt); color: var(--ink-muted); }
+  .note-tag.effort { background: var(--accent-wash); color: var(--accent); }
   .note-related { font-size: 0.76rem; color: var(--ink-muted); }
   .note-date { font-size: 0.72rem; color: var(--ink-muted); margin-left: auto; }
-  .note-text { font-size: 0.87rem; line-height: 1.5; }
+  .note-text { font-size: 0.87rem; line-height: 1.5; margin-bottom: 10px; }
   .note-del { position: absolute; top: 10px; right: 10px; background: none; border: none; color: var(--ink-muted); cursor: pointer; font-size: 0.8rem; padding: 2px 6px; }
   .note-del:hover { color: var(--warn); }
   .notes-empty { color: var(--ink-muted); font-size: 0.86rem; font-style: italic; }
+  .note-status-row { display: flex; align-items: center; gap: 8px; }
+  .note-status-row select {
+    font: inherit; font-size: 0.78rem; padding: 5px 8px; border-radius: 6px; border: 1px solid var(--border);
+    background: var(--surface); color: var(--ink); cursor: pointer;
+  }
+
+  /* Impact/Effort matrix */
+  .wb-matrix-wrap { margin: 18px 0 6px; }
+  .wb-axis-top { text-align: center; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--ink-muted); margin-bottom: 4px; margin-left: 54px; }
+  .wb-matrix-row { display: flex; gap: 8px; align-items: stretch; }
+  .wb-axis-side { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--ink-muted); display: flex; align-items: center; justify-content: center; flex: none; width: 46px; text-align: center; line-height: 1.4; }
+  .wb-matrix { flex: 1; display: grid; grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(3, minmax(76px, 1fr)); gap: 6px; }
+  .wb-cell { border: 1px solid var(--border); border-radius: 8px; padding: 8px; background: var(--surface-alt); display: flex; flex-direction: column; gap: 5px; overflow-y: auto; position: relative; }
+  .wb-cell.best { background: var(--good-soft); border-color: var(--good); }
+  .wb-cell.worst { background: var(--warn-soft); border-color: var(--warn); }
+  .wb-cell-label { position: absolute; top: 4px; right: 6px; font-size: 0.58rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--ink-muted); font-weight: 700; }
+  .wb-chip { font-size: 0.74rem; background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 4px 7px; cursor: pointer; transition: border-color .15s ease, transform .1s ease; }
+  .wb-chip:hover { border-color: var(--accent); transform: translateY(-1px); }
+
+  .wb-filters { display: flex; gap: 6px; flex-wrap: wrap; margin: 18px 0 4px; }
+  .wb-filter { font: inherit; font-size: 0.78rem; font-weight: 600; padding: 5px 12px; border-radius: 999px; border: 1px solid var(--border); background: var(--surface); color: var(--ink-soft); cursor: pointer; }
+  .wb-filter.active { background: var(--ink); color: var(--page); border-color: var(--ink); }
 
   .tabs { display: flex; gap: 4px; background: var(--surface-alt); border-radius: 9px; padding: 4px; margin-bottom: 26px; width: fit-content; flex-wrap: wrap; }
   .tabs button { font: inherit; font-size: 0.85rem; font-weight: 600; padding: 8px 16px; border: none; border-radius: 6px; background: transparent; color: var(--ink-soft); cursor: pointer; transition: background .2s ease, color .2s ease, box-shadow .2s ease; }
@@ -261,7 +285,7 @@
     <button data-view="advantage">Inside Advantage</button>
     <button data-view="people">People &amp; History</button>
     <button data-view="strategy">Strategy</button>
-    <button data-view="notes">My Notes</button>
+    <button data-view="notes">Workbench</button>
   </div>
 
   <div class="view active" id="view-overview">
@@ -404,18 +428,33 @@
 
   <div class="view" id="view-notes">
   <div class="notes-card">
-    <h3>Innovation ideas log</h3>
-    <p class="cap">Specific ideas for how Kelly (or your corner of it) could do something differently — this is the running list a visible improvement project actually comes from.</p>
+    <h3>Strategy workbench</h3>
+    <p class="cap">Not just a list — a place to actually decide what's worth doing. Score each idea on impact and effort, watch where it lands, then move it forward. This is where a visible improvement project actually gets picked, not just written down.</p>
     <div class="note-form">
-      <select id="noteType">
-        <option value="idea">Idea</option>
-        <option value="division">Tied to a division</option>
-      </select>
       <textarea id="noteText" placeholder="What would you change, build, or test?"></textarea>
       <div class="row2">
-        <input id="noteRelated" placeholder="Related to (optional — e.g. Advantage, COBRA process)" />
-        <button id="noteAdd">Add idea</button>
+        <input id="noteRelated" placeholder="Related to (optional — e.g. Advantage, COBRA process)" style="flex:1.4;" />
+        <select id="noteImpact"><option value="high">High impact</option><option value="med" selected>Medium impact</option><option value="low">Low impact</option></select>
+        <select id="noteEffort"><option value="low">Low effort</option><option value="med" selected>Medium effort</option><option value="high">High effort</option></select>
+        <button id="noteAdd">Add to workbench</button>
       </div>
+    </div>
+
+    <div class="wb-matrix-wrap">
+      <div class="wb-axis-top">Effort →</div>
+      <div class="wb-matrix-row">
+        <div class="wb-axis-side">Impact<br>↑</div>
+        <div class="wb-matrix" id="wbMatrix"></div>
+      </div>
+    </div>
+
+    <div class="wb-filters" id="wbFilters">
+      <button class="wb-filter active" data-status="all">All</button>
+      <button class="wb-filter" data-status="idea">Idea</button>
+      <button class="wb-filter" data-status="considering">Considering</button>
+      <button class="wb-filter" data-status="proposed">Proposed</button>
+      <button class="wb-filter" data-status="active">Active</button>
+      <button class="wb-filter" data-status="done">Done / Shelved</button>
     </div>
     <div class="notes-list" id="notesList"></div>
   </div>
@@ -667,35 +706,97 @@
   fitEl.value = localStorage.getItem("custodianFit") || "";
   fitEl.addEventListener("input", () => localStorage.setItem("custodianFit", fitEl.value));
 
-  /* ================= Innovation Ideas Log (shared notes mechanism) ================= */
+  /* ================= Strategy Workbench ================= */
   const NOTES_KEY = "custodianNotes";
   const PAGE_ID = "company";
   function loadNotes() { try { return JSON.parse(localStorage.getItem(NOTES_KEY)) || []; } catch { return []; } }
   function saveNotes(notes) { localStorage.setItem(NOTES_KEY, JSON.stringify(notes)); }
-  const TYPE_LABEL = { idea: "Idea", division: "Division" };
+
+  const STATUS_LABEL = { idea: "Idea", considering: "Considering", proposed: "Proposed", active: "Active", done: "Done", shelved: "Shelved" };
+  const STATUS_ORDER = ["idea", "considering", "proposed", "active", "done", "shelved"];
+  const IMPACT_LABEL = { high: "High impact", med: "Medium impact", low: "Low impact" };
+  const EFFORT_LABEL = { low: "Low effort", med: "Medium effort", high: "High effort" };
+
+  let wbFilter = "all";
+
+  function normalize(n) {
+    // backfill defaults for any entry created before this schema existed
+    return { impact: n.impact || "med", effort: n.effort || "med", status: n.status || "idea", ...n };
+  }
+
+  function renderMatrix() {
+    const all = loadNotes().filter(n => n.page === PAGE_ID).map(normalize).filter(n => n.status !== "done" && n.status !== "shelved");
+    const impacts = ["high", "med", "low"];
+    const efforts = ["low", "med", "high"];
+    const cells = impacts.map(imp => efforts.map(eff => {
+      const items = all.filter(n => n.impact === imp && n.effort === eff);
+      let cls = "";
+      let label = "";
+      if (imp === "high" && eff === "low") { cls = "best"; label = "Do first"; }
+      if (imp === "low" && eff === "high") { cls = "worst"; label = "Reconsider"; }
+      return `<div class="wb-cell ${cls}">
+        ${label ? `<span class="wb-cell-label">${label}</span>` : ""}
+        ${items.map(it => `<div class="wb-chip" data-id="${it.id}" title="${it.text.replace(/"/g, '&quot;')}">${it.text.length > 34 ? it.text.slice(0, 34) + "…" : it.text}</div>`).join("")}
+      </div>`;
+    }).join("")).join("");
+    document.getElementById("wbMatrix").innerHTML = cells;
+    document.querySelectorAll(".wb-chip").forEach(chip => {
+      chip.addEventListener("click", () => {
+        const el = document.querySelector(`.note-item[data-id="${chip.dataset.id}"]`);
+        if (el) { el.scrollIntoView({ behavior: "smooth", block: "center" }); el.style.borderColor = "var(--accent)"; setTimeout(() => el.style.borderColor = "", 1200); }
+      });
+    });
+  }
 
   function renderNotes() {
-    const all = loadNotes().filter(n => n.page === PAGE_ID).sort((a, b) => new Date(b.date) - new Date(a.date));
+    const all = loadNotes().filter(n => n.page === PAGE_ID).map(normalize).sort((a, b) => new Date(b.date) - new Date(a.date));
+    const filtered = wbFilter === "all" ? all
+      : wbFilter === "done" ? all.filter(n => n.status === "done" || n.status === "shelved")
+      : all.filter(n => n.status === wbFilter);
     const list = document.getElementById("notesList");
-    if (!all.length) { list.innerHTML = `<div class="notes-empty">No ideas logged yet — add your first one above.</div>`; return; }
-    list.innerHTML = all.map(n => `
+    if (!filtered.length) { list.innerHTML = `<div class="notes-empty">Nothing here yet.</div>`; renderMatrix(); return; }
+    list.innerHTML = filtered.map(n => `
       <div class="note-item" data-id="${n.id}">
         <button class="note-del" title="Delete" data-id="${n.id}">✕</button>
         <div class="nmeta">
-          <span class="note-tag ${n.type}">${TYPE_LABEL[n.type]}</span>
+          <span class="note-tag impact-${n.impact}">${IMPACT_LABEL[n.impact]}</span>
+          <span class="note-tag effort">${EFFORT_LABEL[n.effort]}</span>
           ${n.related ? `<span class="note-related">${n.related}</span>` : ""}
           <span class="note-date mono">${n.date}</span>
         </div>
         <div class="note-text">${n.text}</div>
+        <div class="note-status-row">
+          <label style="font-size:0.72rem; color:var(--ink-muted); text-transform:uppercase; letter-spacing:0.04em;">Status</label>
+          <select data-id="${n.id}" class="wb-status-select">
+            ${STATUS_ORDER.map(s => `<option value="${s}" ${s === n.status ? "selected" : ""}>${STATUS_LABEL[s]}</option>`).join("")}
+          </select>
+        </div>
       </div>`).join("");
     list.querySelectorAll(".note-del").forEach(btn => {
       btn.addEventListener("click", () => {
-        const remaining = loadNotes().filter(n => n.id !== btn.dataset.id);
-        saveNotes(remaining);
+        saveNotes(loadNotes().filter(n => n.id !== btn.dataset.id));
         renderNotes();
       });
     });
+    list.querySelectorAll(".wb-status-select").forEach(sel => {
+      sel.addEventListener("change", () => {
+        const notes = loadNotes().map(n => n.id === sel.dataset.id ? { ...normalize(n), status: sel.value } : n);
+        saveNotes(notes);
+        renderNotes();
+      });
+    });
+    renderMatrix();
   }
+
+  document.getElementById("wbFilters").addEventListener("click", (e) => {
+    const btn = e.target.closest(".wb-filter");
+    if (!btn) return;
+    document.querySelectorAll(".wb-filter").forEach(b => b.classList.remove("active"));
+    btn.classList.add("active");
+    wbFilter = btn.dataset.status;
+    renderNotes();
+  });
+
   document.getElementById("noteAdd").addEventListener("click", () => {
     const text = document.getElementById("noteText").value.trim();
     if (!text) return;
@@ -703,8 +804,10 @@
     notes.push({
       id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
       page: PAGE_ID,
-      type: document.getElementById("noteType").value,
       related: document.getElementById("noteRelated").value.trim(),
+      impact: document.getElementById("noteImpact").value,
+      effort: document.getElementById("noteEffort").value,
+      status: "idea",
       text,
       date: new Date().toISOString().slice(0, 10)
     });
