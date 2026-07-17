@@ -96,6 +96,53 @@
   .tl-item .tl-sig { font-size: 0.86rem; color: var(--ink-soft); margin-top: 6px; line-height: 1.5; max-width: 70ch; }
 
   footer { border-top: 1px solid var(--border); padding: 24px clamp(20px, 4vw, 56px); font-size: 0.78rem; color: var(--ink-muted); }
+
+  /* Industry Forces */
+  .forces-card { border: 1px solid var(--border); border-radius: 12px; background: var(--surface); padding: 22px 24px; margin-bottom: 26px; }
+  .forces-card h3 { font-size: 1rem; margin-bottom: 4px; }
+  .forces-card .cap { color: var(--ink-soft); font-size: 0.85rem; line-height: 1.5; margin: 6px 0 20px; max-width: 68ch; }
+  .forces-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+  @media (max-width: 800px) { .forces-grid { grid-template-columns: 1fr; } }
+  .force-item { border: 1px solid var(--border); border-radius: 10px; padding: 16px 18px; background: var(--surface-alt); }
+  .force-item .fh { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 8px; }
+  .force-item h4 { font-size: 0.9rem; font-family: "Bahnschrift", "Segoe UI Semibold", sans-serif; font-weight: 700; }
+  .force-level { display: flex; align-items: center; gap: 6px; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--ink-soft); font-weight: 700; white-space: nowrap; }
+  .force-dots { display: flex; gap: 3px; }
+  .force-dots span { width: 7px; height: 7px; border-radius: 50%; background: var(--border); }
+  .force-dots span.on { background: var(--accent); }
+  .force-item p { font-size: 0.86rem; color: var(--ink-soft); line-height: 1.55; margin: 0; }
+
+  /* Notes / hub layer */
+  .notes-card { border: 1px solid var(--border); border-radius: 12px; background: var(--surface); padding: 22px 24px; margin-bottom: 26px; }
+  .notes-card h3 { font-size: 1rem; margin-bottom: 4px; }
+  .notes-card .cap { color: var(--ink-soft); font-size: 0.85rem; line-height: 1.5; margin: 6px 0 18px; max-width: 68ch; }
+  .note-form { display: grid; grid-template-columns: 130px 1fr; gap: 10px; margin-bottom: 8px; }
+  @media (max-width: 640px) { .note-form { grid-template-columns: 1fr; } }
+  .note-form select, .note-form input, .note-form textarea {
+    font: inherit; font-size: 0.87rem; padding: 9px 11px; border-radius: 7px; border: 1px solid var(--border);
+    background: var(--surface-alt); color: var(--ink); resize: vertical;
+  }
+  .note-form textarea { grid-column: 1 / -1; min-height: 56px; }
+  .note-form .row2 { grid-column: 1 / -1; display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+  .note-form .row2 input { flex: 1; min-width: 160px; }
+  .note-form button {
+    font: inherit; font-size: 0.85rem; font-weight: 600; padding: 9px 18px; border-radius: 7px; border: none;
+    background: var(--accent); color: var(--accent-ink); cursor: pointer; transition: filter .15s ease;
+  }
+  .note-form button:hover { filter: brightness(1.08); }
+  .notes-list { margin-top: 16px; display: flex; flex-direction: column; gap: 10px; }
+  .note-item { border: 1px solid var(--border); border-radius: 8px; padding: 12px 14px; background: var(--surface-alt); position: relative; }
+  .note-item .nmeta { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; flex-wrap: wrap; }
+  .note-tag { font-size: 0.66rem; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 700; padding: 2px 8px; border-radius: 5px; }
+  .note-tag.observation { background: var(--accent-wash); color: var(--accent); }
+  .note-tag.question { background: rgba(90,120,200,0.12); color: #5a78c8; }
+  .note-tag.idea { background: var(--manager-soft, rgba(156,106,31,0.12)); color: var(--manager, #9c6a1f); }
+  .note-related { font-size: 0.76rem; color: var(--ink-muted); }
+  .note-date { font-size: 0.72rem; color: var(--ink-muted); margin-left: auto; }
+  .note-text { font-size: 0.87rem; line-height: 1.5; }
+  .note-del { position: absolute; top: 10px; right: 10px; background: none; border: none; color: var(--ink-muted); cursor: pointer; font-size: 0.8rem; padding: 2px 6px; }
+  .note-del:hover { color: var(--warn); }
+  .notes-empty { color: var(--ink-muted); font-size: 0.86rem; font-style: italic; }
 </style>
 </head>
 <body>
@@ -144,6 +191,30 @@
     <h3>Consolidation timeline, 2023–2025</h3>
     <p class="cap">The market-growth chart on Insights and the "regional player among giants" framing on this page are both symptoms of the same thing: this industry is actively consolidating. These are real, dated deals — not a general trend statement.</p>
     <div class="timeline" id="mnaTimeline"></div>
+  </div>
+
+  <div class="forces-card">
+    <h3>Industry forces</h3>
+    <p class="cap">The data above, read as a strategic picture rather than a spec sheet — what's actually driving how this market behaves.</p>
+    <div class="forces-grid" id="forcesGrid"></div>
+  </div>
+
+  <div class="notes-card">
+    <h3>Field notes</h3>
+    <p class="cap">Your own read on this market — observations, open questions, ideas worth chasing. Saved in this browser only; this is where the page actually becomes yours.</p>
+    <div class="note-form">
+      <select id="noteType">
+        <option value="observation">Observation</option>
+        <option value="question">Question</option>
+        <option value="idea">Idea</option>
+      </select>
+      <textarea id="noteText" placeholder="What did you notice, wonder about, or want to test?"></textarea>
+      <div class="row2">
+        <input id="noteRelated" placeholder="Related to (optional — e.g. a company name)" />
+        <button id="noteAdd">Add note</button>
+      </div>
+    </div>
+    <div class="notes-list" id="notesList"></div>
   </div>
 </main>
 
@@ -238,6 +309,75 @@
   }
 
   renderAll();
+
+  /* ================= Industry Forces ================= */
+  const forces = [
+    { name: "Competitive Rivalry", level: 3, text: "Rivalry is intense — five real competitors plus regional players are chasing the same mid-market employers, and M&A has become a routine growth tactic rather than an exception (7 deals in 3 years, above)." },
+    { name: "Threat of New Entrants", level: 2, text: "Compliance complexity (COBRA/ACA/multi-state law) and platform-build costs are real barriers, but PE-backed roll-ups like Navia and OneDigital show capital — not technology — is often the actual key to entry." },
+    { name: "Buyer Power (employers)", level: 3, text: "Employers can and do switch TPAs, and brokers exist specifically to shop the market for them — but switching costs rise fast once a client is embedded in a specific tech platform, which is exactly why platforms compete on lock-in as much as price." },
+    { name: "Supplier Power", level: 1, text: "The 'suppliers' here are mostly insurance carriers and banking partners for HSA custody — fragmented enough that no single one holds real pricing power over administrators." },
+    { name: "Threat of Substitutes", level: 2, text: "PEOs like TriNet bundle benefits administration into a broader co-employment model, and in-house HR software is increasingly absorbing the basic admin functions that used to require a dedicated TPA." }
+  ];
+  function renderForces() {
+    const levelLabel = ["", "Low", "Moderate", "High"];
+    document.getElementById("forcesGrid").innerHTML = forces.map(f => `
+      <div class="force-item">
+        <div class="fh">
+          <h4>${f.name}</h4>
+          <div class="force-level">${levelLabel[f.level]} <span class="force-dots">${[1,2,3].map(n => `<span class="${n <= f.level ? 'on' : ''}"></span>`).join("")}</span></div>
+        </div>
+        <p>${f.text}</p>
+      </div>`).join("");
+  }
+  renderForces();
+
+  /* ================= Field Notes (shared across pages, same localStorage origin) ================= */
+  const NOTES_KEY = "custodianNotes";
+  const PAGE_ID = "landscape";
+  function loadNotes() { try { return JSON.parse(localStorage.getItem(NOTES_KEY)) || []; } catch { return []; } }
+  function saveNotes(notes) { localStorage.setItem(NOTES_KEY, JSON.stringify(notes)); }
+  const TYPE_LABEL = { observation: "Observation", question: "Question", idea: "Idea" };
+
+  function renderNotes() {
+    const all = loadNotes().filter(n => n.page === PAGE_ID).sort((a, b) => new Date(b.date) - new Date(a.date));
+    const list = document.getElementById("notesList");
+    if (!all.length) { list.innerHTML = `<div class="notes-empty">No notes yet — add your first observation above.</div>`; return; }
+    list.innerHTML = all.map(n => `
+      <div class="note-item" data-id="${n.id}">
+        <button class="note-del" title="Delete" data-id="${n.id}">✕</button>
+        <div class="nmeta">
+          <span class="note-tag ${n.type}">${TYPE_LABEL[n.type]}</span>
+          ${n.related ? `<span class="note-related">${n.related}</span>` : ""}
+          <span class="note-date mono">${n.date}</span>
+        </div>
+        <div class="note-text">${n.text}</div>
+      </div>`).join("");
+    list.querySelectorAll(".note-del").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const remaining = loadNotes().filter(n => n.id !== btn.dataset.id);
+        saveNotes(remaining);
+        renderNotes();
+      });
+    });
+  }
+  document.getElementById("noteAdd").addEventListener("click", () => {
+    const text = document.getElementById("noteText").value.trim();
+    if (!text) return;
+    const notes = loadNotes();
+    notes.push({
+      id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
+      page: PAGE_ID,
+      type: document.getElementById("noteType").value,
+      related: document.getElementById("noteRelated").value.trim(),
+      text,
+      date: new Date().toISOString().slice(0, 10)
+    });
+    saveNotes(notes);
+    document.getElementById("noteText").value = "";
+    document.getElementById("noteRelated").value = "";
+    renderNotes();
+  });
+  renderNotes();
 </script>
 </body>
 </html>
