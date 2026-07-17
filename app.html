@@ -135,6 +135,95 @@
   .entry p { color: var(--ink-soft); font-size: 0.9rem; line-height: 1.55; margin: 0; }
   .entry .srcs { margin-top: 10px; display: flex; gap: 12px; flex-wrap: wrap; }
   .entry .srcs a { font-size: 0.78rem; color: var(--accent); text-decoration: none; }
+
+  /* ---- Shared: tabs ---- */
+  .tabs { display: flex; gap: 4px; background: var(--surface-alt); border-radius: 9px; padding: 4px; margin-bottom: 26px; width: fit-content; flex-wrap: wrap; }
+  .tabs button { font: inherit; font-size: 0.85rem; font-weight: 600; padding: 8px 16px; border: none; border-radius: 6px; background: transparent; color: var(--ink-soft); cursor: pointer; transition: background .2s ease, color .2s ease, box-shadow .2s ease; }
+  .tabs button.active { background: var(--surface); color: var(--ink); box-shadow: 0 1px 2px rgba(0,0,0,0.08); }
+  .tabs button:hover:not(.active) { color: var(--ink); }
+  .view { display: none; }
+  .view.active { display: block; animation: viewFade .3s ease; }
+  @keyframes viewFade { from { opacity: 0; transform: translateY(3px); } to { opacity: 1; transform: translateY(0); } }
+  @media (prefers-reduced-motion: reduce) { .view.active { animation: none; } }
+
+  /* ---- Landscape: scale note ---- */
+  .scale-note { border: 1px solid var(--border); border-radius: 10px; background: var(--surface-alt); padding: 16px 20px; margin-bottom: 26px; font-size: 0.9rem; display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+  .scale-note .big { font-size: 1.3rem; font-weight: 700; }
+  .scale-note .rest { color: var(--ink-soft); }
+
+  /* ---- Landscape: profile table ---- */
+  .profile-card { border: 1px solid var(--border); border-radius: 12px; background: var(--surface); padding: 22px 24px; margin-bottom: 26px; }
+  .profile-card h3 { font-size: 1rem; margin-bottom: 16px; }
+  .table-wrap { overflow-x: auto; }
+  table.profiles { width: 100%; border-collapse: collapse; font-size: 0.86rem; min-width: 720px; }
+  table.profiles th, table.profiles td { text-align: left; padding: 10px 12px; border-top: 1px solid var(--border); }
+  table.profiles th { color: var(--ink-soft); font-weight: 600; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.04em; }
+  table.profiles td.status { font-size: 0.78rem; }
+  table.profiles tbody tr { transition: background .15s ease; }
+  table.profiles tbody tr:hover { background: var(--surface-alt); }
+  .status-pill { display: inline-block; padding: 2px 9px; border-radius: 999px; font-size: 0.72rem; font-weight: 600; background: var(--accent-wash); color: var(--accent); }
+  .status-pill.private { background: var(--surface-alt); color: var(--ink-soft); }
+  .caveat { font-size: 0.8rem; color: var(--ink-muted); margin-top: 14px; line-height: 1.5; }
+
+  /* ---- Landscape: timeline ---- */
+  .timeline-card { border: 1px solid var(--border); border-radius: 12px; background: var(--surface); padding: 22px 24px; margin-bottom: 26px; }
+  .timeline-card h3 { font-size: 1rem; margin-bottom: 4px; }
+  .timeline-card .cap { color: var(--ink-soft); font-size: 0.85rem; line-height: 1.5; margin: 6px 0 22px; max-width: 68ch; }
+  .timeline { position: relative; padding-left: 26px; border-left: 2px solid var(--grid); }
+  .tl-item { position: relative; padding-bottom: 22px; transition: opacity .3s ease, transform .3s ease; }
+  .tl-item:last-child { padding-bottom: 0; }
+  .tl-item::before { content: ""; position: absolute; left: -32px; top: 3px; width: 10px; height: 10px; border-radius: 50%; background: var(--accent); border: 2px solid var(--surface); }
+  .tl-item .tl-date { font-size: 0.74rem; font-weight: 700; color: var(--accent); text-transform: uppercase; letter-spacing: 0.04em; }
+  .tl-item .tl-deal { font-size: 0.94rem; font-weight: 600; margin-top: 3px; }
+  .tl-item .tl-value { font-size: 0.78rem; color: var(--ink-muted); margin-top: 2px; }
+  .tl-item .tl-sig { font-size: 0.86rem; color: var(--ink-soft); margin-top: 6px; line-height: 1.5; max-width: 70ch; }
+
+  /* ---- Landscape: industry forces ---- */
+  .forces-card { border: 1px solid var(--border); border-radius: 12px; background: var(--surface); padding: 22px 24px; margin-bottom: 26px; }
+  .forces-card h3 { font-size: 1rem; margin-bottom: 4px; }
+  .forces-card .cap { color: var(--ink-soft); font-size: 0.85rem; line-height: 1.5; margin: 6px 0 20px; max-width: 68ch; }
+  .forces-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+  @media (max-width: 800px) { .forces-grid { grid-template-columns: 1fr; } }
+  .force-item { border: 1px solid var(--border); border-radius: 10px; padding: 16px 18px; background: var(--surface-alt); }
+  .force-item .fh { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 8px; }
+  .force-item h4 { font-size: 0.9rem; font-family: "Bahnschrift", "Segoe UI Semibold", sans-serif; font-weight: 700; }
+  .force-level { display: flex; align-items: center; gap: 6px; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--ink-soft); font-weight: 700; white-space: nowrap; }
+  .force-dots { display: flex; gap: 3px; }
+  .force-dots span { width: 7px; height: 7px; border-radius: 50%; background: var(--border); }
+  .force-dots span.on { background: var(--accent); }
+  .force-item p { font-size: 0.86rem; color: var(--ink-soft); line-height: 1.55; margin: 0; }
+
+  /* ---- Notes / hub layer (shared across pages) ---- */
+  .notes-card { border: 1px solid var(--border); border-radius: 12px; background: var(--surface); padding: 22px 24px; margin-bottom: 26px; }
+  .notes-card h3 { font-size: 1rem; margin-bottom: 4px; }
+  .notes-card .cap { color: var(--ink-soft); font-size: 0.85rem; line-height: 1.5; margin: 6px 0 18px; max-width: 68ch; }
+  .note-form { display: grid; grid-template-columns: 130px 1fr; gap: 10px; margin-bottom: 8px; }
+  @media (max-width: 640px) { .note-form { grid-template-columns: 1fr; } }
+  .note-form select, .note-form input, .note-form textarea {
+    font: inherit; font-size: 0.87rem; padding: 9px 11px; border-radius: 7px; border: 1px solid var(--border);
+    background: var(--surface-alt); color: var(--ink); resize: vertical;
+  }
+  .note-form textarea { grid-column: 1 / -1; min-height: 56px; }
+  .note-form .row2 { grid-column: 1 / -1; display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+  .note-form .row2 input { flex: 1; min-width: 160px; }
+  .note-form button {
+    font: inherit; font-size: 0.85rem; font-weight: 600; padding: 9px 18px; border-radius: 7px; border: none;
+    background: var(--accent); color: var(--accent-ink); cursor: pointer; transition: filter .15s ease;
+  }
+  .note-form button:hover { filter: brightness(1.08); }
+  .notes-list { margin-top: 16px; display: flex; flex-direction: column; gap: 10px; }
+  .note-item { border: 1px solid var(--border); border-radius: 8px; padding: 12px 14px; background: var(--surface-alt); position: relative; }
+  .note-item .nmeta { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; flex-wrap: wrap; }
+  .note-tag { font-size: 0.66rem; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 700; padding: 2px 8px; border-radius: 5px; }
+  .note-tag.observation { background: var(--accent-wash); color: var(--accent); }
+  .note-tag.question { background: rgba(90,120,200,0.12); color: #5a78c8; }
+  .note-tag.idea { background: var(--manager-soft); color: var(--manager); }
+  .note-related { font-size: 0.76rem; color: var(--ink-muted); }
+  .note-date { font-size: 0.72rem; color: var(--ink-muted); margin-left: auto; }
+  .note-text { font-size: 0.87rem; line-height: 1.5; }
+  .note-del { position: absolute; top: 10px; right: 10px; background: none; border: none; color: var(--ink-muted); cursor: pointer; font-size: 0.8rem; padding: 2px 6px; }
+  .note-del:hover { color: var(--warn); }
+  .notes-empty { color: var(--ink-muted); font-size: 0.86rem; font-style: italic; }
 </style>
 </head>
 <body>
@@ -172,6 +261,7 @@
 <script src="js/search.js"></script>
 <script src="js/views/overview.js"></script>
 <script src="js/views/insights.js"></script>
+<script src="js/views/landscape.js"></script>
 <script src="js/app.js"></script>
 </body>
 </html>

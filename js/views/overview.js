@@ -9,8 +9,8 @@ async function renderOverview(mount) {
         This is mid-rebuild — moving from five separate pages into one connected app with a shared sidebar and search across everything you've logged.
       </p>
       <p style="color:var(--ink-soft); font-size:0.92rem; line-height:1.65; margin:0;">
-        <b style="color:var(--ink);">Insights</b> is fully ported — pick it from the sidebar. <b style="color:var(--ink);">Landscape</b> and <b style="color:var(--ink);">Kelly Benefits</b> are still being migrated; until they're ready, the original pages remain live and unaffected at
-        <a href="landscape.html" style="color:var(--accent);">landscape.html</a> and <a href="company.html" style="color:var(--accent);">company.html</a>.
+        <b style="color:var(--ink);">Insights</b> and <b style="color:var(--ink);">Landscape</b> are fully ported — pick either from the sidebar. <b style="color:var(--ink);">Kelly Benefits</b> is still being migrated; until it's ready, the original page remains live and unaffected at
+        <a href="company.html" style="color:var(--accent);">company.html</a>.
       </p>
     </div>
   `;
