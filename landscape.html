@@ -95,6 +95,15 @@
   .tl-item .tl-value { font-size: 0.78rem; color: var(--ink-muted); margin-top: 2px; }
   .tl-item .tl-sig { font-size: 0.86rem; color: var(--ink-soft); margin-top: 6px; line-height: 1.5; max-width: 70ch; }
 
+  .tabs { display: flex; gap: 4px; background: var(--surface-alt); border-radius: 9px; padding: 4px; margin-bottom: 26px; width: fit-content; flex-wrap: wrap; }
+  .tabs button { font: inherit; font-size: 0.85rem; font-weight: 600; padding: 8px 16px; border: none; border-radius: 6px; background: transparent; color: var(--ink-soft); cursor: pointer; transition: background .2s ease, color .2s ease, box-shadow .2s ease; }
+  .tabs button.active { background: var(--surface); color: var(--ink); box-shadow: 0 1px 2px rgba(0,0,0,0.08); }
+  .tabs button:hover:not(.active) { color: var(--ink); }
+  .view { display: none; }
+  .view.active { display: block; animation: viewFade .3s ease; }
+  @keyframes viewFade { from { opacity: 0; transform: translateY(3px); } to { opacity: 1; transform: translateY(0); } }
+  @media (prefers-reduced-motion: reduce) { .view.active { animation: none; } }
+
   footer { border-top: 1px solid var(--border); padding: 24px clamp(20px, 4vw, 56px); font-size: 0.78rem; color: var(--ink-muted); }
 
   /* Industry Forces */
@@ -168,38 +177,52 @@
     <span class="rest">ADP's total FY2025 revenue — more than 3× the combined revenue of the four benefits-focused specialists below. ADP competes on scale as a diversified payroll/HR platform, not as a benefits specialist, which is why it's shown separately rather than squeezed onto the same bars.</span>
   </div>
 
-  <div class="charts">
-    <div class="chart-card">
-      <h3>Revenue — benefits specialists</h3>
-      <p class="cap">Among firms that compete specifically on benefits and COBRA administration, WEX's payments-plus-benefits model edges out Alight's outsourcing scale.</p>
-      <div id="chartRevenue"></div>
+  <div class="tabs" id="tabs">
+    <button data-view="competitors" class="active">Competitors</button>
+    <button data-view="consolidation">Consolidation</button>
+    <button data-view="strategy">Strategy</button>
+    <button data-view="notes">My Notes</button>
+  </div>
+
+  <div class="view active" id="view-competitors">
+    <div class="charts">
+      <div class="chart-card">
+        <h3>Revenue — benefits specialists</h3>
+        <p class="cap">Among firms that compete specifically on benefits and COBRA administration, WEX's payments-plus-benefits model edges out Alight's outsourcing scale.</p>
+        <div id="chartRevenue"></div>
+      </div>
+      <div class="chart-card">
+        <h3>Employees — benefits specialists</h3>
+        <p class="cap">Headcount doesn't track revenue in a straight line — a hint at how much of each company's model is software-driven versus people-driven.</p>
+        <div id="chartEmployees"></div>
+      </div>
     </div>
-    <div class="chart-card">
-      <h3>Employees — benefits specialists</h3>
-      <p class="cap">Headcount doesn't track revenue in a straight line — a hint at how much of each company's model is software-driven versus people-driven.</p>
-      <div id="chartEmployees"></div>
+
+    <div class="profile-card">
+      <h3>Company profiles</h3>
+      <div class="table-wrap" id="profileTable"></div>
+      <div class="caveat">HealthEquity's FY2026 revenue mix is a tell for where this industry's money actually sits: of its $1.31B, more came from custodial interest on HSA balances ($636.8M) than from service fees ($485M) — administration is increasingly a wrapper around asset custody, not a pure fee-for-service business. Figures are the most recent publicly reported annual results as of this writing (public company filings; Businessolver's, Empyrean's, and TriNet's professional-service-revenue figures carry varying degrees of estimation, as noted above) and will drift out of date — treat this as a snapshot, not a live feed.</div>
     </div>
   </div>
 
-  <div class="profile-card">
-    <h3>Company profiles</h3>
-    <div class="table-wrap" id="profileTable"></div>
-    <div class="caveat">HealthEquity's FY2026 revenue mix is a tell for where this industry's money actually sits: of its $1.31B, more came from custodial interest on HSA balances ($636.8M) than from service fees ($485M) — administration is increasingly a wrapper around asset custody, not a pure fee-for-service business. Figures are the most recent publicly reported annual results as of this writing (public company filings; Businessolver's, Empyrean's, and TriNet's professional-service-revenue figures carry varying degrees of estimation, as noted above) and will drift out of date — treat this as a snapshot, not a live feed.</div>
+  <div class="view" id="view-consolidation">
+    <div class="timeline-card">
+      <h3>Consolidation timeline, 2023–2025</h3>
+      <p class="cap">The market-growth chart on Insights and the "regional player among giants" framing on this page are both symptoms of the same thing: this industry is actively consolidating. These are real, dated deals — not a general trend statement.</p>
+      <div class="timeline" id="mnaTimeline"></div>
+    </div>
   </div>
 
-  <div class="timeline-card">
-    <h3>Consolidation timeline, 2023–2025</h3>
-    <p class="cap">The market-growth chart on Insights and the "regional player among giants" framing on this page are both symptoms of the same thing: this industry is actively consolidating. These are real, dated deals — not a general trend statement.</p>
-    <div class="timeline" id="mnaTimeline"></div>
+  <div class="view" id="view-strategy">
+    <div class="forces-card">
+      <h3>Industry forces</h3>
+      <p class="cap">The data above, read as a strategic picture rather than a spec sheet — what's actually driving how this market behaves.</p>
+      <div class="forces-grid" id="forcesGrid"></div>
+    </div>
   </div>
 
-  <div class="forces-card">
-    <h3>Industry forces</h3>
-    <p class="cap">The data above, read as a strategic picture rather than a spec sheet — what's actually driving how this market behaves.</p>
-    <div class="forces-grid" id="forcesGrid"></div>
-  </div>
-
-  <div class="notes-card">
+  <div class="view" id="view-notes">
+    <div class="notes-card">
     <h3>Field notes</h3>
     <p class="cap">Your own read on this market — observations, open questions, ideas worth chasing. Saved in this browser only; this is where the page actually becomes yours.</p>
     <div class="note-form">
@@ -215,6 +238,7 @@
       </div>
     </div>
     <div class="notes-list" id="notesList"></div>
+    </div>
   </div>
 </main>
 
@@ -378,6 +402,16 @@
     renderNotes();
   });
   renderNotes();
+
+  /* ================= Tabs ================= */
+  document.getElementById("tabs").addEventListener("click", (e) => {
+    const btn = e.target.closest("button");
+    if (!btn) return;
+    document.querySelectorAll("#tabs button").forEach(b => b.classList.remove("active"));
+    btn.classList.add("active");
+    document.querySelectorAll(".view").forEach(v => v.classList.remove("active"));
+    document.getElementById("view-" + btn.dataset.view).classList.add("active");
+  });
 </script>
 </body>
 </html>
