@@ -15,12 +15,13 @@
     --ink: #14140f; --ink-soft: #5c5a52; --ink-muted: #8f8c81;
     --accent: #4d6b5e; --accent-wash: rgba(77,107,94,0.10); --accent-ink: #ffffff;
     --border: rgba(20,20,15,0.12); --grid: #e1e0d9; --manager: #9c6a1f; --manager-soft: #f5ead9;
+    --good: #3e7d4c; --good-soft: #e1f0e3; --warn: #a63b2e; --warn-soft: #f8e2df;
   }
   @media (prefers-color-scheme: dark) {
-    :root { --page: #0d0f0d; --surface: #161815; --surface-alt: #1c1f1b; --ink: #f3f2ee; --ink-soft: #b8b6ad; --ink-muted: #7c7a71; --accent: #8fae9e; --accent-wash: rgba(143,174,158,0.14); --accent-ink: #0d0f0d; --border: rgba(255,255,255,0.12); --grid: #2c2c2a; --manager: #e2b46e; --manager-soft: #33291a; }
+    :root { --page: #0d0f0d; --surface: #161815; --surface-alt: #1c1f1b; --ink: #f3f2ee; --ink-soft: #b8b6ad; --ink-muted: #7c7a71; --accent: #8fae9e; --accent-wash: rgba(143,174,158,0.14); --accent-ink: #0d0f0d; --border: rgba(255,255,255,0.12); --grid: #2c2c2a; --manager: #e2b46e; --manager-soft: #33291a; --good: #5fae6e; --good-soft: #1c2b1f; --warn: #e08a7a; --warn-soft: #33201c; }
   }
-  :root[data-theme="dark"] { --page: #0d0f0d; --surface: #161815; --surface-alt: #1c1f1b; --ink: #f3f2ee; --ink-soft: #b8b6ad; --ink-muted: #7c7a71; --accent: #8fae9e; --accent-wash: rgba(143,174,158,0.14); --accent-ink: #0d0f0d; --border: rgba(255,255,255,0.12); --grid: #2c2c2a; --manager: #e2b46e; --manager-soft: #33291a; }
-  :root[data-theme="light"] { --page: #f7f5f0; --surface: #ffffff; --surface-alt: #f0eee8; --ink: #14140f; --ink-soft: #5c5a52; --ink-muted: #8f8c81; --accent: #4d6b5e; --accent-wash: rgba(77,107,94,0.10); --accent-ink: #ffffff; --border: rgba(20,20,15,0.12); --grid: #e1e0d9; --manager: #9c6a1f; --manager-soft: #f5ead9; }
+  :root[data-theme="dark"] { --page: #0d0f0d; --surface: #161815; --surface-alt: #1c1f1b; --ink: #f3f2ee; --ink-soft: #b8b6ad; --ink-muted: #7c7a71; --accent: #8fae9e; --accent-wash: rgba(143,174,158,0.14); --accent-ink: #0d0f0d; --border: rgba(255,255,255,0.12); --grid: #2c2c2a; --manager: #e2b46e; --manager-soft: #33291a; --good: #5fae6e; --good-soft: #1c2b1f; --warn: #e08a7a; --warn-soft: #33201c; }
+  :root[data-theme="light"] { --page: #f7f5f0; --surface: #ffffff; --surface-alt: #f0eee8; --ink: #14140f; --ink-soft: #5c5a52; --ink-muted: #8f8c81; --accent: #4d6b5e; --accent-wash: rgba(77,107,94,0.10); --accent-ink: #ffffff; --border: rgba(20,20,15,0.12); --grid: #e1e0d9; --manager: #9c6a1f; --manager-soft: #f5ead9; --good: #3e7d4c; --good-soft: #e1f0e3; --warn: #a63b2e; --warn-soft: #f8e2df; }
 
   * { box-sizing: border-box; }
   html, body { margin: 0; background: var(--page); color: var(--ink); font-family: "Segoe UI", system-ui, -apple-system, sans-serif; }
@@ -111,6 +112,74 @@
   .integration-box { border-left: 3px solid var(--manager); background: var(--manager-soft); border-radius: 8px; padding: 16px 18px; margin-bottom: 30px; font-size: 0.92rem; line-height: 1.6; }
   .integration-box b { color: var(--manager); }
 
+  /* Where I fit */
+  .fit-box { border: 1px dashed var(--border); border-radius: 10px; padding: 14px 18px; margin-bottom: 26px; background: var(--surface); }
+  .fit-box .lbl { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--ink-soft); font-weight: 700; margin-bottom: 8px; }
+  .fit-box textarea { width: 100%; font: inherit; font-size: 0.9rem; padding: 8px 10px; border-radius: 7px; border: 1px solid var(--border); background: var(--surface-alt); color: var(--ink); min-height: 44px; resize: vertical; }
+  .fit-box .hint { font-size: 0.76rem; color: var(--ink-muted); margin-top: 6px; }
+
+  /* History timeline (shared pattern with Landscape) */
+  .timeline-card { border: 1px solid var(--border); border-radius: 12px; background: var(--surface); padding: 22px 24px; margin-bottom: 26px; }
+  .timeline-card h3 { font-size: 1rem; margin-bottom: 4px; }
+  .timeline-card .cap { color: var(--ink-soft); font-size: 0.85rem; line-height: 1.5; margin: 6px 0 22px; max-width: 68ch; }
+  .timeline { position: relative; padding-left: 26px; border-left: 2px solid var(--grid); }
+  .tl-item { position: relative; padding-bottom: 22px; }
+  .tl-item:last-child { padding-bottom: 0; }
+  .tl-item::before { content: ""; position: absolute; left: -32px; top: 3px; width: 10px; height: 10px; border-radius: 50%; background: var(--manager); border: 2px solid var(--surface); }
+  .tl-item .tl-date { font-size: 0.74rem; font-weight: 700; color: var(--manager); text-transform: uppercase; letter-spacing: 0.04em; }
+  .tl-item .tl-deal { font-size: 0.94rem; font-weight: 600; margin-top: 3px; }
+  .tl-item .tl-sig { font-size: 0.86rem; color: var(--ink-soft); margin-top: 6px; line-height: 1.5; max-width: 70ch; }
+
+  /* SWOT */
+  .swot-card { border: 1px solid var(--border); border-radius: 12px; background: var(--surface); padding: 22px 24px; margin-bottom: 26px; }
+  .swot-card h3 { font-size: 1rem; margin-bottom: 4px; }
+  .swot-card .cap { color: var(--ink-soft); font-size: 0.85rem; line-height: 1.5; margin: 6px 0 20px; max-width: 68ch; }
+  .swot-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  @media (max-width: 700px) { .swot-grid { grid-template-columns: 1fr; } }
+  .swot-item { border-radius: 10px; padding: 16px 18px; }
+  .swot-item.strengths { background: var(--good-soft, #e1f0e3); border: 1px solid var(--good, #3e7d4c); }
+  .swot-item.weaknesses { background: var(--warn-soft, #f8e2df); border: 1px solid var(--warn, #a63b2e); }
+  .swot-item.opportunities { background: var(--accent-wash); border: 1px solid var(--accent); }
+  .swot-item.threats { background: var(--manager-soft); border: 1px solid var(--manager); }
+  .swot-item h4 { font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 10px; font-family: "Bahnschrift", "Segoe UI Semibold", sans-serif; }
+  .swot-item.strengths h4 { color: var(--good, #3e7d4c); }
+  .swot-item.weaknesses h4 { color: var(--warn, #a63b2e); }
+  .swot-item.opportunities h4 { color: var(--accent); }
+  .swot-item.threats h4 { color: var(--manager); }
+  .swot-item ul { margin: 0; padding-left: 18px; font-size: 0.86rem; line-height: 1.6; color: var(--ink); }
+  .swot-item li { margin-bottom: 6px; }
+
+  /* Ideas log (shared pattern with Landscape notes) */
+  .notes-card { border: 1px solid var(--border); border-radius: 12px; background: var(--surface); padding: 22px 24px; margin-bottom: 26px; }
+  .notes-card h3 { font-size: 1rem; margin-bottom: 4px; }
+  .notes-card .cap { color: var(--ink-soft); font-size: 0.85rem; line-height: 1.5; margin: 6px 0 18px; max-width: 68ch; }
+  .note-form { display: grid; grid-template-columns: 130px 1fr; gap: 10px; margin-bottom: 8px; }
+  @media (max-width: 640px) { .note-form { grid-template-columns: 1fr; } }
+  .note-form select, .note-form input, .note-form textarea {
+    font: inherit; font-size: 0.87rem; padding: 9px 11px; border-radius: 7px; border: 1px solid var(--border);
+    background: var(--surface-alt); color: var(--ink); resize: vertical;
+  }
+  .note-form textarea { grid-column: 1 / -1; min-height: 56px; }
+  .note-form .row2 { grid-column: 1 / -1; display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+  .note-form .row2 input { flex: 1; min-width: 160px; }
+  .note-form button {
+    font: inherit; font-size: 0.85rem; font-weight: 600; padding: 9px 18px; border-radius: 7px; border: none;
+    background: var(--accent); color: var(--accent-ink); cursor: pointer; transition: filter .15s ease;
+  }
+  .note-form button:hover { filter: brightness(1.08); }
+  .notes-list { margin-top: 16px; display: flex; flex-direction: column; gap: 10px; }
+  .note-item { border: 1px solid var(--border); border-radius: 8px; padding: 12px 14px; background: var(--surface-alt); position: relative; }
+  .note-item .nmeta { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; flex-wrap: wrap; }
+  .note-tag { font-size: 0.66rem; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 700; padding: 2px 8px; border-radius: 5px; }
+  .note-tag.idea { background: var(--manager-soft); color: var(--manager); }
+  .note-tag.division { background: var(--accent-wash); color: var(--accent); }
+  .note-related { font-size: 0.76rem; color: var(--ink-muted); }
+  .note-date { font-size: 0.72rem; color: var(--ink-muted); margin-left: auto; }
+  .note-text { font-size: 0.87rem; line-height: 1.5; }
+  .note-del { position: absolute; top: 10px; right: 10px; background: none; border: none; color: var(--ink-muted); cursor: pointer; font-size: 0.8rem; padding: 2px 6px; }
+  .note-del:hover { color: var(--warn); }
+  .notes-empty { color: var(--ink-muted); font-size: 0.86rem; font-style: italic; }
+
   footer { border-top: 1px solid var(--border); padding: 24px clamp(20px, 4vw, 56px); font-size: 0.78rem; color: var(--ink-muted); line-height: 1.5; }
 </style>
 </head>
@@ -132,6 +201,12 @@
     <p>A privately-held, family-owned benefits company built around four connected divisions — each one sells into (or draws from) the next, forming a closed loop of the client relationship rather than a single-service business.</p>
   </div>
 
+  <div class="fit-box">
+    <div class="lbl">Where I fit</div>
+    <textarea id="fitText" placeholder="e.g. I work in COBRA administration within Kelly Benefits Advantage, handling..."></textarea>
+    <div class="hint">Saved in this browser only. Ground the rest of this page in your actual seat — it changes what "moving up" should mean.</div>
+  </div>
+
   <div class="snapshot">
     <div class="snap-card"><div class="l">Founded</div><div class="v">1976 — 50th anniversary this year</div></div>
     <div class="snap-card"><div class="l">Scale</div><div class="v">~10,000 corporate clients · 600,000+ covered lives</div></div>
@@ -148,6 +223,12 @@
     <div class="leader-card"><div class="name">David Kelly</div><div class="title">Chief Organizational Officer</div><div class="note">President of Payroll and Advantage — the "back half" of the circle: administer and process.</div></div>
     <div class="leader-card"><div class="name">Bryan Kelly</div><div class="title">EVP, Kelly Benefits &amp; Advantage</div><div class="note">Fourth brother in the family leadership team.</div></div>
     <div class="leader-card"><div class="name">Katherine Vahdani</div><div class="title">Chief Technology Officer</div><div class="note">Joined April 2026 — leads a 70-person tech team; first non-family C-suite technology hire.</div></div>
+  </div>
+
+  <div class="timeline-card">
+    <h3>Company history</h3>
+    <p class="cap">50 years from a bedroom in Maryland to four connected divisions — the growth pattern (family stability, then acquisition, then outside technology leadership) tells its own story.</p>
+    <div class="timeline" id="historyTimeline"></div>
   </div>
 
   <div class="circle-wrap">
@@ -180,6 +261,66 @@
 
   <div class="integration-box">
     <b>Why the circle matters —</b> each division individually competes against specialists that are often dramatically larger — Gallagher in consulting, WEX/Alight in administration, ADP/Paychex in payroll, CAPTRUST/OneDigital in retirement. Almost none of those specialists connect all four under one client relationship and one technology platform the way Kelly does. If there's a strategic edge here, it's integration, not any single division's scale — and OneDigital (health + wealth convergence) is the one competitor pursuing the same idea, just at a much larger scale.
+  </div>
+
+  <div class="swot-card">
+    <h3>SWOT</h3>
+    <p class="cap">The circle and the competitor data, synthesized into a strategic read — not a description of what Kelly is, but a read on the position it's actually in.</p>
+    <div class="swot-grid">
+      <div class="swot-item strengths">
+        <h4>Strengths</h4>
+        <ul>
+          <li>Integration across all four divisions — one client relationship instead of four vendors</li>
+          <li>Total Benefits Solution® / KTBSonline is genuinely in-house, not licensed — full control over the product</li>
+          <li>50 years of family stability and reputation; 23 consecutive years as MD's #1 benefits administrator</li>
+          <li>Advantage's broker-technology licensing gives it a second revenue line beyond direct clients</li>
+        </ul>
+      </div>
+      <div class="swot-item weaknesses">
+        <h4>Weaknesses</h4>
+        <ul>
+          <li>Strategies is a regional player next to national giants — Gallagher alone is ~55× its estimated revenue</li>
+          <li>Advisory isn't fully independent — it runs under Global Retirement Partners/HUB's regulatory umbrella</li>
+          <li>No public financials — headcount and scale are third-party estimates even for someone working there</li>
+          <li>Limited brand visibility outside the Mid-Atlantic region</li>
+        </ul>
+      </div>
+      <div class="swot-item opportunities">
+        <h4>Opportunities</h4>
+        <ul>
+          <li>Push the health + wealth convergence further — OneDigital is proving the model at scale</li>
+          <li>Grow Advantage's tech-licensing line as a distinct product, not just a byproduct</li>
+          <li>Continue the Gettysburg-style acquisition pattern to grow Strategies inorganically</li>
+          <li>Use the 50th anniversary as a real visibility moment beyond the home region</li>
+        </ul>
+      </div>
+      <div class="swot-item threats">
+        <h4>Threats</h4>
+        <ul>
+          <li>PE-backed roll-ups (Navia, OneDigital, HUB) have more acquisition capital than a private family firm</li>
+          <li>Industry consolidation could squeeze independent regional players from both ends</li>
+          <li>A new CTO and 70-person tech team is a bet — if it underdelivers, competitors' platforms may pull ahead</li>
+          <li>Client tech expectations keep rising (consumer-grade UX), raising the cost of staying competitive</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="notes-card">
+    <h3>Innovation ideas log</h3>
+    <p class="cap">Specific ideas for how Kelly (or your corner of it) could do something differently — this is the running list a visible improvement project actually comes from.</p>
+    <div class="note-form">
+      <select id="noteType">
+        <option value="idea">Idea</option>
+        <option value="division">Tied to a division</option>
+      </select>
+      <textarea id="noteText" placeholder="What would you change, build, or test?"></textarea>
+      <div class="row2">
+        <input id="noteRelated" placeholder="Related to (optional — e.g. Advantage, COBRA process)" />
+        <button id="noteAdd">Add idea</button>
+      </div>
+    </div>
+    <div class="notes-list" id="notesList"></div>
   </div>
 </main>
 
@@ -319,6 +460,78 @@
       requestAnimationFrame(() => { el.style.opacity = 1; });
     });
   }
+
+  /* ================= Company history timeline ================= */
+  const history = [
+    { date: "1976", deal: "Frank & Janet Kelly launch Francis X. Kelly Associates, Inc.", value: "", sig: "Started from the bedroom of their Maryland home, pooling small companies together through trade associations to find affordable health coverage." },
+    { date: "1976 (later that year)", deal: "Gary Chick, CLU joins — becomes Kelly-Chick & Associates", value: "", sig: "The business moves from the bedroom to the basement." },
+    { date: "1986–1991", deal: "Frank Kelly III, John, David, and Bryan Kelly join full-time", value: "", sig: "All four sons join the family business after college, setting up the leadership structure still in place today." },
+    { date: "January 1998", deal: "Move to 301 International Circle, Hunt Valley, MD", value: "30,000 sq ft", sig: "Outgrew its fifth office facility since founding — housed ~85 employees serving ~5,000 corporate clients at the time." },
+    { date: "2007", deal: "Frank Kelly III becomes CEO", value: "", sig: "Had been President since 1994; marks the formal generational leadership transition." },
+    { date: "January 2022", deal: "Kelly Benefits Strategies acquires Jolles Insurance", value: "~400 clients", sig: "A Howard County, MD brokerage — an early example of the acquisition-driven growth pattern." },
+    { date: "October 2024", deal: "Acquires Gettysburg Benefits Administrators, Inc.", value: "Undisclosed", sig: "Extended Kelly's footprint into PA, DC, DE, NY, NJ, WV, and CT." },
+    { date: "April 2026", deal: "Katherine Vahdani named Chief Technology Officer", value: "", sig: "First non-family C-suite technology hire, leading a 70-person tech team — a real signal about where the next growth phase is expected to come from." },
+    { date: "March 2026", deal: "50th anniversary", value: "", sig: "Half a century from a bedroom startup to ~10,000 corporate clients across four divisions." }
+  ];
+  document.getElementById("historyTimeline").innerHTML = history.map(h => `
+    <div class="tl-item">
+      <div class="tl-date mono">${h.date}</div>
+      <div class="tl-deal">${h.deal}${h.value ? ` <span class="mono" style="font-weight:400; color:var(--ink-muted); font-size:0.8rem;">— ${h.value}</span>` : ""}</div>
+      <div class="tl-sig">${h.sig}</div>
+    </div>`).join("");
+
+  /* ================= Where I fit (persisted) ================= */
+  const fitEl = document.getElementById("fitText");
+  fitEl.value = localStorage.getItem("custodianFit") || "";
+  fitEl.addEventListener("input", () => localStorage.setItem("custodianFit", fitEl.value));
+
+  /* ================= Innovation Ideas Log (shared notes mechanism) ================= */
+  const NOTES_KEY = "custodianNotes";
+  const PAGE_ID = "company";
+  function loadNotes() { try { return JSON.parse(localStorage.getItem(NOTES_KEY)) || []; } catch { return []; } }
+  function saveNotes(notes) { localStorage.setItem(NOTES_KEY, JSON.stringify(notes)); }
+  const TYPE_LABEL = { idea: "Idea", division: "Division" };
+
+  function renderNotes() {
+    const all = loadNotes().filter(n => n.page === PAGE_ID).sort((a, b) => new Date(b.date) - new Date(a.date));
+    const list = document.getElementById("notesList");
+    if (!all.length) { list.innerHTML = `<div class="notes-empty">No ideas logged yet — add your first one above.</div>`; return; }
+    list.innerHTML = all.map(n => `
+      <div class="note-item" data-id="${n.id}">
+        <button class="note-del" title="Delete" data-id="${n.id}">✕</button>
+        <div class="nmeta">
+          <span class="note-tag ${n.type}">${TYPE_LABEL[n.type]}</span>
+          ${n.related ? `<span class="note-related">${n.related}</span>` : ""}
+          <span class="note-date mono">${n.date}</span>
+        </div>
+        <div class="note-text">${n.text}</div>
+      </div>`).join("");
+    list.querySelectorAll(".note-del").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const remaining = loadNotes().filter(n => n.id !== btn.dataset.id);
+        saveNotes(remaining);
+        renderNotes();
+      });
+    });
+  }
+  document.getElementById("noteAdd").addEventListener("click", () => {
+    const text = document.getElementById("noteText").value.trim();
+    if (!text) return;
+    const notes = loadNotes();
+    notes.push({
+      id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
+      page: PAGE_ID,
+      type: document.getElementById("noteType").value,
+      related: document.getElementById("noteRelated").value.trim(),
+      text,
+      date: new Date().toISOString().slice(0, 10)
+    });
+    saveNotes(notes);
+    document.getElementById("noteText").value = "";
+    document.getElementById("noteRelated").value = "";
+    renderNotes();
+  });
+  renderNotes();
 </script>
 </body>
 </html>
