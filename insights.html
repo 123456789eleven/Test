@@ -36,7 +36,9 @@
   }
   nav.site .links { display: flex; align-items: center; flex-wrap: wrap; gap: 12px 24px; font-size: 0.82rem; }
   nav.site .links a { text-decoration: none; color: var(--ink-soft); }
+  nav.site .links a { position: relative; padding-bottom: 3px; transition: color .15s ease; }
   nav.site .links a.current { color: var(--ink); font-weight: 600; }
+  nav.site .links a.current::after { content: ""; position: absolute; left: 0; right: 0; bottom: -3px; height: 2px; background: var(--accent); border-radius: 1px; }
   nav.site .pill {
     border: 1px solid var(--ink); border-radius: 999px; padding: 7px 16px;
     font-size: 0.78rem; text-decoration: none; color: var(--ink); background: none; cursor: pointer; font-family: inherit;
@@ -61,7 +63,8 @@
   /* ---- Charts ---- */
   .charts { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; }
   @media (max-width: 900px) { .charts { grid-template-columns: 1fr; } }
-  .chart-card { grid-column: span 1; border: 1px solid var(--border); border-radius: 12px; background: var(--surface); padding: 22px 24px; }
+  .chart-card { grid-column: span 1; border: 1px solid var(--border); border-radius: 12px; background: var(--surface); padding: 22px 24px; box-shadow: 0 1px 2px rgba(0,0,0,0.04); transition: box-shadow .2s ease, transform .2s ease; }
+  .chart-card:hover { box-shadow: 0 1px 2px rgba(0,0,0,0.06), 0 10px 24px rgba(0,0,0,0.06); transform: translateY(-2px); }
   .chart-card.wide { grid-column: 1 / -1; }
   .chart-card h3 { font-size: 1rem; margin-bottom: 4px; }
   .chart-card .cap { color: var(--ink-soft); font-size: 0.85rem; line-height: 1.5; margin: 6px 0 18px; max-width: 62ch; }
@@ -69,7 +72,9 @@
   .hbar-row { display: grid; grid-template-columns: 92px 1fr 64px; align-items: center; gap: 10px; margin-bottom: 14px; }
   .hbar-row .lbl { font-size: 0.82rem; color: var(--ink-soft); }
   .hbar-track { position: relative; height: 24px; background: var(--surface-alt); border-radius: 4px; }
-  .hbar-fill { position: absolute; left: 0; top: 0; height: 100%; background: var(--accent); border-radius: 4px 2px 2px 4px; }
+  .hbar-fill { position: absolute; left: 0; top: 0; height: 100%; background: var(--accent); border-radius: 4px 2px 2px 4px; width: 0; transition: width .9s cubic-bezier(.2,.8,.2,1); }
+  .hbar-row:hover .hbar-track { background: color-mix(in srgb, var(--accent) 10%, var(--surface-alt)); }
+  @media (prefers-reduced-motion: reduce) { .hbar-fill { transition: none; } }
   .hbar-row .val { font-size: 0.84rem; font-weight: 600; text-align: right; }
   .axis-ticks { display: grid; grid-template-columns: 92px 1fr 64px; margin-top: 2px; }
   .axis-ticks .ticks { display: flex; justify-content: space-between; font-size: 0.68rem; color: var(--ink-muted); padding-top: 4px; border-top: 1px solid var(--grid); }
@@ -102,7 +107,8 @@
   .cat-chip { font: inherit; font-size: 0.8rem; font-weight: 600; padding: 6px 13px; border-radius: 999px; border: 1px solid var(--border); background: var(--surface); color: var(--ink-soft); cursor: pointer; }
   .cat-chip.active { background: var(--ink); color: var(--page); border-color: var(--ink); }
   .feed { display: flex; flex-direction: column; gap: 12px; max-width: 82ch; }
-  .entry { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 18px 20px; }
+  .entry { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 18px 20px; transition: border-color .2s ease, transform .2s ease; }
+  .entry:hover { border-color: var(--accent); transform: translateX(2px); }
   .entry .meta { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; flex-wrap: wrap; }
   .entry .tag { font-size: 0.66rem; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 700; padding: 3px 9px; border-radius: 5px; background: var(--accent-wash); color: var(--accent); }
   .entry .date { font-size: 0.76rem; color: var(--ink-muted); }
@@ -173,10 +179,17 @@
 
 <script>
   /* ---- Charts ---- */
+  function animateBars(container) {
+    const els = (container || document).querySelectorAll(".hbar-fill[data-w]");
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      els.forEach(el => { el.style.width = el.dataset.w + "%"; });
+    }));
+  }
   function renderCharts() {
     renderDurationChart();
     renderPenaltyChart();
     renderMarketChart();
+    animateBars();
   }
 
   function renderDurationChart() {
@@ -191,7 +204,7 @@
     el.innerHTML = data.map(d => `
       <div class="hbar-row">
         <div class="lbl">${d.label}</div>
-        <div class="hbar-track"><div class="hbar-fill" style="width:${(d.value / max) * 100}%"></div></div>
+        <div class="hbar-track"><div class="hbar-fill" data-w="${(d.value / max) * 100}"></div></div>
         <div class="val mono">${d.value} mo.</div>
       </div>
     `).join("") + `
@@ -213,7 +226,7 @@
     el.innerHTML = data.map(d => `
       <div class="hbar-row">
         <div class="lbl">${d.label}</div>
-        <div class="hbar-track"><div class="hbar-fill" style="width:${(d.value / max) * 100}%"></div></div>
+        <div class="hbar-track"><div class="hbar-fill" data-w="${(d.value / max) * 100}"></div></div>
         <div class="val mono">$${d.value}/day</div>
       </div>
     `).join("") + `
@@ -238,23 +251,69 @@
     const gridVals = [600, 700, 800];
     const gridlines = gridVals.map(v => `<line class="gridline" x1="${padL}" x2="${w - padR}" y1="${y(v)}" y2="${y(v)}"/><text x="${padL - 8}" y="${y(v) + 3}" text-anchor="end">$${v}B</text>`).join("");
     const yearLabels = years.map((yr, i) => `<text x="${x(i)}" y="${h - 4}" text-anchor="middle">${yr}</text>`).join("");
-    const dots = points.map((p, i) => `<circle class="dot" cx="${p[0]}" cy="${p[1]}" r="4"/>`).join("");
+    const dots = points.map((p, i) => `<circle class="dot" id="dot${i}" cx="${p[0]}" cy="${p[1]}" r="4"/>`).join("");
+    const hits = points.map((p, i) => `<circle class="hit" cx="${p[0]}" cy="${p[1]}" r="14" fill="transparent" data-i="${i}" data-year="${years[i]}" data-value="${values[i]}"/>`).join("");
     const el = document.getElementById("chartMarket");
     el.innerHTML = `
       <svg class="linechart" viewBox="0 0 ${w} ${h}" preserveAspectRatio="xMidYMid meet">
         ${gridlines}
         <line class="baseline" x1="${padL}" x2="${w - padR}" y1="${padT + innerH}" y2="${padT + innerH}"/>
-        <path class="area" d="${areaPath}"/>
-        <path class="line" d="${linePath}"/>
+        <path class="area" d="${areaPath}" id="marketArea"/>
+        <path class="line" d="${linePath}" id="marketLine"/>
         ${dots}
         <text class="endlabel" x="${x(0)}" y="${y(values[0]) - 12}" text-anchor="start">$${values[0]}B</text>
         <text class="endlabel" x="${x(values.length - 1)}" y="${y(values[values.length - 1]) - 12}" text-anchor="end">$${values[values.length - 1]}B</text>
         ${yearLabels}
+        ${hits}
+        <g id="chartTip" style="opacity:0; transition: opacity .12s ease; pointer-events:none;">
+          <rect id="chartTipRect" rx="5" fill="var(--surface)" stroke="var(--border)" stroke-width="1" height="34"/>
+          <text id="chartTipText" x="0" y="0" text-anchor="middle" style="font-size:11px; font-weight:700; fill:var(--ink);"></text>
+        </g>
       </svg>
       <details class="table-toggle"><summary>View as table</summary>
         <table><thead><tr><th>Year</th><th>Market size</th></tr></thead>
         <tbody>${years.map((yr, i) => `<tr><td>${yr}</td><td>$${values[i]}B</td></tr>`).join("")}</tbody></table>
       </details>`;
+
+    // Line-draw entrance animation
+    if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      [document.getElementById("marketLine")].forEach(path => {
+        const len = path.getTotalLength();
+        path.style.strokeDasharray = len;
+        path.style.strokeDashoffset = len;
+        path.getBoundingClientRect();
+        path.style.transition = "stroke-dashoffset 1s cubic-bezier(.2,.8,.2,1)";
+        requestAnimationFrame(() => { path.style.strokeDashoffset = 0; });
+      });
+    }
+
+    // Hover tooltip
+    const tip = document.getElementById("chartTip");
+    const tipRect = document.getElementById("chartTipRect");
+    const tipText = document.getElementById("chartTipText");
+    el.querySelectorAll(".hit").forEach(hit => {
+      hit.addEventListener("mouseenter", () => {
+        const i = hit.dataset.i;
+        document.querySelectorAll(".linechart .dot").forEach(d => d.style.r = "4");
+        const dot = document.getElementById("dot" + i);
+        dot.style.r = "5.5";
+        const cx = parseFloat(hit.getAttribute("cx")), cy = parseFloat(hit.getAttribute("cy"));
+        tipText.textContent = `${hit.dataset.year}: $${hit.dataset.value}B`;
+        const tw = Math.max(70, tipText.getComputedTextLength() + 20);
+        tipRect.setAttribute("width", tw);
+        tipRect.setAttribute("x", -tw / 2);
+        tipRect.setAttribute("y", -34);
+        tipText.setAttribute("x", 0);
+        tipText.setAttribute("y", -14);
+        tip.setAttribute("transform", `translate(${cx}, ${cy - 8})`);
+        tip.style.opacity = "1";
+      });
+      hit.addEventListener("mouseleave", () => {
+        tip.style.opacity = "0";
+        const dot = document.getElementById("dot" + hit.dataset.i);
+        if (dot) dot.style.r = "4";
+      });
+    });
   }
 
   /* ---- Insights feed ---- */

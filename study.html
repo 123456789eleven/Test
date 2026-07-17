@@ -36,7 +36,9 @@
   nav.site .wordmark { font-family: "Bahnschrift", "Segoe UI Semibold", sans-serif; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; text-decoration: none; color: var(--ink); font-size: 0.95rem; }
   nav.site .links { display: flex; align-items: center; flex-wrap: wrap; gap: 12px 22px; font-size: 0.82rem; }
   nav.site .links a { text-decoration: none; color: var(--ink-soft); }
+  nav.site .links a { position: relative; padding-bottom: 3px; transition: color .15s ease; }
   nav.site .links a.current { color: var(--ink); font-weight: 600; }
+  nav.site .links a.current::after { content: ""; position: absolute; left: 0; right: 0; bottom: -3px; height: 2px; background: var(--accent); border-radius: 1px; }
 
   header.top { max-width: 80ch; margin-bottom: 18px; }
   header.top h1 { font-size: 1.5rem; }

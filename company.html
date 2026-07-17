@@ -32,7 +32,9 @@
   nav.site { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; row-gap: 10px; padding: 22px clamp(20px, 4vw, 56px); border-bottom: 1px solid var(--border); }
   nav.site .links { display: flex; align-items: center; flex-wrap: wrap; gap: 12px 22px; font-size: 0.82rem; }
   nav.site .links a { text-decoration: none; color: var(--ink-soft); }
+  nav.site .links a { position: relative; padding-bottom: 3px; transition: color .15s ease; }
   nav.site .links a.current { color: var(--ink); font-weight: 600; }
+  nav.site .links a.current::after { content: ""; position: absolute; left: 0; right: 0; bottom: -3px; height: 2px; background: var(--accent); border-radius: 1px; }
 
   main { max-width: 1180px; margin: 0 auto; padding: 60px clamp(20px, 4vw, 56px) 100px; }
 
@@ -98,8 +100,11 @@
   .hbar-row .lbl { font-size: 0.84rem; }
   .hbar-row .lbl .sub { display: block; color: var(--ink-muted); font-size: 0.72rem; }
   .hbar-track { position: relative; height: 22px; background: var(--surface-alt); border-radius: 4px; }
-  .hbar-fill { position: absolute; left: 0; top: 0; height: 100%; background: var(--accent); border-radius: 4px 2px 2px 4px; }
+  .hbar-fill { position: absolute; left: 0; top: 0; height: 100%; background: var(--accent); border-radius: 4px 2px 2px 4px; width: 0; transition: width .8s cubic-bezier(.2,.8,.2,1); }
   .hbar-fill.kelly { background: var(--manager); }
+  @media (prefers-reduced-motion: reduce) { .hbar-fill { transition: none; } }
+  .leader-card { transition: transform .2s ease, box-shadow .2s ease; }
+  .leader-card:hover { transform: translateY(-2px); box-shadow: 0 1px 2px rgba(0,0,0,0.06), 0 10px 20px rgba(0,0,0,0.06); }
   .hbar-row .val { font-size: 0.82rem; font-weight: 600; text-align: right; }
   .chart-caption { font-size: 0.8rem; color: var(--ink-muted); margin-top: 10px; }
 
@@ -281,7 +286,7 @@
     const chartHtml = d.competitors.map(c => `
       <div class="hbar-row">
         <div class="lbl">${c.name}${c.note ? `<span class="sub">${c.note}</span>` : ""}</div>
-        <div class="hbar-track">${c.value !== null ? `<div class="hbar-fill ${c.kelly ? 'kelly' : ''}" style="width:${(c.value / max) * 100}%"></div>` : ""}</div>
+        <div class="hbar-track">${c.value !== null ? `<div class="hbar-fill ${c.kelly ? 'kelly' : ''}" data-w="${(c.value / max) * 100}"></div>` : ""}</div>
         <div class="val mono">${fmtVal(c.value, d.unit)}</div>
       </div>
     `).join("");
@@ -289,11 +294,31 @@
 
     document.getElementById("divisionDetail").classList.add("show");
     document.getElementById("divisionDetail").scrollIntoView({ behavior: "smooth", block: "nearest" });
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      document.querySelectorAll("#ddChart .hbar-fill[data-w]").forEach(el => { el.style.width = el.dataset.w + "%"; });
+    }));
   }
   function closeDivision() { openId = null; renderCircle(); document.getElementById("divisionDetail").classList.remove("show"); }
   document.getElementById("closeDivision").addEventListener("click", closeDivision);
 
   renderCircle();
+
+  // One-time entrance animation: draw the connecting lines, then fade in the nodes
+  if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    document.querySelectorAll(".circle-diagram svg.lines path").forEach((path, i) => {
+      const len = path.getTotalLength();
+      path.style.strokeDasharray = len;
+      path.style.strokeDashoffset = len;
+      path.getBoundingClientRect();
+      path.style.transition = `stroke-dashoffset .8s cubic-bezier(.2,.8,.2,1) ${i * 0.08}s`;
+      requestAnimationFrame(() => { path.style.strokeDashoffset = 0; });
+    });
+    document.querySelectorAll(".division-node").forEach((el, i) => {
+      el.style.opacity = 0;
+      el.style.transition = `opacity .5s ease ${0.3 + i * 0.08}s`;
+      requestAnimationFrame(() => { el.style.opacity = 1; });
+    });
+  }
 </script>
 </body>
 </html>
