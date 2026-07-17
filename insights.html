@@ -60,6 +60,18 @@
   .refresh-badge { display: inline-flex; align-items: center; gap: 6px; margin-top: 12px; font-size: 0.78rem; color: var(--ink-soft); }
   .refresh-badge .pulse { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); }
 
+  /* ---- Live sources ---- */
+  .live-card { border: 1px solid var(--border); border-radius: 12px; background: var(--surface); padding: 18px 22px; margin-bottom: 26px; }
+  .live-card h3 { font-size: 0.88rem; display: flex; align-items: center; gap: 8px; }
+  .live-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--good, #3e7d4c); flex: none; animation: livepulse 2s ease infinite; }
+  @keyframes livepulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.35; } }
+  @media (prefers-reduced-motion: reduce) { .live-dot { animation: none; } }
+  .live-card p.cap { color: var(--ink-soft); font-size: 0.82rem; margin: 6px 0 14px; max-width: 68ch; }
+  .live-links { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 8px 20px; }
+  .live-links a { display: flex; align-items: center; gap: 6px; font-size: 0.86rem; color: var(--ink); text-decoration: none; padding: 4px 0; }
+  .live-links a:hover { color: var(--accent); }
+  .live-links a::after { content: "↗"; font-size: 0.72rem; color: var(--ink-muted); }
+
   /* ---- Charts ---- */
   .charts { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; }
   @media (max-width: 900px) { .charts { grid-template-columns: 1fr; } }
@@ -137,6 +149,17 @@
     <h1>Industry Insights</h1>
     <p>Regulatory changes, TPA industry trends, and practical tips — with the underlying data, not just the headline.</p>
     <div class="refresh-badge"><span class="pulse"></span><span id="lastUpdated">Last updated —</span></div>
+  </div>
+
+  <div class="live-card">
+    <h3><span class="live-dot"></span>Live sources</h3>
+    <p class="cap">The feed below is curated and refreshes daily (automated, filtered for genuine relevance). For anything more current than that, these are the actual live pages — no delay, no filtering.</p>
+    <div class="live-links">
+      <a href="https://www.dol.gov/agencies/ebsa/about-ebsa/our-activities/resource-center/newsroom" target="_blank" rel="noopener">DOL EBSA Newsroom</a>
+      <a href="https://www.irs.gov/newsroom" target="_blank" rel="noopener">IRS Newsroom</a>
+      <a href="https://insurance.maryland.gov/Insurer/Pages/Bulletins.aspx" target="_blank" rel="noopener">Maryland Insurance Administration Bulletins</a>
+      <a href="https://www.benefitnews.com" target="_blank" rel="noopener">Employee Benefit News</a>
+    </div>
   </div>
 
   <div class="charts">
