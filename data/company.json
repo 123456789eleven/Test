@@ -1,0 +1,142 @@
+{
+  "snapshot": [
+    { "l": "Founded", "v": "1976 — 50th anniversary this year" },
+    { "l": "Scale", "v": "~10,000 corporate clients · 600,000+ covered lives" },
+    { "l": "Structure", "v": "Privately held, 4th-generation family leadership" },
+    { "l": "Recognition", "v": "Baltimore Business Journal's #1 MD benefits administrator, 23 years running (2002–2024)" },
+    { "l": "Headquarters", "v": "Sparks / Hunt Valley, MD" },
+    { "l": "Other offices", "v": "Wilmington DE · Rockville MD · Philadelphia · D.C." }
+  ],
+  "leadership": [
+    { "name": "Frank Kelly III", "title": "CEO", "note": "President since 1994, CEO since 2007. CLU, RHU, REBC — past president, Maryland & Baltimore Associations of Health Underwriters." },
+    { "name": "John Kelly", "title": "Chief Innovation & Strategy Officer", "note": "President of Strategies and Advisory — the \"front half\" of the circle: sell and invest." },
+    { "name": "David Kelly", "title": "Chief Organizational Officer", "note": "President of Payroll and Advantage — the \"back half\" of the circle: administer and process." },
+    { "name": "Bryan Kelly", "title": "EVP, Kelly Benefits & Advantage", "note": "Fourth brother in the family leadership team." },
+    { "name": "Katherine Vahdani", "title": "Chief Technology Officer", "note": "Joined April 2026 — leads a 70-person tech team; first non-family C-suite technology hire." }
+  ],
+  "history": [
+    { "date": "1976", "deal": "Frank & Janet Kelly launch Francis X. Kelly Associates, Inc.", "value": "", "sig": "Started from the bedroom of their Maryland home, pooling small companies together through trade associations to find affordable health coverage." },
+    { "date": "1976 (later that year)", "deal": "Gary Chick, CLU joins — becomes Kelly-Chick & Associates", "value": "", "sig": "The business moves from the bedroom to the basement." },
+    { "date": "1986–1991", "deal": "Frank Kelly III, John, David, and Bryan Kelly join full-time", "value": "", "sig": "All four sons join the family business after college, setting up the leadership structure still in place today." },
+    { "date": "January 1998", "deal": "Move to 301 International Circle, Hunt Valley, MD", "value": "30,000 sq ft", "sig": "Outgrew its fifth office facility since founding — housed ~85 employees serving ~5,000 corporate clients at the time." },
+    { "date": "2007", "deal": "Frank Kelly III becomes CEO", "value": "", "sig": "Had been President since 1994; marks the formal generational leadership transition." },
+    { "date": "January 2022", "deal": "Kelly Benefits Strategies acquires Jolles Insurance", "value": "~400 clients", "sig": "A Howard County, MD brokerage — an early example of the acquisition-driven growth pattern." },
+    { "date": "October 2024", "deal": "Acquires Gettysburg Benefits Administrators, Inc.", "value": "Undisclosed", "sig": "Extended Kelly's footprint into PA, DC, DE, NY, NJ, WV, and CT." },
+    { "date": "April 2026", "deal": "Katherine Vahdani named Chief Technology Officer", "value": "", "sig": "First non-family C-suite technology hire, leading a 70-person tech team — a real signal about where the next growth phase is expected to come from." },
+    { "date": "March 2026", "deal": "50th anniversary", "value": "", "sig": "Half a century from a bedroom startup to ~10,000 corporate clients across four divisions." }
+  ],
+  "divisions": [
+    {
+      "id": "strategies", "name": "Strategies", "role": "Sell & Consult", "x": 300, "y": 130,
+      "desc": "Employee benefits consulting and brokerage — the front door of the client relationship. Covers the full benefits lifecycle: consulting, plan design, implementation, and ongoing support across medical, dental, vision, and Medicare options.",
+      "scale": "Kelly Benefits Strategies' revenue is estimated around <b>$250M</b> (third-party estimate, private company) — a genuine regional player standing next to firms valued at 20–100× its size.",
+      "unit": "Annual revenue ($B)",
+      "competitors": [
+        { "name": "Marsh & McLennan", "value": 25.3 },
+        { "name": "Aon", "value": 15.4 },
+        { "name": "Arthur J. Gallagher", "value": 13.8 },
+        { "name": "Hub International", "value": 4.8 },
+        { "name": "Brown & Brown", "value": 4.7 },
+        { "name": "Kelly Benefits Strategies (est.)", "value": 0.25, "kelly": true }
+      ],
+      "caption": "Figures: public company revenue (SEC/annual reports) for the national brokers; Kelly Benefits Strategies is a third-party revenue estimate since it's privately held."
+    },
+    {
+      "id": "advantage", "name": "Advantage", "role": "Administer", "x": 470, "y": 300,
+      "desc": "Benefits administration and technology — compliance solutions, COBRA & state continuation administration (2% premium admin fee model), a call center for employers and participants, and broker technology licensed out to other brokerages.",
+      "scale": "Kelly doesn't disclose Advantage's standalone revenue. Shown here is the competitive field it operates in — TPAs and benefits-admin platforms of very different scales.",
+      "unit": "Annual revenue ($B)",
+      "competitors": [
+        { "name": "WEX Inc.", "value": 2.66 },
+        { "name": "Alight Solutions", "value": 2.3 },
+        { "name": "HealthEquity", "value": 1.31 },
+        { "name": "Businessolver", "value": 0.21 }
+      ],
+      "caption": "All four figures from the Industry Landscape page — SEC filings for public companies, third-party estimate for privately-held Businessolver."
+    },
+    {
+      "id": "payroll", "name": "Payroll", "role": "Process", "x": 300, "y": 470,
+      "desc": "Full-service payroll administration across all 50 states — pay processing, new hire registry, garnishments, and electronic tax filing — integrated with benefits deductions through the shared Total Benefits Solution® platform.",
+      "scale": "ADP alone processes payroll at roughly <b>80× Kelly's estimated total company scale</b> — payroll is the division where Kelly competes hardest against sheer size.",
+      "unit": "Annual revenue ($B)",
+      "competitors": [
+        { "name": "ADP", "value": 20.6 },
+        { "name": "Paychex", "value": 5.57, "note": "acquired Paycor for $4.1B in 2025" },
+        { "name": "Gusto", "value": null, "note": "private, 400,000+ SMB clients, revenue undisclosed" }
+      ],
+      "caption": "ADP and Paychex from SEC filings. Gusto is private and doesn't disclose revenue — shown for competitive context only."
+    },
+    {
+      "id": "advisory", "name": "Advisory", "role": "Invest", "x": 130, "y": 300,
+      "desc": "401(k) and retirement plan consulting and investment advisory. Operates as Global Retirement Partners, LLC dba Kelly Benefits Advisory — an SEC-registered investment advisor. Notably, this is the one division that runs under a larger outside aggregator's regulatory umbrella rather than standing fully independent.",
+      "scale": "Measured in assets under management (AUM), not revenue — a different yardstick from the other three divisions, since this is an investment advisory business.",
+      "unit": "Assets under management ($B)",
+      "competitors": [
+        { "name": "CAPTRUST", "value": 1240 },
+        { "name": "OneDigital", "value": 137, "note": "closest model parallel: health + wealth convergence" },
+        { "name": "Cerity Partners", "value": 122.8 },
+        { "name": "Mercer Advisors", "value": 84.4 },
+        { "name": "Beacon Pointe Advisors", "value": 62 }
+      ],
+      "caption": "AUM figures from firm disclosures / SEC ADV filings as reported in trade press. Nearly 20 similar retirement-advisory aggregators exist — this is a sample, not exhaustive."
+    }
+  ],
+  "verticals": {
+    "win": {
+      "name": "Win", "confirmed": false,
+      "desc": "New business — getting the client. Not yet confirmed in detail; the name implies sales enablement rather than direct sales.",
+      "funcs": [ ["Proposal / RFP response support", false], ["Pre-sale technical & data scoping", false], ["New business underwriting / eligibility review", false], ["New broker & producer proposal support", false] ]
+    },
+    "construct": {
+      "name": "Construct", "confirmed": true,
+      "desc": "Confirmed: implementation and integration — building out a new client's setup before it goes live.",
+      "funcs": [ ["Implementation project management", false], ["EDI / data feed setup for new clients", false], ["Plan build & system configuration", false], ["Testing & QA of new client setups", false], ["Initial eligibility load", false], ["Carrier connection setup", false], ["Initial enrollment setup (onboarding)", false] ]
+    },
+    "protect": {
+      "name": "Protect", "confirmed": false,
+      "desc": "Believed to include broker management — not yet confirmed. The name suggests a compliance/risk function.",
+      "funcs": [ ["Broker / producer relationship management", false], ["Compliance (ERISA / ACA / HIPAA)", false], ["Audit & quality assurance", false], ["Risk management", false], ["Regulatory / legal monitoring", false] ]
+    },
+    "connect": {
+      "name": "Connect", "confirmed": true,
+      "desc": "Confirmed: this is your seat — COBRA administration.",
+      "funcs": [ ["COBRA administration", true], ["State continuation coverage", false], ["ACA reporting (1094-C / 1095-C)", false], ["Direct billing", false], ["Eligibility & billing reconciliation", false], ["Ongoing data feed monitoring", false] ]
+    },
+    "serve": {
+      "name": "Serve", "confirmed": true,
+      "desc": "Confirmed: dedicated service — the coworkers near your cubicle.",
+      "funcs": [ ["Dedicated account / client service reps", true], ["Participant / member call center support", false], ["Annual open enrollment support", false], ["Claims / reimbursement processing (FSA/HRA)", false], ["Renewals support", false] ]
+    }
+  },
+  "swot": {
+    "strengths": [
+      "Integration across all four divisions — one client relationship instead of four vendors",
+      "Total Benefits Solution® / KTBSonline is genuinely in-house, not licensed — full control over the product",
+      "50 years of family stability and reputation; 23 consecutive years as MD's #1 benefits administrator",
+      "Advantage's broker-technology licensing gives it a second revenue line beyond direct clients"
+    ],
+    "weaknesses": [
+      "Strategies is a regional player next to national giants — Gallagher alone is ~55× its estimated revenue",
+      "Advisory isn't fully independent — it runs under Global Retirement Partners/HUB's regulatory umbrella",
+      "No public financials — headcount and scale are third-party estimates even for someone working there",
+      "Limited brand visibility outside the Mid-Atlantic region"
+    ],
+    "opportunities": [
+      "Push the health + wealth convergence further — OneDigital is proving the model at scale",
+      "Grow Advantage's tech-licensing line as a distinct product, not just a byproduct",
+      "Continue the Gettysburg-style acquisition pattern to grow Strategies inorganically",
+      "Use the 50th anniversary as a real visibility moment beyond the home region"
+    ],
+    "threats": [
+      "PE-backed roll-ups (Navia, OneDigital, HUB) have more acquisition capital than a private family firm",
+      "Industry consolidation could squeeze independent regional players from both ends",
+      "A new CTO and 70-person tech team is a bet — if it underdelivers, competitors' platforms may pull ahead",
+      "Client tech expectations keep rising (consumer-grade UX), raising the cost of staying competitive"
+    ]
+  },
+  "integrationNote": "Why the circle matters — each division individually competes against specialists that are often dramatically larger — Gallagher in consulting, WEX/Alight in administration, ADP/Paychex in payroll, CAPTRUST/OneDigital in retirement. Almost none of those specialists connect all four under one client relationship and one technology platform the way Kelly does. If there's a strategic edge here, it's integration, not any single division's scale — and OneDigital (health + wealth convergence) is the one competitor pursuing the same idea, just at a much larger scale.",
+  "crossCutting": {
+    "enrollment": "Enrollment isn't one thing — it likely spans three verticals: initial enrollment setup during onboarding (Construct), COBRA elections specifically (Connect), and ongoing annual open enrollment support (Serve). Worth confirming whether Advantage even splits it that way, or handles it as one continuous function.",
+    "reconciliation": "Reconciliation (eligibility, billing) most plausibly sits in Connect — it's the same \"keep two systems in sync\" work as COBRA admin — but could also be a Serve function if it's framed as client-facing account maintenance rather than backend data work."
+  }
+}

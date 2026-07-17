@@ -1,0 +1,28 @@
+{
+  "companies": [
+    { "name": "ADP", "status": "public", "ticker": "NASDAQ: ADP", "model": "Diversified payroll & HR platform — benefits administration is one line among many", "revenue": 20561, "employees": 67000 },
+    { "name": "WEX Inc.", "status": "public", "ticker": "NYSE: WEX", "model": "Payments company with a benefits-accounts segment (HSA/FSA/COBRA)", "revenue": 2661, "employees": 6600 },
+    { "name": "Alight Solutions", "status": "public", "ticker": "NYSE: ALIT", "model": "HR & benefits outsourcing at enterprise scale", "revenue": 2300, "employees": 9500, "note": "Divested its Payroll & Professional Services business to H.I.G. Capital (now \"Strada\") for up to $1.2B in mid-2024 — now a purer benefits-admin play than before." },
+    { "name": "HealthEquity", "status": "public", "ticker": "NASDAQ: HQY", "model": "HSA custodian and consumer-directed benefits administrator, incl. COBRA", "revenue": 1310, "employees": 3120 },
+    { "name": "TriNet Group", "status": "public", "ticker": "NYSE: TNET", "model": "PEO co-employing client staff to deliver outsourced payroll, HR, compliance & benefits (incl. COBRA)", "revenue": 719, "employees": 3600, "note": "Revenue shown is \"professional service revenue,\" the figure comparable to the others — TriNet's total GAAP revenue is ~$5.0B, but ~$4.28B of that is pass-through insurance premiums, not retained revenue." },
+    { "name": "Businessolver", "status": "private", "ticker": "Private", "model": "Pure-play benefits administration SaaS platform", "revenue": 210, "employees": 1565 },
+    { "name": "Empyrean Benefit Solutions", "status": "private", "ticker": "Private (Securian Financial subsidiary)", "model": "Benefits administration & enrollment tech for large employers, brokers, and private exchanges, incl. COBRA", "revenue": 209, "employees": 575, "note": "Moderate-confidence estimate — Empyrean doesn't file separate financials since its 2019 acquisition by Securian." }
+  ],
+  "mnaDeals": [
+    { "date": "January 2023", "deal": "Voya Financial acquired Benefitfocus", "value": "~$570M ($10.50/share, all-cash)", "sig": "The deal that kicked off the current consolidation wave — took a public benefits-admin SaaS platform private under an insurer's ownership." },
+    { "date": "Sep 2023 – May 2024", "deal": "HealthEquity acquired the BenefitWallet HSA portfolio from Conduent", "value": "$425.0M", "sig": "Added ~616,000 HSAs and $2.7B in HSA assets, pushing HealthEquity past 9 million HSA members — direct consolidation at the HSA-custodian tier." },
+    { "date": "Feb 15, 2024", "deal": "Businessolver acquired The Capstone Group", "value": "Undisclosed", "sig": "Bolted on employee-benefits outsourcing, risk management, and compliance capability." },
+    { "date": "Feb 2024", "deal": "Navia Benefit Solutions acquired Nexus Administrators", "value": "Undisclosed", "sig": "Continued Navia's roll-up strategy in the regional COBRA/FSA/HSA TPA space." },
+    { "date": "Mar – Jul 2024", "deal": "H.I.G. Capital (\"Strada\") acquired Alight's Payroll & Professional Services business", "value": "Up to $1.2B", "sig": "Major structural event — Alight shed its payroll/HCM-outsourcing arm to refocus purely on benefits administration, which is why its post-2024 revenue and headcount (shown above) are smaller than before." },
+    { "date": "Apr 12, 2024", "deal": "bswift acquired Davis & Company", "value": "Undisclosed", "sig": "A smaller bolt-on (internal communications/engagement firm) by another major benefits-admin platform player." },
+    { "date": "Apr 2025", "deal": "Navia Benefit Solutions acquired Flex-Plan Retirement Services", "value": "Undisclosed", "sig": "Navia expanded from health/FSA/COBRA into retirement-plan TPA services — cross-category consolidation." },
+    { "date": "Jul 1, 2025", "deal": "Businessolver acquired the assets of ProView Global", "value": "Undisclosed", "sig": "Brought an existing back-office/BPO partner in-house, expanding 24/7 administrative support — TPAs vertically integrating service delivery rather than outsourcing it." }
+  ],
+  "forces": [
+    { "name": "Competitive Rivalry", "level": 3, "text": "Rivalry is intense — five real competitors plus regional players are chasing the same mid-market employers, and M&A has become a routine growth tactic rather than an exception (7 deals in 3 years, above)." },
+    { "name": "Threat of New Entrants", "level": 2, "text": "Compliance complexity (COBRA/ACA/multi-state law) and platform-build costs are real barriers, but PE-backed roll-ups like Navia and OneDigital show capital — not technology — is often the actual key to entry." },
+    { "name": "Buyer Power (employers)", "level": 3, "text": "Employers can and do switch TPAs, and brokers exist specifically to shop the market for them — but switching costs rise fast once a client is embedded in a specific tech platform, which is exactly why platforms compete on lock-in as much as price." },
+    { "name": "Supplier Power", "level": 1, "text": "The 'suppliers' here are mostly insurance carriers and banking partners for HSA custody — fragmented enough that no single one holds real pricing power over administrators." },
+    { "name": "Threat of Substitutes", "level": 2, "text": "PEOs like TriNet bundle benefits administration into a broader co-employment model, and in-house HR software is increasingly absorbing the basic admin functions that used to require a dedicated TPA." }
+  ]
+}
