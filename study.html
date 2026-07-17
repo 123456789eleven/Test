@@ -50,11 +50,14 @@
   .countdown label { font-size: 0.8rem; color: var(--ink-soft); }
 
   .tabs { display: flex; gap: 4px; background: var(--surface-alt); border-radius: 9px; padding: 4px; margin-bottom: 22px; width: fit-content; flex-wrap: wrap; }
-  .tabs button { font: inherit; font-size: 0.85rem; font-weight: 600; padding: 8px 16px; border: none; border-radius: 6px; background: transparent; color: var(--ink-soft); cursor: pointer; }
+  .tabs button { font: inherit; font-size: 0.85rem; font-weight: 600; padding: 8px 16px; border: none; border-radius: 6px; background: transparent; color: var(--ink-soft); cursor: pointer; transition: background .2s ease, color .2s ease, box-shadow .2s ease; }
   .tabs button.active { background: var(--surface); color: var(--ink); box-shadow: 0 1px 2px rgba(0,0,0,0.08); }
+  .tabs button:hover:not(.active) { color: var(--ink); }
 
   .view { display: none; }
-  .view.active { display: block; }
+  .view.active { display: block; animation: viewFade .3s ease; }
+  @keyframes viewFade { from { opacity: 0; transform: translateY(3px); } to { opacity: 1; transform: translateY(0); } }
+  @media (prefers-reduced-motion: reduce) { .view.active { animation: none; } }
 
   /* Plan */
   table.plan { width: 100%; border-collapse: collapse; font-size: 0.86rem; }
@@ -66,39 +69,80 @@
 
   /* Flashcards */
   .fc-controls { display: flex; gap: 10px; align-items: center; margin-bottom: 18px; flex-wrap: wrap; }
-  .fc-controls select { font: inherit; padding: 8px 10px; border-radius: 8px; border: 1px solid var(--border); background: var(--surface); color: var(--ink); }
+  .fc-controls select { font: inherit; padding: 8px 10px; border-radius: 8px; border: 1px solid var(--border); background: var(--surface); color: var(--ink); transition: border-color .15s ease; }
+  .fc-controls select:hover { border-color: var(--accent); }
   .fc-stage { max-width: 560px; margin: 0 auto; }
+  .fc-deckbar { height: 6px; border-radius: 3px; background: var(--surface-alt); overflow: hidden; margin-bottom: 18px; }
+  .fc-deckbar .fill { height: 100%; background: var(--accent); border-radius: 3px; transition: width .3s ease; }
+
   .flashcard {
-    border: 1px solid var(--border); border-radius: 16px; background: var(--surface); min-height: 220px;
-    display: flex; align-items: center; justify-content: center; text-align: center; padding: 32px 28px;
-    cursor: pointer; font-size: 1.15rem; line-height: 1.5; box-shadow: 0 1px 2px rgba(0,0,0,0.06), 0 8px 20px rgba(0,0,0,0.05);
+    position: relative; perspective: 1400px; min-height: 240px; cursor: pointer;
   }
-  .flashcard:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; }
-  .flashcard .tag { position: absolute; margin-top: -70px; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--accent); font-weight: 700; }
+  .flashcard:focus-visible .fc-face.front { outline: 2px solid var(--accent); outline-offset: 4px; }
+  .fc-inner {
+    position: relative; width: 100%; height: 100%; min-height: 240px; text-align: center;
+    transition: transform .55s cubic-bezier(.4,.2,.2,1); transform-style: preserve-3d;
+  }
+  .flashcard.flipped .fc-inner { transform: rotateY(180deg); }
+  .fc-face {
+    position: absolute; inset: 0; backface-visibility: hidden; border-radius: 16px;
+    border: 1px solid var(--border); background: var(--surface);
+    display: flex; align-items: center; justify-content: center; padding: 32px 28px;
+    font-size: 1.15rem; line-height: 1.5; box-shadow: 0 1px 2px rgba(0,0,0,0.06), 0 8px 24px rgba(0,0,0,0.06);
+  }
+  .fc-face.back { transform: rotateY(180deg); background: var(--accent-wash, var(--surface-alt)); border-color: var(--accent); }
+  @media (prefers-reduced-motion: reduce) { .fc-inner { transition: none; } }
   .flashcard .side-label { display: block; font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--ink-muted); margin-bottom: 12px; }
+  .fc-face.back .side-label { color: var(--accent); }
+  .fc-hint { position: absolute; bottom: 10px; right: 14px; font-size: 0.66rem; color: var(--ink-muted); letter-spacing: 0.03em; }
   .fc-actions { display: flex; justify-content: center; gap: 12px; margin-top: 18px; }
-  .fc-actions button { font: inherit; font-size: 0.86rem; font-weight: 600; padding: 10px 20px; border-radius: 8px; border: 1px solid var(--border); background: var(--surface); color: var(--ink); cursor: pointer; }
+  .fc-actions button { font: inherit; font-size: 0.86rem; font-weight: 600; padding: 10px 20px; border-radius: 8px; border: 1px solid var(--border); background: var(--surface); color: var(--ink); cursor: pointer; transition: transform .12s ease, background .15s ease, border-color .15s ease; }
+  .fc-actions button:hover { transform: translateY(-1px); }
+  .fc-actions button:active { transform: translateY(0); }
   .fc-actions button.know { border-color: var(--good); color: var(--good); }
+  .fc-actions button.know:hover { background: var(--good-soft); }
   .fc-actions button.dontknow { border-color: var(--warn); color: var(--warn); }
+  .fc-actions button.dontknow:hover { background: var(--warn-soft); }
   .fc-progress { text-align: center; color: var(--ink-soft); font-size: 0.82rem; margin-top: 10px; }
 
   /* Quiz */
   .quiz-setup { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-bottom: 20px; }
-  .quiz-setup select, .quiz-setup button.start { font: inherit; padding: 9px 14px; border-radius: 8px; border: 1px solid var(--border); background: var(--surface); color: var(--ink); cursor: pointer; }
+  .quiz-setup select, .quiz-setup button.start { font: inherit; padding: 9px 14px; border-radius: 8px; border: 1px solid var(--border); background: var(--surface); color: var(--ink); cursor: pointer; transition: transform .12s ease, filter .15s ease; }
   .quiz-setup button.start { background: var(--accent); color: var(--accent-ink); border: none; font-weight: 600; }
+  .quiz-setup button.start:hover { filter: brightness(1.08); transform: translateY(-1px); }
   .quiz-card { max-width: 640px; }
-  .quiz-q { font-size: 1.05rem; font-weight: 600; margin-bottom: 16px; line-height: 1.5; }
-  .quiz-opt { display: block; width: 100%; text-align: left; font: inherit; font-size: 0.92rem; padding: 12px 16px; margin-bottom: 10px; border-radius: 8px; border: 1px solid var(--border); background: var(--surface); color: var(--ink); cursor: pointer; }
-  .quiz-opt:hover { border-color: var(--accent); }
-  .quiz-opt.correct { background: var(--good-soft); border-color: var(--good); }
-  .quiz-opt.incorrect { background: var(--warn-soft); border-color: var(--warn); }
-  .quiz-explain { margin-top: 8px; padding: 12px 14px; border-radius: 8px; background: var(--surface-alt); font-size: 0.86rem; color: var(--ink-soft); display: none; }
-  .quiz-explain.show { display: block; }
-  .quiz-next { margin-top: 16px; font: inherit; font-size: 0.88rem; font-weight: 600; padding: 10px 20px; border-radius: 8px; border: none; background: var(--accent); color: var(--accent-ink); cursor: pointer; display: none; }
+  .quiz-progress-bar { height: 5px; border-radius: 3px; background: var(--surface-alt); overflow: hidden; margin-bottom: 18px; }
+  .quiz-progress-bar .fill { height: 100%; background: var(--accent); border-radius: 3px; transition: width .35s ease; }
+  .quiz-q {
+    font-size: 1.05rem; font-weight: 600; margin-bottom: 16px; line-height: 1.5;
+    animation: qfade .3s ease;
+  }
+  @keyframes qfade { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+  .quiz-opt {
+    display: block; width: 100%; text-align: left; font: inherit; font-size: 0.92rem; padding: 12px 16px; margin-bottom: 10px;
+    border-radius: 8px; border: 1px solid var(--border); background: var(--surface); color: var(--ink); cursor: pointer;
+    transition: border-color .15s ease, background .2s ease, transform .1s ease;
+  }
+  .quiz-opt:hover:not(:disabled) { border-color: var(--accent); transform: translateX(2px); }
+  .quiz-opt:disabled { cursor: default; }
+  .quiz-opt.correct { background: var(--good-soft); border-color: var(--good); animation: pulseGood .4s ease; }
+  .quiz-opt.incorrect { background: var(--warn-soft); border-color: var(--warn); animation: shake .35s ease; }
+  @keyframes pulseGood { 0% { transform: scale(1); } 40% { transform: scale(1.015); } 100% { transform: scale(1); } }
+  @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-4px); } 75% { transform: translateX(4px); } }
+  @media (prefers-reduced-motion: reduce) { .quiz-q, .quiz-opt.correct, .quiz-opt.incorrect { animation: none; } }
+  .quiz-explain { margin-top: 8px; padding: 12px 14px; border-radius: 8px; background: var(--surface-alt); font-size: 0.86rem; color: var(--ink-soft); max-height: 0; opacity: 0; overflow: hidden; transition: max-height .3s ease, opacity .25s ease, margin-top .3s ease; }
+  .quiz-explain.show { display: block; max-height: 200px; opacity: 1; }
+  .quiz-next { margin-top: 16px; font: inherit; font-size: 0.88rem; font-weight: 600; padding: 10px 20px; border-radius: 8px; border: none; background: var(--accent); color: var(--accent-ink); cursor: pointer; display: none; transition: filter .15s ease, transform .12s ease; }
+  .quiz-next:hover { filter: brightness(1.08); transform: translateY(-1px); }
   .quiz-next.show { display: inline-block; }
   .quiz-score { font-size: 0.86rem; color: var(--ink-soft); margin-bottom: 14px; }
-  .quiz-result { text-align: center; padding: 40px 20px; }
-  .quiz-result .big { font-size: 2.4rem; font-weight: 700; }
+  .quiz-result { text-align: center; padding: 30px 20px; animation: qfade .4s ease; }
+  .quiz-result .ring-wrap { position: relative; width: 150px; height: 150px; margin: 0 auto 14px; }
+  .quiz-result .ring-wrap svg { transform: rotate(-90deg); }
+  .quiz-result .ring-wrap .ring-bg { fill: none; stroke: var(--surface-alt); stroke-width: 10; }
+  .quiz-result .ring-wrap .ring-fill { fill: none; stroke: var(--accent); stroke-width: 10; stroke-linecap: round; transition: stroke-dashoffset 1s cubic-bezier(.3,.7,.3,1); }
+  .quiz-result .ring-label { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 1.7rem; font-weight: 700; }
+  .quiz-result .sub { color: var(--ink-soft); font-size: 0.92rem; }
 
   /* Progress */
   .prog-row { display: grid; grid-template-columns: 220px 1fr 90px 70px; align-items: center; gap: 12px; margin-bottom: 12px; font-size: 0.86rem; }
@@ -155,12 +199,22 @@
     <span class="fc-progress" id="fcCount" style="margin:0;"></span>
   </div>
   <div class="fc-stage">
-    <div class="flashcard" id="fcCard" tabindex="0" role="button" aria-label="Flashcard, press Enter or Space to flip"></div>
-    <div class="fc-actions">
-      <button class="dontknow" id="fcDontKnow">Still learning</button>
-      <button class="know" id="fcKnow">Got it</button>
+    <div class="fc-deckbar"><div class="fill" id="fcDeckFill" style="width:0%"></div></div>
+    <div id="fcActive">
+      <div class="flashcard" id="fcCard" tabindex="0" role="button" aria-label="Flashcard, press Enter or Space to flip">
+        <div class="fc-inner" id="fcInner">
+          <div class="fc-face front" id="fcFront"></div>
+          <div class="fc-face back" id="fcBack"></div>
+        </div>
+        <div class="fc-hint">tap to flip</div>
+      </div>
+      <div class="fc-actions">
+        <button class="dontknow" id="fcDontKnow">Still learning</button>
+        <button class="know" id="fcKnow">Got it</button>
+      </div>
+      <div class="fc-progress" id="fcRemaining"></div>
     </div>
-    <div class="fc-progress" id="fcRemaining"></div>
+    <div id="fcComplete" class="quiz-result" style="display:none;"></div>
   </div>
 </div>
 
@@ -507,34 +561,43 @@
   }
   function showFcCard() {
     const cardEl = document.getElementById("fcCard");
+    const activeEl = document.getElementById("fcActive");
+    const completeEl = document.getElementById("fcComplete");
     fcFlipped = false;
+    cardEl.classList.remove("flipped");
+
+    const totalInDeck = fcDeck.length;
+    const fillPct = totalInDeck ? Math.min(100, (fcIndex / totalInDeck) * 100) : 0;
+    document.getElementById("fcDeckFill").style.width = fillPct + "%";
+
     if (fcIndex >= fcDeck.length) {
-      cardEl.innerHTML = fcMissed.length
-        ? `Deck complete. ${fcMissed.length} card(s) marked "still learning" — click below to redo just those.`
-        : `Deck complete — nice work.`;
-      document.getElementById("fcRemaining").textContent = "";
+      activeEl.style.display = "none";
+      completeEl.style.display = "block";
+      document.getElementById("fcDeckFill").style.width = "100%";
+      completeEl.innerHTML = fcMissed.length
+        ? `<div class="sub">Deck complete — ${fcMissed.length} card(s) marked "still learning."</div>`
+        : `<div class="sub">Deck complete — nice work.</div>`;
       if (fcMissed.length) {
         const btn = document.createElement("button");
         btn.textContent = "Review missed cards";
-        btn.style.cssText = "margin-top:12px;font:inherit;padding:8px 16px;border-radius:8px;border:1px solid var(--border);background:var(--surface);cursor:pointer;";
-        btn.addEventListener("click", () => { fcDeck = fcMissed.slice(); fcMissed = []; fcIndex = 0; showFcCard(); });
-        cardEl.appendChild(document.createElement("br"));
-        cardEl.appendChild(btn);
+        btn.className = "quiz-next show";
+        btn.style.marginTop = "16px";
+        btn.addEventListener("click", () => { fcDeck = fcMissed.slice(); fcMissed = []; fcIndex = 0; activeEl.style.display = ""; completeEl.style.display = "none"; showFcCard(); });
+        completeEl.appendChild(btn);
       }
       return;
     }
+    activeEl.style.display = "";
+    completeEl.style.display = "none";
     const card = flashcards[fcDeck[fcIndex]];
-    cardEl.innerHTML = `<div><span class="side-label">${sectionName(card[0])} — tap to flip</span>${card[1]}</div>`;
+    document.getElementById("fcFront").innerHTML = `<div><span class="side-label">${sectionName(card[0])}</span>${card[1]}</div>`;
+    document.getElementById("fcBack").innerHTML = `<div><span class="side-label">Answer</span>${card[2]}</div>`;
     document.getElementById("fcRemaining").textContent = `${fcIndex + 1} of ${fcDeck.length}`;
   }
   function flipFcCard() {
     if (fcIndex >= fcDeck.length) return;
-    const card = flashcards[fcDeck[fcIndex]];
     fcFlipped = !fcFlipped;
-    const cardEl = document.getElementById("fcCard");
-    cardEl.innerHTML = fcFlipped
-      ? `<div><span class="side-label">Answer</span>${card[2]}</div>`
-      : `<div><span class="side-label">${sectionName(card[0])} — tap to flip</span>${card[1]}</div>`;
+    document.getElementById("fcCard").classList.toggle("flipped", fcFlipped);
   }
   document.getElementById("fcCard").addEventListener("click", flipFcCard);
   document.getElementById("fcCard").addEventListener("keydown", (e) => {
@@ -572,14 +635,30 @@
     const area = document.getElementById("quizArea");
     if (quizIdx >= quizSet.length) {
       const pct = Math.round((quizScore / quizSet.length) * 100);
-      area.innerHTML = `<div class="quiz-result"><div class="big mono">${pct}%</div><div>${quizScore} of ${quizSet.length} correct</div></div>`;
+      const r = 65, c = 2 * Math.PI * r;
+      area.innerHTML = `
+        <div class="quiz-result">
+          <div class="ring-wrap">
+            <svg viewBox="0 0 150 150">
+              <circle class="ring-bg" cx="75" cy="75" r="${r}"/>
+              <circle class="ring-fill" id="ringFill" cx="75" cy="75" r="${r}" stroke-dasharray="${c}" stroke-dashoffset="${c}"/>
+            </svg>
+            <div class="ring-label mono">${pct}%</div>
+          </div>
+          <div class="sub">${quizScore} of ${quizSet.length} correct</div>
+        </div>`;
+      requestAnimationFrame(() => requestAnimationFrame(() => {
+        document.getElementById("ringFill").style.strokeDashoffset = c - (c * pct / 100);
+      }));
       return;
     }
     const [sid, q, opts, correct, explain] = quizSet[quizIdx];
+    const progressPct = (quizIdx / quizSet.length) * 100;
     area.innerHTML = `
+      <div class="quiz-progress-bar"><div class="fill" style="width:${progressPct}%"></div></div>
       <div class="quiz-score">Question ${quizIdx + 1} of ${quizSet.length} — ${sectionName(sid)}</div>
       <div class="quiz-q">${q}</div>
-      ${opts.map((o, i) => `<button class="quiz-opt" data-i="${i}">${o}</button>`).join("")}
+      ${opts.map((o, i) => `<button class="quiz-opt" data-i="${i}" style="animation: qfade .25s ease ${i * 0.05}s both;">${o}</button>`).join("")}
       <div class="quiz-explain" id="quizExplain">${explain}</div>
       <button class="quiz-next" id="quizNext">Next question</button>
     `;
@@ -588,6 +667,7 @@
         if (quizAnswered) return;
         quizAnswered = true;
         const i = parseInt(btn.dataset.i, 10);
+        area.querySelectorAll(".quiz-opt").forEach(b => b.disabled = true);
         const correctBtn = area.querySelector(`.quiz-opt[data-i="${correct}"]`);
         correctBtn.classList.add("correct");
         if (i !== correct) btn.classList.add("incorrect");
