@@ -189,6 +189,46 @@
   @keyframes viewFade { from { opacity: 0; transform: translateY(3px); } to { opacity: 1; transform: translateY(0); } }
   @media (prefers-reduced-motion: reduce) { .view.active { animation: none; } }
 
+  /* Inside Advantage — vertical flow */
+  .adv-intro { max-width: 74ch; color: var(--ink-soft); font-size: 0.92rem; line-height: 1.6; margin-bottom: 24px; }
+  .adv-intro b { color: var(--ink); }
+  .vf-flow { margin-bottom: 8px; }
+  .vf-row { display: flex; align-items: stretch; justify-content: center; gap: 14px; flex-wrap: wrap; }
+  .vf-row.three { margin-top: 10px; }
+  .vf-arrow { display: flex; align-items: center; color: var(--ink-muted); font-size: 1.3rem; }
+  .vf-split-label { text-align: center; font-size: 0.76rem; color: var(--ink-muted); margin: 10px 0; text-transform: uppercase; letter-spacing: 0.05em; }
+  .vf-node {
+    flex: 1; min-width: 150px; max-width: 220px; border: 1px solid var(--border); border-radius: 12px;
+    background: var(--surface); padding: 16px 16px; cursor: pointer; text-align: center;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.04); transition: transform .15s ease, box-shadow .15s ease, border-color .15s ease;
+  }
+  .vf-node:hover, .vf-node.open { transform: translateY(-2px); box-shadow: 0 1px 2px rgba(0,0,0,0.06), 0 10px 20px rgba(0,0,0,0.07); border-color: var(--accent); }
+  .vf-node:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+  .vf-node .vf-name { font-family: "Bahnschrift", "Segoe UI Semibold", sans-serif; font-weight: 700; font-size: 1rem; }
+  .vf-node .vf-func { font-size: 0.78rem; color: var(--ink-soft); margin-top: 4px; }
+  .vf-node.seat { border-color: var(--manager); background: var(--manager-soft); }
+  .vf-seat-badge { display: inline-block; margin-top: 8px; font-size: 0.66rem; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 700; color: var(--manager); background: var(--surface); padding: 2px 8px; border-radius: 999px; }
+
+  #advDetail { display: none; border: 1px solid var(--border); border-radius: 14px; background: var(--surface); padding: 24px 26px; margin-top: 22px; }
+  #advDetail.show { display: block; }
+  #advDetail .ad-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; margin-bottom: 6px; }
+  #advDetail h3 { font-size: 1.15rem; }
+  #advDetail .ad-status { font-size: 0.76rem; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 700; padding: 3px 9px; border-radius: 5px; }
+  #advDetail .ad-status.confirmed { background: var(--good-soft); color: var(--good); }
+  #advDetail .ad-status.unconfirmed { background: var(--manager-soft); color: var(--manager); }
+  #closeAdv { background: none; border: 1px solid var(--border); border-radius: 6px; color: var(--ink-soft); font: inherit; font-size: 0.8rem; padding: 5px 10px; cursor: pointer; }
+  .ad-func-list { list-style: none; margin: 14px 0 0; padding: 0; }
+  .ad-func-list li { display: flex; align-items: baseline; gap: 8px; padding: 8px 0; border-top: 1px solid var(--border); font-size: 0.88rem; }
+  .ad-func-list li:first-child { border-top: none; }
+  .ad-pill { flex: none; font-size: 0.64rem; text-transform: uppercase; letter-spacing: 0.04em; font-weight: 700; padding: 2px 7px; border-radius: 5px; white-space: nowrap; }
+  .ad-pill.confirmed { background: var(--good-soft); color: var(--good); }
+  .ad-pill.estimated { background: var(--surface-alt); color: var(--ink-muted); }
+
+  .crosscutting-box { border-left: 3px solid var(--manager); background: var(--manager-soft); border-radius: 8px; padding: 16px 18px; margin-top: 22px; font-size: 0.9rem; line-height: 1.65; }
+  .crosscutting-box h4 { font-family: "Bahnschrift", "Segoe UI Semibold", sans-serif; font-size: 0.9rem; margin-bottom: 8px; color: var(--manager); }
+  .crosscutting-box p { margin: 0 0 8px; }
+  .crosscutting-box p:last-child { margin-bottom: 0; }
+
   footer { border-top: 1px solid var(--border); padding: 24px clamp(20px, 4vw, 56px); font-size: 0.78rem; color: var(--ink-muted); line-height: 1.5; }
 </style>
 </head>
@@ -218,6 +258,7 @@
 
   <div class="tabs" id="tabs">
     <button data-view="overview" class="active">Overview</button>
+    <button data-view="advantage">Inside Advantage</button>
     <button data-view="people">People &amp; History</button>
     <button data-view="strategy">Strategy</button>
     <button data-view="notes">My Notes</button>
@@ -264,6 +305,39 @@
   <div class="integration-box">
     <b>Why the circle matters —</b> each division individually competes against specialists that are often dramatically larger — Gallagher in consulting, WEX/Alight in administration, ADP/Paychex in payroll, CAPTRUST/OneDigital in retirement. Almost none of those specialists connect all four under one client relationship and one technology platform the way Kelly does. If there's a strategic edge here, it's integration, not any single division's scale — and OneDigital (health + wealth convergence) is the one competitor pursuing the same idea, just at a much larger scale.
   </div>
+  </div>
+
+  <div class="view" id="view-advantage">
+    <p class="adv-intro">Kelly Benefits Advantage itself is organized into five verticals. This is a working model built from what's confirmed on the ground, not public research — click any vertical for what's actually known versus what's still a guess.</p>
+    <div class="vf-flow">
+      <div class="vf-row">
+        <div class="vf-node" data-v="win" tabindex="0" role="button"><div class="vf-name">Win</div><div class="vf-func">New business</div></div>
+        <div class="vf-arrow">→</div>
+        <div class="vf-node" data-v="construct" tabindex="0" role="button"><div class="vf-name">Construct</div><div class="vf-func">Implementation &amp; integration</div></div>
+      </div>
+      <div class="vf-split-label">then splits into three ongoing tracks ↓</div>
+      <div class="vf-row three">
+        <div class="vf-node" data-v="protect" tabindex="0" role="button"><div class="vf-name">Protect</div><div class="vf-func">Compliance &amp; broker mgmt (unconfirmed)</div></div>
+        <div class="vf-node seat" data-v="connect" tabindex="0" role="button"><div class="vf-name">Connect</div><div class="vf-func">COBRA admin</div><span class="vf-seat-badge">You are here</span></div>
+        <div class="vf-node" data-v="serve" tabindex="0" role="button"><div class="vf-name">Serve</div><div class="vf-func">Dedicated service</div></div>
+      </div>
+    </div>
+
+    <div id="advDetail">
+      <div class="ad-head">
+        <h3 id="advTitle"></h3>
+        <span class="ad-status" id="advStatus"></span>
+        <button id="closeAdv">Close ✕</button>
+      </div>
+      <p id="advDesc" style="color:var(--ink-soft); font-size:0.9rem; margin-top:4px;"></p>
+      <ul class="ad-func-list" id="advFuncs"></ul>
+    </div>
+
+    <div class="crosscutting-box">
+      <h4>Where "enrollment" and "reconciliation" actually sit</h4>
+      <p><b>Enrollment</b> isn't one thing — it likely spans three verticals: initial enrollment setup during onboarding (Construct), COBRA elections specifically (Connect), and ongoing annual open enrollment support (Serve). Worth confirming whether Advantage even splits it that way, or handles it as one continuous function.</p>
+      <p><b>Reconciliation</b> (eligibility, billing) most plausibly sits in Connect — it's the same "keep two systems in sync" work as COBRA admin — but could also be a Serve function if it's framed as client-facing account maintenance rather than backend data work.</p>
+    </div>
   </div>
 
   <div class="view" id="view-people">
@@ -410,6 +484,90 @@
       caption: "AUM figures from firm disclosures / SEC ADV filings as reported in trade press. Nearly 20 similar retirement-advisory aggregators exist — this is a sample, not exhaustive."
     }
   ];
+
+  /* ================= Inside Advantage: verticals ================= */
+  const verticals = {
+    win: {
+      name: "Win", confirmed: false,
+      desc: "New business — getting the client. Not yet confirmed in detail; the name implies sales enablement rather than direct sales.",
+      funcs: [
+        ["Proposal / RFP response support", false],
+        ["Pre-sale technical & data scoping", false],
+        ["New business underwriting / eligibility review", false],
+        ["New broker & producer proposal support", false]
+      ]
+    },
+    construct: {
+      name: "Construct", confirmed: true,
+      desc: "Confirmed: implementation and integration — building out a new client's setup before it goes live.",
+      funcs: [
+        ["Implementation project management", false],
+        ["EDI / data feed setup for new clients", false],
+        ["Plan build & system configuration", false],
+        ["Testing & QA of new client setups", false],
+        ["Initial eligibility load", false],
+        ["Carrier connection setup", false],
+        ["Initial enrollment setup (onboarding)", false]
+      ]
+    },
+    protect: {
+      name: "Protect", confirmed: false,
+      desc: "Believed to include broker management — not yet confirmed. The name suggests a compliance/risk function.",
+      funcs: [
+        ["Broker / producer relationship management", false],
+        ["Compliance (ERISA / ACA / HIPAA)", false],
+        ["Audit & quality assurance", false],
+        ["Risk management", false],
+        ["Regulatory / legal monitoring", false]
+      ]
+    },
+    connect: {
+      name: "Connect", confirmed: true,
+      desc: "Confirmed: this is your seat — COBRA administration.",
+      funcs: [
+        ["COBRA administration", true],
+        ["State continuation coverage", false],
+        ["ACA reporting (1094-C / 1095-C)", false],
+        ["Direct billing", false],
+        ["Eligibility & billing reconciliation", false],
+        ["Ongoing data feed monitoring", false]
+      ]
+    },
+    serve: {
+      name: "Serve", confirmed: true,
+      desc: "Confirmed: dedicated service — the coworkers near your cubicle.",
+      funcs: [
+        ["Dedicated account / client service reps", true],
+        ["Participant / member call center support", false],
+        ["Annual open enrollment support", false],
+        ["Claims / reimbursement processing (FSA/HRA)", false],
+        ["Renewals support", false]
+      ]
+    }
+  };
+
+  function openVertical(id) {
+    const v = verticals[id];
+    document.querySelectorAll(".vf-node").forEach(n => n.classList.toggle("open", n.dataset.v === id));
+    document.getElementById("advTitle").textContent = v.name;
+    const statusEl = document.getElementById("advStatus");
+    statusEl.textContent = v.confirmed ? "Confirmed" : "Estimated — verify";
+    statusEl.className = "ad-status " + (v.confirmed ? "confirmed" : "unconfirmed");
+    document.getElementById("advDesc").textContent = v.desc;
+    document.getElementById("advFuncs").innerHTML = v.funcs.map(([label, confirmed]) => `
+      <li><span class="ad-pill ${confirmed ? 'confirmed' : 'estimated'}">${confirmed ? "confirmed" : "est."}</span> ${label}</li>
+    `).join("");
+    document.getElementById("advDetail").classList.add("show");
+    document.getElementById("advDetail").scrollIntoView({ behavior: "smooth", block: "nearest" });
+  }
+  document.querySelectorAll(".vf-node").forEach(node => {
+    node.addEventListener("click", () => openVertical(node.dataset.v));
+    node.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); openVertical(node.dataset.v); } });
+  });
+  document.getElementById("closeAdv").addEventListener("click", () => {
+    document.getElementById("advDetail").classList.remove("show");
+    document.querySelectorAll(".vf-node").forEach(n => n.classList.remove("open"));
+  });
 
   const diagram = document.getElementById("circleDiagram");
   let openId = null;
