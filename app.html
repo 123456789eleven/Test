@@ -5,25 +5,28 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Custodian</title>
 <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet" />
 <style>
   :root {
-    --page: #f7f5f0; --surface: #ffffff; --surface-alt: #f0eee8;
-    --ink: #14140f; --ink-soft: #5c5a52; --ink-muted: #8f8c81;
-    --accent: #4d6b5e; --accent-wash: rgba(77,107,94,0.10); --accent-ink: #ffffff;
-    --border: rgba(20,20,15,0.12); --grid: #e1e0d9; --manager: #9c6a1f; --manager-soft: #f5ead9;
-    --good: #3e7d4c; --good-soft: #e1f0e3; --warn: #a63b2e; --warn-soft: #f8e2df;
+    --page: #f6f7fa; --surface: #ffffff; --surface-alt: #eef0f5;
+    --ink: #14161f; --ink-soft: #565b6b; --ink-muted: #8b90a0;
+    --accent: #4f46e5; --accent-wash: rgba(79,70,229,0.10); --accent-ink: #ffffff;
+    --border: rgba(20,22,31,0.11); --grid: #e3e5ea; --manager: #b7791f; --manager-soft: #fbf0dc;
+    --good: #16a34a; --good-soft: #dcfce7; --warn: #dc2626; --warn-soft: #fee2e2;
   }
   @media (prefers-color-scheme: dark) {
-    :root { --page: #0d0f0d; --surface: #161815; --surface-alt: #1c1f1b; --ink: #f3f2ee; --ink-soft: #b8b6ad; --ink-muted: #7c7a71; --accent: #8fae9e; --accent-wash: rgba(143,174,158,0.14); --accent-ink: #0d0f0d; --border: rgba(255,255,255,0.12); --grid: #2c2c2a; --manager: #e2b46e; --manager-soft: #33291a; --good: #5fae6e; --good-soft: #1c2b1f; --warn: #e08a7a; --warn-soft: #33201c; }
+    :root { --page: #0b0d12; --surface: #14161c; --surface-alt: #1b1e26; --ink: #f2f3f6; --ink-soft: #b8bcc9; --ink-muted: #7d8194; --accent: #8b85f5; --accent-wash: rgba(139,133,245,0.16); --accent-ink: #0b0d12; --border: rgba(255,255,255,0.10); --grid: #262a35; --manager: #e0ac4f; --manager-soft: #332711; --good: #4ade80; --good-soft: #14291d; --warn: #f87171; --warn-soft: #2e1616; }
   }
-  :root[data-theme="dark"] { --page: #0d0f0d; --surface: #161815; --surface-alt: #1c1f1b; --ink: #f3f2ee; --ink-soft: #b8b6ad; --ink-muted: #7c7a71; --accent: #8fae9e; --accent-wash: rgba(143,174,158,0.14); --accent-ink: #0d0f0d; --border: rgba(255,255,255,0.12); --grid: #2c2c2a; --manager: #e2b46e; --manager-soft: #33291a; --good: #5fae6e; --good-soft: #1c2b1f; --warn: #e08a7a; --warn-soft: #33201c; }
-  :root[data-theme="light"] { --page: #f7f5f0; --surface: #ffffff; --surface-alt: #f0eee8; --ink: #14140f; --ink-soft: #5c5a52; --ink-muted: #8f8c81; --accent: #4d6b5e; --accent-wash: rgba(77,107,94,0.10); --accent-ink: #ffffff; --border: rgba(20,20,15,0.12); --grid: #e1e0d9; --manager: #9c6a1f; --manager-soft: #f5ead9; --good: #3e7d4c; --good-soft: #e1f0e3; --warn: #a63b2e; --warn-soft: #f8e2df; }
+  :root[data-theme="dark"] { --page: #0b0d12; --surface: #14161c; --surface-alt: #1b1e26; --ink: #f2f3f6; --ink-soft: #b8bcc9; --ink-muted: #7d8194; --accent: #8b85f5; --accent-wash: rgba(139,133,245,0.16); --accent-ink: #0b0d12; --border: rgba(255,255,255,0.10); --grid: #262a35; --manager: #e0ac4f; --manager-soft: #332711; --good: #4ade80; --good-soft: #14291d; --warn: #f87171; --warn-soft: #2e1616; }
+  :root[data-theme="light"] { --page: #f6f7fa; --surface: #ffffff; --surface-alt: #eef0f5; --ink: #14161f; --ink-soft: #565b6b; --ink-muted: #8b90a0; --accent: #4f46e5; --accent-wash: rgba(79,70,229,0.10); --accent-ink: #ffffff; --border: rgba(20,22,31,0.11); --grid: #e3e5ea; --manager: #b7791f; --manager-soft: #fbf0dc; --good: #16a34a; --good-soft: #dcfce7; --warn: #dc2626; --warn-soft: #fee2e2; }
 
   * { box-sizing: border-box; }
-  html, body { margin: 0; height: 100%; background: var(--page); color: var(--ink); font-family: "Segoe UI", system-ui, -apple-system, sans-serif; }
+  html, body { margin: 0; height: 100%; background: var(--page); color: var(--ink); font-family: "Inter", system-ui, -apple-system, sans-serif; }
   a { color: inherit; }
-  h1, h2, h3 { font-family: "Bahnschrift", "Segoe UI Semibold", sans-serif; font-weight: 600; margin: 0; }
-  .wordmark { font-family: "Bahnschrift", "Segoe UI Semibold", sans-serif; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; }
+  h1, h2, h3 { font-family: "Space Grotesk", sans-serif; font-weight: 600; margin: 0; }
+  .wordmark { font-family: "Space Grotesk", sans-serif; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; }
   .mono { font-variant-numeric: tabular-nums; }
 
   .app-shell { display: grid; grid-template-columns: 220px 1fr; min-height: 100vh; }
@@ -113,7 +116,7 @@
   .linechart .area { fill: var(--accent); opacity: 0.08; }
   .linechart .line { fill: none; stroke: var(--accent); stroke-width: 2; }
   .linechart .dot { fill: var(--accent); stroke: var(--page); stroke-width: 2; }
-  .linechart text { font-size: 10px; fill: var(--ink-muted); font-family: "Segoe UI", sans-serif; }
+  .linechart text { font-size: 10px; fill: var(--ink-muted); font-family: "Inter", sans-serif; }
   .linechart text.endlabel { fill: var(--ink); font-weight: 700; font-size: 11px; }
   .table-toggle { margin-top: 14px; }
   .table-toggle summary { font-size: 0.78rem; color: var(--accent); cursor: pointer; list-style: none; }
@@ -210,7 +213,7 @@
   @media (max-width: 800px) { .forces-grid { grid-template-columns: 1fr; } }
   .force-item { padding: 16px 0; border-top: 1px solid var(--border); }
   .force-item .fh { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 8px; }
-  .force-item h4 { font-size: 0.9rem; font-family: "Bahnschrift", "Segoe UI Semibold", sans-serif; font-weight: 700; }
+  .force-item h4 { font-size: 0.9rem; font-family: "Space Grotesk", sans-serif; font-weight: 700; }
   .force-level { display: flex; align-items: center; gap: 6px; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--ink-soft); font-weight: 700; white-space: nowrap; }
   .force-dots { display: flex; gap: 3px; }
   .force-dots span { width: 6px; height: 6px; border-radius: 50%; background: var(--border); }
@@ -327,7 +330,7 @@
   .swot-item.weaknesses { border-top-color: var(--warn); }
   .swot-item.opportunities { border-top-color: var(--accent); }
   .swot-item.threats { border-top-color: var(--manager); }
-  .swot-item h4 { font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 10px; font-family: "Bahnschrift", "Segoe UI Semibold", sans-serif; }
+  .swot-item h4 { font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 10px; font-family: "Space Grotesk", sans-serif; }
   .swot-item.strengths h4 { color: var(--good); }
   .swot-item.weaknesses h4 { color: var(--warn); }
   .swot-item.opportunities h4 { color: var(--accent); }
@@ -378,7 +381,7 @@
   }
   .vf-node:hover, .vf-node.open { border-color: var(--accent); }
   .vf-node:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
-  .vf-node .vf-name { font-family: "Bahnschrift", "Segoe UI Semibold", sans-serif; font-weight: 700; font-size: 1rem; }
+  .vf-node .vf-name { font-family: "Space Grotesk", sans-serif; font-weight: 700; font-size: 1rem; }
   .vf-node .vf-func { font-size: 0.78rem; color: var(--ink-soft); margin-top: 4px; }
   .vf-node.seat { border-color: var(--manager); }
   .vf-seat-badge { display: inline-block; margin-top: 8px; font-size: 0.66rem; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 700; color: var(--manager); }
@@ -399,7 +402,7 @@
   .ad-pill.estimated { color: var(--ink-muted); }
 
   .crosscutting-box { border-left: 2px solid var(--manager); padding: 4px 0 4px 18px; margin-top: 22px; font-size: 0.9rem; line-height: 1.65; color: var(--ink-soft); }
-  .crosscutting-box h4 { font-family: "Bahnschrift", "Segoe UI Semibold", sans-serif; font-size: 0.9rem; margin-bottom: 8px; color: var(--manager); }
+  .crosscutting-box h4 { font-family: "Space Grotesk", sans-serif; font-size: 0.9rem; margin-bottom: 8px; color: var(--manager); }
   .crosscutting-box p { margin: 0 0 8px; }
   .crosscutting-box p:last-child { margin-bottom: 0; }
 </style>
