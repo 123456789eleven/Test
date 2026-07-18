@@ -62,7 +62,8 @@
     const svg = document.createElementNS(svgNS, "svg");
     svg.setAttribute("viewBox", `0 0 ${width} ${height}`);
     svg.setAttribute("class", "orgmap-svg");
-    svg.setAttribute("width", "100%");
+    svg.setAttribute("width", width);
+    svg.setAttribute("height", height);
 
     const defs = document.createElementNS(svgNS, "defs");
     defs.innerHTML = `<marker id="omArrow" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" class="orgmap-arrowhead"/></marker>`;
