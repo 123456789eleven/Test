@@ -29,6 +29,7 @@
       <div class="tabs" id="lsTabs">
         <button data-view="competitors" class="active">Competitors</button>
         <button data-view="consolidation">Consolidation</button>
+        <button data-view="trends">Trends</button>
         <button data-view="strategy">Strategy</button>
         <button data-view="notes">My Notes</button>
       </div>
@@ -59,6 +60,13 @@
           <p class="cap">The market-growth chart on Insights and the "regional player among giants" framing on this page are both symptoms of the same thing: this industry is actively consolidating. These are real, dated deals — not a general trend statement.</p>
           <div class="timeline" id="lsMnaTimeline"></div>
         </div>
+      </div>
+
+      <div class="view" id="lsview-trends">
+        <div class="trends-intro">
+          <p class="cap">Revenue and headcount are logged here only when the daily research check finds a genuinely new, sourced figure — never padded for density. Most companies will show a single baseline point until the next real update lands, then grow into a real trend line.</p>
+        </div>
+        <div class="trends-grid" id="lsTrendsGrid"></div>
       </div>
 
       <div class="view" id="lsview-strategy">
@@ -208,6 +216,112 @@
       ...companies.map(c => ({ title: c.name, snippet: c.model, route: "landscape" })),
       ...mnaDeals.map(d => ({ title: d.deal, snippet: d.sig, route: "landscape" }))
     ]);
+
+    renderTrends();
+  }
+
+  async function renderTrends() {
+    const grid = document.getElementById("lsTrendsGrid");
+    if (!grid) return;
+    let history;
+    try {
+      history = await fetch("data/history.json").then(r => r.json());
+    } catch (err) {
+      grid.innerHTML = `<div style="color:var(--warn);">Couldn't load trend history (${err.message}).</div>`;
+      return;
+    }
+    if (!document.getElementById("lsTrendsGrid")) return;
+
+    const FIELD_LABEL = { revenue: "Revenue", employees: "Employees" };
+    const byCompany = {};
+    const order = [];
+    history.forEach(h => {
+      if (!byCompany[h.company]) { byCompany[h.company] = {}; order.push(h.company); }
+      byCompany[h.company][h.field] = byCompany[h.company][h.field] || [];
+      byCompany[h.company][h.field].push(h);
+    });
+
+    grid.innerHTML = order.map(company => {
+      const fields = byCompany[company];
+      const sections = ["revenue", "employees"].filter(f => fields[f]).map(f => {
+        const points = fields[f].slice().sort((a, b) => new Date(a.date) - new Date(b.date));
+        const fmt = f === "revenue" ? fmtM : (v => v.toLocaleString());
+        if (points.length === 1) {
+          const p = points[0];
+          return `<div class="trend-field-label">${FIELD_LABEL[f]}</div><div class="trend-baseline">Baseline ${fmt(p.value)} <span class="trend-date mono">(${p.date})</span></div>`;
+        }
+        const chartId = `spark-${company.replace(/[^a-z0-9]/gi, "")}-${f}`;
+        return `<div class="trend-field-label">${FIELD_LABEL[f]}</div><div class="viz" id="${chartId}"></div>`;
+      }).join("");
+      return `<div class="chart-card"><h3>${company}</h3>${sections}</div>`;
+    }).join("");
+
+    order.forEach(company => {
+      const fields = byCompany[company];
+      ["revenue", "employees"].forEach(f => {
+        if (!fields[f] || fields[f].length < 2) return;
+        const points = fields[f].slice().sort((a, b) => new Date(a.date) - new Date(b.date));
+        const chartId = `spark-${company.replace(/[^a-z0-9]/gi, "")}-${f}`;
+        renderSparkline(chartId, points, f === "revenue" ? fmtM : (v => v.toLocaleString()));
+      });
+    });
+  }
+
+  function renderSparkline(containerId, points, fmt) {
+    const el = document.getElementById(containerId);
+    if (!el) return;
+    const w = 320, h = 90, padL = 8, padR = 8, padT = 16, padB = 18;
+    const innerW = w - padL - padR, innerH = h - padT - padB;
+    const values = points.map(p => p.value);
+    const minV = Math.min(...values), maxV = Math.max(...values);
+    const span = maxV - minV || 1;
+    const x = i => padL + (i / (points.length - 1)) * innerW;
+    const y = v => padT + innerH - ((v - minV) / span) * innerH;
+    const coords = values.map((v, i) => [x(i), y(v)]);
+    const linePath = coords.map((c, i) => (i === 0 ? "M" : "L") + c[0].toFixed(1) + "," + c[1].toFixed(1)).join(" ");
+    const areaPath = linePath + ` L${x(points.length - 1)},${padT + innerH} L${padL},${padT + innerH} Z`;
+    const dots = coords.map((c, i) => `<circle class="dot" id="${containerId}-dot${i}" cx="${c[0]}" cy="${c[1]}" r="3.5"/>`).join("");
+    const hits = coords.map((c, i) => `<circle class="hit" cx="${c[0]}" cy="${c[1]}" r="12" fill="transparent" data-i="${i}" data-date="${points[i].date}" data-value="${fmt(points[i].value)}"/>`).join("");
+    el.innerHTML = `
+      <svg class="linechart" viewBox="0 0 ${w} ${h}" preserveAspectRatio="xMidYMid meet" style="height:${h}px;">
+        <line class="baseline" x1="${padL}" x2="${w - padR}" y1="${padT + innerH}" y2="${padT + innerH}"/>
+        <path class="area" d="${areaPath}"/>
+        <path class="line" d="${linePath}"/>
+        ${dots}
+        <text class="endlabel" x="${x(0)}" y="${y(values[0]) - 8}" text-anchor="start">${fmt(values[0])}</text>
+        <text class="endlabel" x="${x(values.length - 1)}" y="${y(values[values.length - 1]) - 8}" text-anchor="end">${fmt(values[values.length - 1])}</text>
+        ${hits}
+        <g class="spark-tip" style="opacity:0; transition: opacity .12s ease; pointer-events:none;">
+          <rect class="spark-tip-rect" rx="5" fill="var(--surface)" stroke="var(--border)" stroke-width="1" height="30"/>
+          <text class="spark-tip-text" x="0" y="0" text-anchor="middle" style="font-size:10px; font-weight:700; fill:var(--ink);"></text>
+        </g>
+      </svg>`;
+
+    const tip = el.querySelector(".spark-tip");
+    const tipRect = el.querySelector(".spark-tip-rect");
+    const tipText = el.querySelector(".spark-tip-text");
+    el.querySelectorAll(".hit").forEach(hit => {
+      hit.addEventListener("mouseenter", () => {
+        const i = hit.dataset.i;
+        el.querySelectorAll(".dot").forEach(d => d.style.r = "3.5");
+        const dot = document.getElementById(containerId + "-dot" + i);
+        if (dot) dot.style.r = "5";
+        const cx = parseFloat(hit.getAttribute("cx")), cy = parseFloat(hit.getAttribute("cy"));
+        tipText.textContent = `${hit.dataset.date}: ${hit.dataset.value}`;
+        const tw = Math.max(60, tipText.getComputedTextLength() + 16);
+        tipRect.setAttribute("width", tw);
+        tipRect.setAttribute("x", -tw / 2);
+        tipRect.setAttribute("y", -30);
+        tipText.setAttribute("y", -10);
+        tip.setAttribute("transform", `translate(${cx}, ${cy - 6})`);
+        tip.style.opacity = "1";
+      });
+      hit.addEventListener("mouseleave", () => {
+        tip.style.opacity = "0";
+        const dot = document.getElementById(containerId + "-dot" + hit.dataset.i);
+        if (dot) dot.style.r = "3.5";
+      });
+    });
   }
 
   function updateNotesGate() {

@@ -155,7 +155,8 @@ function renderMarketChart() {
   const gridVals = [600, 700, 800];
   const gridlines = gridVals.map(v => `<line class="gridline" x1="${padL}" x2="${w - padR}" y1="${y(v)}" y2="${y(v)}"/><text x="${padL - 8}" y="${y(v) + 3}" text-anchor="end">$${v}B</text>`).join("");
   const yearLabels = years.map((yr, i) => `<text x="${x(i)}" y="${h - 4}" text-anchor="middle">${yr}</text>`).join("");
-  const dots = points.map((p) => `<circle class="dot" cx="${p[0]}" cy="${p[1]}" r="4"/>`).join("");
+  const dots = points.map((p, i) => `<circle class="dot" id="marketDot${i}" cx="${p[0]}" cy="${p[1]}" r="4"/>`).join("");
+  const hits = points.map((p, i) => `<circle class="hit" cx="${p[0]}" cy="${p[1]}" r="14" fill="transparent" data-i="${i}" data-year="${years[i]}" data-value="${values[i]}"/>`).join("");
   const el = document.getElementById("chartMarket");
   el.innerHTML = `
     <svg class="linechart" viewBox="0 0 ${w} ${h}" preserveAspectRatio="xMidYMid meet">
@@ -167,11 +168,43 @@ function renderMarketChart() {
       <text class="endlabel" x="${x(0)}" y="${y(values[0]) - 12}" text-anchor="start">$${values[0]}B</text>
       <text class="endlabel" x="${x(values.length - 1)}" y="${y(values[values.length - 1]) - 12}" text-anchor="end">$${values[values.length - 1]}B</text>
       ${yearLabels}
+      ${hits}
+      <g id="marketTip" style="opacity:0; transition: opacity .12s ease; pointer-events:none;">
+        <rect id="marketTipRect" rx="5" fill="var(--surface)" stroke="var(--border)" stroke-width="1" height="34"/>
+        <text id="marketTipText" x="0" y="0" text-anchor="middle" style="font-size:11px; font-weight:700; fill:var(--ink);"></text>
+      </g>
     </svg>
     <details class="table-toggle"><summary>View as table</summary>
       <table><thead><tr><th>Year</th><th>Market size</th></tr></thead>
       <tbody>${years.map((yr, i) => `<tr><td>${yr}</td><td>$${values[i]}B</td></tr>`).join("")}</tbody></table>
     </details>`;
+
+  const tip = document.getElementById("marketTip");
+  const tipRect = document.getElementById("marketTipRect");
+  const tipText = document.getElementById("marketTipText");
+  el.querySelectorAll(".hit").forEach(hit => {
+    hit.addEventListener("mouseenter", () => {
+      const i = hit.dataset.i;
+      el.querySelectorAll(".linechart .dot").forEach(d => d.style.r = "4");
+      const dot = document.getElementById("marketDot" + i);
+      dot.style.r = "5.5";
+      const cx = parseFloat(hit.getAttribute("cx")), cy = parseFloat(hit.getAttribute("cy"));
+      tipText.textContent = `${hit.dataset.year}: $${hit.dataset.value}B`;
+      const tw = Math.max(70, tipText.getComputedTextLength() + 20);
+      tipRect.setAttribute("width", tw);
+      tipRect.setAttribute("x", -tw / 2);
+      tipRect.setAttribute("y", -34);
+      tipText.setAttribute("x", 0);
+      tipText.setAttribute("y", -14);
+      tip.setAttribute("transform", `translate(${cx}, ${cy - 8})`);
+      tip.style.opacity = "1";
+    });
+    hit.addEventListener("mouseleave", () => {
+      tip.style.opacity = "0";
+      const dot = document.getElementById("marketDot" + hit.dataset.i);
+      if (dot) dot.style.r = "4";
+    });
+  });
 }
 
 Router.register("insights", renderInsightsView);

@@ -1,0 +1,16 @@
+[
+  { "date": "2026-07-18", "company": "ADP", "field": "revenue", "value": 20561, "note": "Baseline recorded" },
+  { "date": "2026-07-18", "company": "ADP", "field": "employees", "value": 67000, "note": "Baseline recorded" },
+  { "date": "2026-07-18", "company": "WEX Inc.", "field": "revenue", "value": 2661, "note": "Baseline recorded" },
+  { "date": "2026-07-18", "company": "WEX Inc.", "field": "employees", "value": 6600, "note": "Baseline recorded" },
+  { "date": "2026-07-18", "company": "Alight Solutions", "field": "revenue", "value": 2300, "note": "Baseline recorded" },
+  { "date": "2026-07-18", "company": "Alight Solutions", "field": "employees", "value": 9500, "note": "Baseline recorded" },
+  { "date": "2026-07-18", "company": "HealthEquity", "field": "revenue", "value": 1310, "note": "Baseline recorded" },
+  { "date": "2026-07-18", "company": "HealthEquity", "field": "employees", "value": 3120, "note": "Baseline recorded" },
+  { "date": "2026-07-18", "company": "TriNet Group", "field": "revenue", "value": 719, "note": "Baseline recorded" },
+  { "date": "2026-07-18", "company": "TriNet Group", "field": "employees", "value": 3600, "note": "Baseline recorded" },
+  { "date": "2026-07-18", "company": "Businessolver", "field": "revenue", "value": 210, "note": "Baseline recorded" },
+  { "date": "2026-07-18", "company": "Businessolver", "field": "employees", "value": 1565, "note": "Baseline recorded" },
+  { "date": "2026-07-18", "company": "Empyrean Benefit Solutions", "field": "revenue", "value": 209, "note": "Baseline recorded" },
+  { "date": "2026-07-18", "company": "Empyrean Benefit Solutions", "field": "employees", "value": 575, "note": "Baseline recorded" }
+]
