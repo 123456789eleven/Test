@@ -63,6 +63,26 @@
   .search-result-item .ttl { font-size: 0.86rem; font-weight: 600; margin-top: 2px; }
   .search-empty { padding: 14px; font-size: 0.82rem; color: var(--ink-muted); }
 
+  .auth-btn { font: inherit; font-size: 0.8rem; font-weight: 600; padding: 7px 14px; border-radius: 8px; border: 1px solid var(--border); background: var(--surface); color: var(--ink-soft); cursor: pointer; white-space: nowrap; transition: border-color .15s ease, color .15s ease; }
+  .auth-btn:hover { border-color: var(--accent); color: var(--ink); }
+  .auth-btn[data-mode="signout"] { color: var(--accent); border-color: var(--accent); }
+
+  .auth-modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 100; align-items: center; justify-content: center; padding: 20px; }
+  .auth-modal-overlay.show { display: flex; }
+  .auth-modal { position: relative; width: 100%; max-width: 360px; background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 26px 28px; }
+  .auth-modal h3 { font-size: 1.1rem; margin-bottom: 6px; }
+  .auth-modal-sub { color: var(--ink-soft); font-size: 0.84rem; line-height: 1.5; margin: 0 0 18px; }
+  .auth-modal-close { position: absolute; top: 16px; right: 16px; background: none; border: none; color: var(--ink-muted); cursor: pointer; font-size: 0.85rem; }
+  #authForm { display: flex; flex-direction: column; gap: 10px; }
+  #authForm input { font: inherit; font-size: 0.9rem; padding: 9px 11px; border-radius: 7px; border: 1px solid var(--border); background: var(--surface-alt); color: var(--ink); }
+  #authForm button[type="submit"] { font: inherit; font-size: 0.88rem; font-weight: 600; padding: 10px; border-radius: 8px; border: none; background: var(--accent); color: var(--accent-ink); cursor: pointer; margin-top: 4px; transition: filter .15s ease; }
+  #authForm button[type="submit"]:hover { filter: brightness(1.08); }
+  .auth-error { color: var(--warn); font-size: 0.8rem; min-height: 1em; }
+  .auth-toggle-mode { display: block; width: 100%; text-align: center; background: none; border: none; color: var(--accent); font: inherit; font-size: 0.8rem; margin-top: 14px; cursor: pointer; }
+
+  .auth-gate { border: 1px dashed var(--border); border-radius: 10px; padding: 16px 18px; text-align: center; color: var(--ink-soft); font-size: 0.88rem; margin-bottom: 8px; }
+  .auth-gate button { font: inherit; font-size: 0.85rem; font-weight: 600; color: var(--accent); background: none; border: none; cursor: pointer; text-decoration: underline; }
+
   main { flex: 1; padding: 28px clamp(16px, 3vw, 40px) 70px; max-width: 1180px; width: 100%; margin: 0 auto; }
   .loading { color: var(--ink-muted); font-size: 0.9rem; padding: 40px 0; text-align: center; }
 
@@ -403,6 +423,7 @@
         <input id="globalSearch" placeholder="Search everything (notes, insights, companies)…" autocomplete="off" />
         <div class="search-results" id="searchResults"></div>
       </div>
+      <button class="auth-btn" id="authButton">Sign in to edit</button>
     </div>
     <main id="viewMount">
       <div class="loading">Loading…</div>
@@ -411,6 +432,25 @@
   </div>
 </div>
 
+<div class="auth-modal-overlay" id="authModalOverlay">
+  <div class="auth-modal">
+    <button class="auth-modal-close" id="authModalClose">✕</button>
+    <h3 id="authModalTitle">Sign in</h3>
+    <p class="auth-modal-sub">Only needed to add or edit notes — everything on this site stays viewable either way.</p>
+    <form id="authForm">
+      <input type="email" id="authEmail" placeholder="Email" autocomplete="email" required />
+      <input type="password" id="authPassword" placeholder="Password" autocomplete="current-password" required />
+      <div class="auth-error" id="authError"></div>
+      <button type="submit" id="authSubmit">Sign in</button>
+    </form>
+    <button class="auth-toggle-mode" id="authToggleMode">First time? Create your account</button>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/supabase-client.js"></script>
+<script src="js/migrate.js"></script>
+<script src="js/auth.js"></script>
 <script src="js/router.js"></script>
 <script src="js/search.js"></script>
 <script src="js/views/overview.js"></script>

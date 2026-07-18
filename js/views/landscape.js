@@ -1,10 +1,7 @@
 (function () {
-  const NOTES_KEY = "custodianNotes";
   const PAGE_ID = "landscape";
   const TYPE_LABEL = { observation: "Observation", question: "Question", idea: "Idea" };
 
-  function loadNotes() { try { return JSON.parse(localStorage.getItem(NOTES_KEY)) || []; } catch { return []; } }
-  function saveNotes(notes) { localStorage.setItem(NOTES_KEY, JSON.stringify(notes)); }
   function fmtM(v) { return v >= 1000 ? "$" + (v / 1000).toFixed(2) + "B" : "$" + v + "M"; }
 
   async function renderLandscapeView(mount) {
@@ -75,8 +72,9 @@
       <div class="view" id="lsview-notes">
         <div class="notes-card">
           <h3>Field notes</h3>
-          <p class="cap">Your own read on this market — observations, open questions, ideas worth chasing. Saved in this browser only; this is where the page actually becomes yours.</p>
-          <div class="note-form">
+          <p class="cap">Your own read on this market — observations, open questions, ideas worth chasing. Visible to anyone, editable only when you're signed in.</p>
+          <div id="lsAuthGate"></div>
+          <div class="note-form" id="lsNoteForm">
             <select id="lsNoteType">
               <option value="observation">Observation</option>
               <option value="question">Question</option>
@@ -102,24 +100,34 @@
       document.getElementById("lsview-" + btn.dataset.view).classList.add("active");
     });
 
+    await Auth.ready;
+    updateNotesGate();
     renderFieldNotes();
-    document.getElementById("lsNoteAdd").addEventListener("click", () => {
+    document.getElementById("lsNoteAdd").addEventListener("click", async () => {
       const text = document.getElementById("lsNoteText").value.trim();
       if (!text) return;
-      const notes = loadNotes();
-      notes.push({
-        id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
+      await supabaseClient.from("field_notes").insert({
         page: PAGE_ID,
         type: document.getElementById("lsNoteType").value,
-        related: document.getElementById("lsNoteRelated").value.trim(),
-        text,
-        date: new Date().toISOString().slice(0, 10)
+        related: document.getElementById("lsNoteRelated").value.trim() || null,
+        body: text
       });
-      saveNotes(notes);
       document.getElementById("lsNoteText").value = "";
       document.getElementById("lsNoteRelated").value = "";
       renderFieldNotes();
     });
+
+    const onAuthOrMigrate = () => {
+      if (!document.getElementById("lsAuthGate")) {
+        window.removeEventListener("custodian:authchange", onAuthOrMigrate);
+        window.removeEventListener("custodian:migrated", onAuthOrMigrate);
+        return;
+      }
+      updateNotesGate();
+      renderFieldNotes();
+    };
+    window.addEventListener("custodian:authchange", onAuthOrMigrate);
+    window.addEventListener("custodian:migrated", onAuthOrMigrate);
 
     let data;
     try {
@@ -202,24 +210,45 @@
     ]);
   }
 
-  function renderFieldNotes() {
+  function updateNotesGate() {
+    const gate = document.getElementById("lsAuthGate");
+    const form = document.getElementById("lsNoteForm");
+    if (!gate || !form) return;
+    if (Auth.isSignedIn()) {
+      gate.innerHTML = "";
+      form.style.display = "";
+    } else {
+      form.style.display = "none";
+      gate.innerHTML = `<div class="auth-gate">Sign in to add or edit notes. <button id="lsAuthGateBtn">Sign in</button></div>`;
+      document.getElementById("lsAuthGateBtn").addEventListener("click", () => document.getElementById("authButton").click());
+    }
+  }
+
+  async function renderFieldNotes() {
     const list = document.getElementById("lsNotesList");
     if (!list) return;
-    const all = loadNotes().filter(n => n.page === PAGE_ID).sort((a, b) => new Date(b.date) - new Date(a.date));
-    if (!all.length) { list.innerHTML = `<div class="notes-empty">No notes yet — add your first observation above.</div>`; return; }
-    list.innerHTML = all.map(n => `
+    const { data, error } = await supabaseClient
+      .from("field_notes")
+      .select("*")
+      .eq("page", PAGE_ID)
+      .order("created_at", { ascending: false });
+    if (!document.getElementById("lsNotesList")) return;
+    if (error) { list.innerHTML = `<div style="color:var(--warn);">Couldn't load notes (${error.message}).</div>`; return; }
+    if (!data.length) { list.innerHTML = `<div class="notes-empty">No notes yet — add your first observation above.</div>`; return; }
+    const signedIn = Auth.isSignedIn();
+    list.innerHTML = data.map(n => `
       <div class="note-item" data-id="${n.id}">
-        <button class="note-del" title="Delete" data-id="${n.id}">✕</button>
+        ${signedIn ? `<button class="note-del" title="Delete" data-id="${n.id}">✕</button>` : ""}
         <div class="nmeta">
           <span class="note-tag ${n.type}">${TYPE_LABEL[n.type]}</span>
           ${n.related ? `<span class="note-related">${n.related}</span>` : ""}
-          <span class="note-date mono">${n.date}</span>
+          <span class="note-date mono">${n.created_at.slice(0, 10)}</span>
         </div>
-        <div class="note-text">${n.text}</div>
+        <div class="note-text">${n.body}</div>
       </div>`).join("");
     list.querySelectorAll(".note-del").forEach(btn => {
-      btn.addEventListener("click", () => {
-        saveNotes(loadNotes().filter(n => n.id !== btn.dataset.id));
+      btn.addEventListener("click", async () => {
+        await supabaseClient.from("field_notes").delete().eq("id", btn.dataset.id);
         renderFieldNotes();
       });
     });
