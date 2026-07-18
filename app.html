@@ -268,35 +268,56 @@
   .leader-card .note { font-size: 0.82rem; color: var(--ink-soft); line-height: 1.5; flex: 1; min-width: 220px; }
   @media (max-width: 700px) { .leader-card { flex-direction: column; gap: 4px; } .leader-card .name, .leader-card .title { width: auto; } }
 
-  /* ---- Kelly Benefits: circle diagram ---- */
-  .circle-wrap { display: flex; justify-content: center; margin: 10px 0 30px; }
-  .circle-diagram { position: relative; width: 100%; max-width: 560px; aspect-ratio: 1/1; }
-  .circle-diagram svg.lines { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
-  .circle-diagram svg.lines path { fill: none; stroke: var(--ink-muted); stroke-width: 2.5; marker-end: url(#arrowhead); opacity: 0.55; }
-  .circle-center {
-    position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-    width: 42%; text-align: center; font-size: 0.78rem; color: var(--ink-soft); line-height: 1.4;
-  }
-  .circle-center b { display: block; color: var(--ink); font-size: 0.88rem; margin-bottom: 3px; }
-  .division-node {
-    position: absolute; transform: translate(-50%, -50%); width: 168px;
-    display: flex; flex-direction: column; align-items: center; text-align: center; cursor: pointer;
-  }
-  .division-node .node-circle {
-    width: 78px; height: 78px; border-radius: 50%; background: var(--page); border: 2px solid var(--accent);
-    display: flex; align-items: center; justify-content: center;
-    transition: background .15s ease; font-size: 0.72rem; font-weight: 700; color: var(--accent); padding: 6px; line-height: 1.15;
-  }
-  .division-node:hover .node-circle, .division-node.open .node-circle { background: var(--accent-wash); }
-  .division-node .node-sub { font-size: 0.72rem; color: var(--ink-soft); margin-top: 8px; line-height: 1.3; }
-  .division-node:focus-visible { outline: 2px solid var(--manager); outline-offset: 4px; border-radius: 14px; }
+  /* ---- Kelly Benefits: unified org/process map ---- */
+  .orgmap-wrap { margin: 10px 0 8px; }
+  .orgmap-wrap .cap { color: var(--ink-soft); font-size: 0.9rem; line-height: 1.55; max-width: 74ch; margin-bottom: 18px; }
+  .orgmap-container { width: 100%; overflow-x: auto; }
+  .orgmap-svg { width: 100%; height: auto; display: block; min-width: 640px; }
+  .orgmap-arrowhead { fill: var(--accent); }
 
-  #divisionDetail { display: none; border-top: 1px solid var(--border); padding-top: 22px; margin-bottom: 30px; }
-  #divisionDetail.show { display: block; }
-  .dd-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; margin-bottom: 6px; }
+  .orgmap-link { fill: none; transition: opacity .15s ease, stroke-width .15s ease; }
+  .orgmap-link-tree { stroke: var(--border); stroke-width: 1.5; }
+  .orgmap-link-flow { stroke: var(--accent); stroke-width: 2; opacity: 0.85; }
+  .orgmap-link-cross { stroke: var(--manager); stroke-width: 1.5; stroke-dasharray: 4 4; opacity: 0.7; }
+  .orgmap-link.hi { opacity: 1; stroke-width: 3; }
+  .orgmap-link.dim { opacity: 0.15; }
+
+  .orgmap-node {
+    box-sizing: border-box; width: 100%; height: 100%; border: 1.5px solid var(--border); background: var(--page);
+    padding: 8px 12px; display: flex; flex-direction: column; justify-content: center; text-align: center;
+    cursor: pointer; transition: border-color .15s ease, opacity .15s ease; font-family: "Inter", sans-serif;
+  }
+  .orgmap-node:hover, .orgmap-node:focus-visible { border-color: var(--accent); outline: none; }
+  .orgmap-node.dim { opacity: 0.25; }
+  .orgmap-node-root { border-color: var(--ink); border-width: 2px; }
+  .orgmap-node-division { border-color: var(--accent); }
+  .orgmap-node-vertical { font-size: 0.92em; }
+  .orgmap-node-cto { border-style: dashed; border-color: var(--manager); }
+  .orgmap-node-seat { border-color: var(--manager); border-width: 2px; background: var(--manager-soft); }
+  .omn-name { font-family: "Space Grotesk", sans-serif; font-weight: 700; font-size: 0.9rem; color: var(--ink); display: flex; align-items: center; justify-content: center; gap: 6px; }
+  .omn-sub { font-size: 0.72rem; color: var(--ink-soft); margin-top: 3px; line-height: 1.3; }
+  .omn-seat { font-size: 0.62rem; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 700; color: var(--manager); margin-top: 4px; }
+  .omn-dot { display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--manager); }
+
+  .orgmap-legend { display: flex; gap: 20px; flex-wrap: wrap; margin-top: 16px; font-size: 0.78rem; color: var(--ink-soft); }
+  .orgmap-legend span { display: flex; align-items: center; gap: 6px; }
+  .lg-swatch { display: inline-block; width: 16px; height: 2px; }
+  .lg-swatch.lg-tree { background: var(--border); }
+  .lg-swatch.lg-flow { background: var(--accent); }
+  .lg-swatch.lg-cross { background: repeating-linear-gradient(90deg, var(--manager) 0 3px, transparent 3px 6px); }
+  .lg-swatch.lg-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--manager); }
+
+  #orgDetail { display: none; border-top: 1px solid var(--border); padding-top: 22px; margin: 10px 0 30px; }
+  #orgDetail.show { display: block; }
+  .dd-head, .ad-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; margin-bottom: 6px; }
   .dd-head h2 { font-size: 1.3rem; }
-  #divisionDetail p.desc { color: var(--ink-soft); font-size: 0.94rem; line-height: 1.6; max-width: 74ch; margin: 8px 0 20px; }
-  #closeDivision { background: none; border: none; color: var(--ink-soft); font: inherit; font-size: 0.8rem; padding: 0; cursor: pointer; text-decoration: underline; }
+  .dd-leaders { color: var(--ink-soft); font-size: 0.86rem; margin-top: 4px; }
+  #orgDetail p.desc { color: var(--ink-soft); font-size: 0.94rem; line-height: 1.6; max-width: 74ch; margin: 8px 0 20px; }
+  #closeOrgDetail { background: none; border: none; color: var(--ink-soft); font: inherit; font-size: 0.8rem; padding: 0; cursor: pointer; text-decoration: underline; flex: none; }
+  .ad-head h3 { font-size: 1.15rem; }
+  .ad-status { font-size: 0.76rem; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 700; }
+  .ad-status.confirmed { color: var(--good); }
+  .ad-status.unconfirmed { color: var(--manager); }
 
   .co-hbar-row { display: grid; grid-template-columns: 150px 1fr 90px; align-items: center; gap: 10px; margin-bottom: 12px; }
   .co-hbar-row .lbl { font-size: 0.84rem; }
@@ -366,34 +387,7 @@
   .wb-filter { font: inherit; font-size: 0.8rem; font-weight: 600; padding: 0; border: none; background: none; color: var(--ink-soft); cursor: pointer; }
   .wb-filter.active { color: var(--ink); }
 
-  /* ---- Kelly Benefits: Inside Advantage vertical flow ---- */
-  .adv-intro { max-width: 74ch; color: var(--ink-soft); font-size: 0.92rem; line-height: 1.6; margin-bottom: 24px; }
-  .adv-intro b { color: var(--ink); }
-  .vf-flow { margin-bottom: 8px; }
-  .vf-row { display: flex; align-items: stretch; justify-content: center; gap: 14px; flex-wrap: wrap; }
-  .vf-row.three { margin-top: 10px; }
-  .vf-arrow { display: flex; align-items: center; color: var(--ink-muted); font-size: 1.3rem; }
-  .vf-split-label { text-align: center; font-size: 0.76rem; color: var(--ink-muted); margin: 10px 0; text-transform: uppercase; letter-spacing: 0.05em; }
-  .vf-node {
-    flex: 1; min-width: 150px; max-width: 220px; border: 1px solid var(--border);
-    background: transparent; padding: 16px 16px; cursor: pointer; text-align: center;
-    transition: border-color .15s ease;
-  }
-  .vf-node:hover, .vf-node.open { border-color: var(--accent); }
-  .vf-node:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
-  .vf-node .vf-name { font-family: "Space Grotesk", sans-serif; font-weight: 700; font-size: 1rem; }
-  .vf-node .vf-func { font-size: 0.78rem; color: var(--ink-soft); margin-top: 4px; }
-  .vf-node.seat { border-color: var(--manager); }
-  .vf-seat-badge { display: inline-block; margin-top: 8px; font-size: 0.66rem; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 700; color: var(--manager); }
-
-  #advDetail { display: none; border-top: 1px solid var(--border); padding-top: 22px; margin-top: 22px; }
-  #advDetail.show { display: block; }
-  #advDetail .ad-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; margin-bottom: 6px; }
-  #advDetail h3 { font-size: 1.15rem; }
-  #advDetail .ad-status { font-size: 0.76rem; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 700; }
-  #advDetail .ad-status.confirmed { color: var(--good); }
-  #advDetail .ad-status.unconfirmed { color: var(--manager); }
-  #closeAdv { background: none; border: none; color: var(--ink-soft); font: inherit; font-size: 0.8rem; padding: 0; cursor: pointer; text-decoration: underline; }
+  /* ---- Kelly Benefits: vertical function detail (used in #orgDetail) ---- */
   .ad-func-list { list-style: none; margin: 14px 0 0; padding: 0; }
   .ad-func-list li { display: flex; align-items: baseline; gap: 8px; padding: 8px 0; border-top: 1px solid var(--border); font-size: 0.88rem; }
   .ad-func-list li:first-child { border-top: none; }
@@ -455,9 +449,11 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
 <script src="js/supabase-client.js"></script>
 <script src="js/migrate.js"></script>
 <script src="js/auth.js"></script>
+<script src="js/orgmap.js"></script>
 <script src="js/router.js"></script>
 <script src="js/search.js"></script>
 <script src="js/views/overview.js"></script>

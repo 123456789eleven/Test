@@ -5,7 +5,6 @@
   const EFFORT_LABEL = { low: "Low effort", med: "Medium effort", high: "High effort" };
 
   let wbFilter = "all";
-  let openDivisionId = null;
   let fitSaveTimeout;
 
   function fmtVal(v) { return v === null ? "n/a" : "$" + v + "B"; }
@@ -25,7 +24,6 @@
 
       <div class="tabs" id="coTabs">
         <button data-view="overview" class="active">Overview</button>
-        <button data-view="advantage">Inside Advantage</button>
         <button data-view="people">People &amp; History</button>
         <button data-view="strategy">Strategy</button>
         <button data-view="notes">Workbench</button>
@@ -34,61 +32,20 @@
       <div class="view active" id="coview-overview">
         <div class="snapshot" id="coSnapshot"></div>
 
-        <div class="circle-wrap">
-          <div class="circle-diagram" id="circleDiagram">
-            <svg class="lines" viewBox="0 0 600 600">
-              <defs>
-                <marker id="arrowhead" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="var(--ink-muted)" opacity="0.7"/></marker>
-              </defs>
-              <path d="M 300 130 A 170 170 0 0 1 470 300" marker-end="url(#arrowhead)"></path>
-              <path d="M 470 300 A 170 170 0 0 1 300 470" marker-end="url(#arrowhead)"></path>
-              <path d="M 300 470 A 170 170 0 0 1 130 300" marker-end="url(#arrowhead)"></path>
-              <path d="M 130 300 A 170 170 0 0 1 300 130" marker-end="url(#arrowhead)"></path>
-            </svg>
-            <div class="circle-center"><b>One client relationship</b>Sold, administered, paid, and invested — through a shared Total Benefits Solution® platform.</div>
+        <div class="orgmap-wrap">
+          <p class="cap">Every division, Kelly Benefits Advantage's five internal verticals, and where technology and enrollment cut across all of them — one connected map instead of three separate diagrams. Click any box for detail; hover to trace exactly what connects to what.</p>
+          <div id="coOrgMap" class="orgmap-container"></div>
+          <div class="orgmap-legend">
+            <span><i class="lg-swatch lg-tree"></i>Org structure</span>
+            <span><i class="lg-swatch lg-flow"></i>Workflow (Win → Construct → …)</span>
+            <span><i class="lg-swatch lg-cross"></i>Cross-cutting (Technology)</span>
+            <span><i class="lg-swatch lg-dot"></i>Shares enrollment responsibility</span>
           </div>
         </div>
 
-        <div id="divisionDetail">
-          <div class="dd-head">
-            <div><h2 id="ddTitle"></h2></div>
-            <button id="closeDivision">Close ✕</button>
-          </div>
-          <p class="desc" id="ddDesc"></p>
-          <div class="scale-note" id="ddScale"></div>
-          <div id="ddChart"></div>
-          <div class="chart-caption" id="ddCaption"></div>
-        </div>
+        <div id="orgDetail"></div>
 
         <div class="integration-box" id="coIntegrationNote"></div>
-      </div>
-
-      <div class="view" id="coview-advantage">
-        <p class="adv-intro">Kelly Benefits Advantage itself is organized into five verticals. This is a working model built from what's confirmed on the ground, not public research — click any vertical for what's actually known versus what's still a guess.</p>
-        <div class="vf-flow">
-          <div class="vf-row">
-            <div class="vf-node" data-v="win" tabindex="0" role="button"><div class="vf-name">Win</div><div class="vf-func">New business</div></div>
-            <div class="vf-arrow">→</div>
-            <div class="vf-node" data-v="construct" tabindex="0" role="button"><div class="vf-name">Construct</div><div class="vf-func">Implementation &amp; integration</div></div>
-          </div>
-          <div class="vf-split-label">then splits into three ongoing tracks ↓</div>
-          <div class="vf-row three">
-            <div class="vf-node" data-v="protect" tabindex="0" role="button"><div class="vf-name">Protect</div><div class="vf-func">Compliance &amp; broker mgmt (unconfirmed)</div></div>
-            <div class="vf-node seat" data-v="connect" tabindex="0" role="button"><div class="vf-name">Connect</div><div class="vf-func">COBRA admin</div><span class="vf-seat-badge">You are here</span></div>
-            <div class="vf-node" data-v="serve" tabindex="0" role="button"><div class="vf-name">Serve</div><div class="vf-func">Dedicated service</div></div>
-          </div>
-        </div>
-
-        <div id="advDetail">
-          <div class="ad-head">
-            <h3 id="advTitle"></h3>
-            <span class="ad-status" id="advStatus"></span>
-            <button id="closeAdv">Close ✕</button>
-          </div>
-          <p id="advDesc" style="color:var(--ink-soft); font-size:0.9rem; margin-top:4px;"></p>
-          <ul class="ad-func-list" id="advFuncs"></ul>
-        </div>
-
         <div class="crosscutting-box">
           <h4>Where "enrollment" and "reconciliation" actually sit</h4>
           <p id="coEnrollmentNote"></p>
@@ -97,7 +54,7 @@
       </div>
 
       <div class="view" id="coview-people">
-        <p class="section-label">Leadership — split along the same circle</p>
+        <p class="section-label">Leadership — split across the four divisions</p>
         <div class="leadership" id="coLeadership"></div>
         <div class="timeline-card">
           <h3>Company history</h3>
@@ -218,34 +175,7 @@
         <ul>${data.swot[key].map(item => `<li>${item}</li>`).join("")}</ul>
       </div>`).join("");
 
-    const diagram = document.getElementById("circleDiagram");
-    function renderCircle() {
-      diagram.querySelectorAll(".division-node").forEach(el => el.remove());
-      data.divisions.forEach(d => {
-        const el = document.createElement("div");
-        el.className = "division-node" + (openDivisionId === d.id ? " open" : "");
-        el.style.left = (d.x / 600 * 100) + "%";
-        el.style.top = (d.y / 600 * 100) + "%";
-        el.innerHTML = `<div class="node-circle">${d.name}</div><div class="node-sub">${d.role}</div>`;
-        el.tabIndex = 0;
-        el.setAttribute("role", "button");
-        el.setAttribute("aria-label", `${d.name} — ${d.role}`);
-        el.addEventListener("click", () => openDivision(d.id));
-        el.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); openDivision(d.id); } });
-        diagram.appendChild(el);
-      });
-    }
-
-    function openDivision(id) {
-      if (openDivisionId === id) { closeDivision(); return; }
-      openDivisionId = id;
-      renderCircle();
-      const d = data.divisions.find(x => x.id === id);
-      document.getElementById("ddTitle").textContent = `Kelly Benefits ${d.name} — ${d.role}`;
-      document.getElementById("ddDesc").textContent = d.desc;
-      document.getElementById("ddScale").innerHTML = d.scale;
-      document.getElementById("ddCaption").textContent = d.caption;
-
+    function renderDivisionDetail(d) {
       const withVals = d.competitors.filter(c => c.value !== null);
       const max = Math.max(...withVals.map(c => c.value));
       const chartHtml = d.competitors.map(c => `
@@ -255,56 +185,71 @@
           <div class="val mono">${fmtVal(c.value)}</div>
         </div>
       `).join("");
-      document.getElementById("ddChart").innerHTML = `<div style="font-size:0.72rem; text-transform:uppercase; letter-spacing:0.05em; color:var(--ink-soft); margin-bottom:10px;">${d.unit}</div>` + chartHtml;
+      const leaders = (ORG_CONSTANTS.DIVISION_LEADERS[d.id] || []).join(", ");
+      return `
+        <div class="dd-head">
+          <div><h2>Kelly Benefits ${d.name} — ${d.role}</h2>${leaders ? `<div class="dd-leaders">${leaders}</div>` : ""}</div>
+          <button id="closeOrgDetail">Close ✕</button>
+        </div>
+        <p class="desc">${d.desc}</p>
+        <div class="scale-note">${d.scale}</div>
+        <div style="font-size:0.72rem; text-transform:uppercase; letter-spacing:0.05em; color:var(--ink-soft); margin-bottom:10px;">${d.unit}</div>
+        ${chartHtml}
+        <div class="chart-caption">${d.caption}</div>
+      `;
+    }
 
-      document.getElementById("divisionDetail").classList.add("show");
-      document.getElementById("divisionDetail").scrollIntoView({ behavior: "smooth", block: "nearest" });
+    function renderVerticalDetail(key) {
+      const v = data.verticals[key];
+      return `
+        <div class="ad-head">
+          <h3>${v.name}</h3>
+          <span class="ad-status ${v.confirmed ? "confirmed" : "unconfirmed"}">${v.confirmed ? "Confirmed" : "Estimated — verify"}</span>
+          <button id="closeOrgDetail">Close ✕</button>
+        </div>
+        <p style="color:var(--ink-soft); font-size:0.9rem; margin-top:4px;">${v.desc}</p>
+        <ul class="ad-func-list">${v.funcs.map(([label, confirmed]) => `
+          <li><span class="ad-pill ${confirmed ? "confirmed" : "estimated"}">${confirmed ? "confirmed" : "est."}</span> ${label}</li>
+        `).join("")}</ul>
+      `;
+    }
+
+    function renderPersonDetail(name, title, note) {
+      return `
+        <div class="dd-head">
+          <div><h2>${name}</h2><div class="dd-leaders">${title}</div></div>
+          <button id="closeOrgDetail">Close ✕</button>
+        </div>
+        <p class="desc">${note}</p>
+      `;
+    }
+
+    function handleOrgNodeClick(id) {
+      const panel = document.getElementById("orgDetail");
+      let html = "";
+      if (data.divisions.some(d => d.id === id)) {
+        html = renderDivisionDetail(data.divisions.find(d => d.id === id));
+      } else if (data.verticals[id]) {
+        html = renderVerticalDetail(id);
+      } else if (id === "cto") {
+        const p = data.leadership.find(l => l.name === ORG_CONSTANTS.CTO_NAME);
+        html = renderPersonDetail(p.name, p.title, p.note);
+      } else if (id === "root") {
+        const p = data.leadership.find(l => l.name === ORG_CONSTANTS.CEO_NAME);
+        html = renderPersonDetail(p.name, p.title, p.note);
+      } else {
+        return;
+      }
+      panel.innerHTML = html;
+      panel.classList.add("show");
+      document.getElementById("closeOrgDetail").addEventListener("click", () => panel.classList.remove("show"));
+      panel.scrollIntoView({ behavior: "smooth", block: "nearest" });
       requestAnimationFrame(() => requestAnimationFrame(() => {
-        document.querySelectorAll("#ddChart .co-hbar-fill[data-w]").forEach(el => { el.style.width = el.dataset.w + "%"; });
+        panel.querySelectorAll(".co-hbar-fill[data-w]").forEach(el => { el.style.width = el.dataset.w + "%"; });
       }));
     }
-    function closeDivision() { openDivisionId = null; renderCircle(); document.getElementById("divisionDetail").classList.remove("show"); }
-    document.getElementById("closeDivision").addEventListener("click", closeDivision);
-    renderCircle();
 
-    if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-      document.querySelectorAll(".circle-diagram svg.lines path").forEach((path, i) => {
-        const len = path.getTotalLength();
-        path.style.strokeDasharray = len;
-        path.style.strokeDashoffset = len;
-        path.getBoundingClientRect();
-        path.style.transition = `stroke-dashoffset .8s cubic-bezier(.2,.8,.2,1) ${i * 0.08}s`;
-        requestAnimationFrame(() => { path.style.strokeDashoffset = 0; });
-      });
-      document.querySelectorAll(".division-node").forEach((el, i) => {
-        el.style.opacity = 0;
-        el.style.transition = `opacity .5s ease ${0.3 + i * 0.08}s`;
-        requestAnimationFrame(() => { el.style.opacity = 1; });
-      });
-    }
-
-    function openVertical(id) {
-      const v = data.verticals[id];
-      document.querySelectorAll(".vf-node").forEach(n => n.classList.toggle("open", n.dataset.v === id));
-      document.getElementById("advTitle").textContent = v.name;
-      const statusEl = document.getElementById("advStatus");
-      statusEl.textContent = v.confirmed ? "Confirmed" : "Estimated — verify";
-      statusEl.className = "ad-status " + (v.confirmed ? "confirmed" : "unconfirmed");
-      document.getElementById("advDesc").textContent = v.desc;
-      document.getElementById("advFuncs").innerHTML = v.funcs.map(([label, confirmed]) => `
-        <li><span class="ad-pill ${confirmed ? "confirmed" : "estimated"}">${confirmed ? "confirmed" : "est."}</span> ${label}</li>
-      `).join("");
-      document.getElementById("advDetail").classList.add("show");
-      document.getElementById("advDetail").scrollIntoView({ behavior: "smooth", block: "nearest" });
-    }
-    document.querySelectorAll(".vf-node").forEach(node => {
-      node.addEventListener("click", () => openVertical(node.dataset.v));
-      node.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); openVertical(node.dataset.v); } });
-    });
-    document.getElementById("closeAdv").addEventListener("click", () => {
-      document.getElementById("advDetail").classList.remove("show");
-      document.querySelectorAll(".vf-node").forEach(n => n.classList.remove("open"));
-    });
+    renderOrgMap("coOrgMap", { companyData: data, onNodeClick: handleOrgNodeClick });
 
     SearchIndex.register("Kelly Benefits", [
       ...data.divisions.map(d => ({ title: `Kelly Benefits ${d.name}`, snippet: d.desc, route: "company" })),
