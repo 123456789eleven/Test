@@ -1,28 +1,34 @@
 (function () {
-  const DIVISION_LEADERS = {
-    strategies: ["John Kelly"],
-    advantage: ["David Kelly", "Bryan Kelly"],
-    payroll: ["David Kelly"],
-    advisory: ["John Kelly"]
-  };
-  const CEO_NAME = "Frank Kelly III";
-  const CTO_NAME = "Katherine Vahdani";
   const ENROLLMENT_VERTICALS = ["construct", "connect", "serve"];
   const WORKFLOW_EDGES = [["win", "construct"], ["construct", "protect"], ["construct", "connect"], ["construct", "serve"]];
+  const EXEC_IDS = ["fx3", "frankIII"];
 
-  window.ORG_CONSTANTS = { DIVISION_LEADERS, CEO_NAME, CTO_NAME };
+  function personNode(p) {
+    return { id: p.id, name: p.name, type: "person", title: p.title, cross: p.cross || [] };
+  }
 
   function buildTree(companyData) {
+    const leadership = companyData.leadership;
+    const byParent = {};
+    leadership.forEach(p => { (byParent[p.parent] = byParent[p.parent] || []).push(p); });
+
+    const rootPeople = (byParent.root || []).filter(p => EXEC_IDS.includes(p.id));
+    const corpPeople = (byParent.root || []).filter(p => !EXEC_IDS.includes(p.id));
+
+    const divisionNodes = companyData.divisions.map(d => {
+      const people = (byParent[d.id] || []).map(personNode);
+      const verticals = d.id === "advantage" ? Object.entries(companyData.verticals).map(([key, v]) => ({
+        id: key, name: v.name, type: "vertical", confirmed: v.confirmed,
+        seat: key === "connect", enrollment: ENROLLMENT_VERTICALS.includes(key)
+      })) : [];
+      return { id: d.id, name: d.name, type: "division", role: d.role, children: [...people, ...verticals] };
+    });
+
+    const corpGroup = { id: "corpfn", name: "Corporate Functions", type: "group", children: corpPeople.map(personNode) };
+
     return {
-      id: "root", name: "Kelly Benefits", type: "root", subtitle: CEO_NAME + " · CEO",
-      children: companyData.divisions.map(d => ({
-        id: d.id, name: d.name, type: "division", role: d.role,
-        leaders: DIVISION_LEADERS[d.id] || [],
-        children: d.id === "advantage" ? Object.entries(companyData.verticals).map(([key, v]) => ({
-          id: key, name: v.name, type: "vertical", confirmed: v.confirmed,
-          seat: key === "connect", enrollment: ENROLLMENT_VERTICALS.includes(key)
-        })) : []
-      }))
+      id: "root", name: "Kelly Benefits", type: "root",
+      children: [...rootPeople.map(personNode), corpGroup, ...divisionNodes]
     };
   }
 
@@ -33,24 +39,21 @@
 
     const treeData = buildTree(companyData);
     const root = d3.hierarchy(treeData);
-    const nodeW = 172, nodeH = 66;
-    const layout = d3.tree().nodeSize([nodeW + 26, nodeH + 58]);
+    const nodeW = 156, nodeH = 58;
+    const layout = d3.tree().nodeSize([nodeW + 18, nodeH + 54]);
     layout(root);
 
     const nodes = root.descendants();
     const links = root.links();
+    const nodeLookup = {};
+    nodes.forEach(n => { nodeLookup[n.data.id] = n; });
 
     let minX = Infinity, maxX = -Infinity, maxY = 0;
     nodes.forEach(n => { minX = Math.min(minX, n.x); maxX = Math.max(maxX, n.x); maxY = Math.max(maxY, n.y); });
 
-    const divisionNodes = nodes.filter(n => n.data.type === "division");
-    const divisionY = divisionNodes.length ? divisionNodes[0].y : (nodeH + 58);
-    const ctoNode = { x: minX - (nodeW + 64), y: divisionY, data: { id: "cto", name: CTO_NAME, type: "cto", subtitle: "Chief Technology Officer" } };
-    minX = Math.min(minX, ctoNode.x);
-
-    const width = (maxX - minX) + nodeW + 80;
+    const width = (maxX - minX) + nodeW + 60;
     const height = maxY + nodeH + 60;
-    const offsetX = -minX + nodeW / 2 + 40;
+    const offsetX = -minX + nodeW / 2 + 30;
     function px(n) { return n.x + offsetX; }
     function py(n) { return n.y + 30; }
 
@@ -68,10 +71,6 @@
     const linkLayer = document.createElementNS(svgNS, "g");
     linkLayer.setAttribute("class", "orgmap-links");
     svg.appendChild(linkLayer);
-
-    const nodeLookup = {};
-    nodes.forEach(n => { nodeLookup[n.data.id] = n; });
-    nodeLookup.cto = ctoNode;
 
     function addLink(a, b, cls, curveH) {
       const na = nodeLookup[a], nb = nodeLookup[b];
@@ -95,8 +94,11 @@
 
     links.forEach(l => addLink(l.source.data.id, l.target.data.id, "orgmap-link-tree", false));
     WORKFLOW_EDGES.forEach(([a, b]) => addLink(a, b, "orgmap-link-flow", true));
-    divisionNodes.forEach(dn => addLink("cto", dn.data.id, "orgmap-link-cross", false));
-
+    nodes.forEach(n => {
+      if (n.data.type === "person" && n.data.cross && n.data.cross.length) {
+        n.data.cross.forEach(targetId => addLink(n.data.id, targetId, "orgmap-link-cross", false));
+      }
+    });
     WORKFLOW_EDGES.forEach(([a, b]) => {
       const path = linkLayer.querySelector(`path.orgmap-link-flow[data-a="${a}"][data-b="${b}"]`);
       if (path) path.setAttribute("marker-end", "url(#omArrow)");
@@ -117,11 +119,15 @@
       const div = document.createElement("div");
       div.className = "orgmap-node orgmap-node-" + d.type + (d.seat ? " orgmap-node-seat" : "");
       div.tabIndex = 0;
-      div.innerHTML = `
-        <div class="omn-name">${d.name}${d.enrollment ? '<span class="omn-dot" title="Shares enrollment responsibility"></span>' : ""}</div>
-        <div class="omn-sub">${d.subtitle || d.role || (d.leaders && d.leaders.length ? d.leaders.join(", ") : "")}</div>
-        ${d.seat ? '<div class="omn-seat">YOU ARE HERE</div>' : ""}
-      `;
+      if (d.type === "person") {
+        div.innerHTML = `<div class="omn-name">${d.name}</div><div class="omn-sub">${d.title}</div>`;
+      } else {
+        div.innerHTML = `
+          <div class="omn-name">${d.name}${d.enrollment ? '<span class="omn-dot" title="Shares enrollment responsibility"></span>' : ""}</div>
+          <div class="omn-sub">${d.role || ""}</div>
+          ${d.seat ? '<div class="omn-seat">YOU ARE HERE</div>' : ""}
+        `;
+      }
       div.addEventListener("click", () => { if (onNodeClick) onNodeClick(d.id); });
       div.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); if (onNodeClick) onNodeClick(d.id); } });
       div.addEventListener("mouseenter", () => setHighlight(d.id));
@@ -130,7 +136,6 @@
       nodeLayer.appendChild(fo);
     }
     nodes.forEach(renderNode);
-    renderNode(ctoNode);
 
     function setHighlight(id) {
       const allLinks = Array.from(linkLayer.querySelectorAll(".orgmap-link"));

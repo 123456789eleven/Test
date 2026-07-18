@@ -185,7 +185,7 @@
           <div class="val mono">${fmtVal(c.value)}</div>
         </div>
       `).join("");
-      const leaders = (ORG_CONSTANTS.DIVISION_LEADERS[d.id] || []).join(", ");
+      const leaders = data.leadership.filter(l => l.parent === d.id || (l.cross && l.cross.includes(d.id))).map(l => l.name).join(", ");
       return `
         <div class="dd-head">
           <div><h2>Kelly Benefits ${d.name} — ${d.role}</h2>${leaders ? `<div class="dd-leaders">${leaders}</div>` : ""}</div>
@@ -220,7 +220,19 @@
           <div><h2>${name}</h2><div class="dd-leaders">${title}</div></div>
           <button id="closeOrgDetail">Close ✕</button>
         </div>
-        <p class="desc">${note}</p>
+        ${note ? `<p class="desc">${note}</p>` : ""}
+      `;
+    }
+
+    function renderGroupDetail() {
+      const execIds = ["fx3", "frankIII"];
+      const people = data.leadership.filter(l => l.parent === "root" && !execIds.includes(l.id));
+      return `
+        <div class="dd-head">
+          <div><h2>Corporate Functions</h2><div class="dd-leaders">Shared services spanning all four divisions</div></div>
+          <button id="closeOrgDetail">Close ✕</button>
+        </div>
+        <ul class="ad-func-list">${people.map(p => `<li><strong style="flex:none; min-width:170px;">${p.name}</strong> ${p.title}</li>`).join("")}</ul>
       `;
     }
 
@@ -231,14 +243,15 @@
         html = renderDivisionDetail(data.divisions.find(d => d.id === id));
       } else if (data.verticals[id]) {
         html = renderVerticalDetail(id);
-      } else if (id === "cto") {
-        const p = data.leadership.find(l => l.name === ORG_CONSTANTS.CTO_NAME);
-        html = renderPersonDetail(p.name, p.title, p.note);
+      } else if (id === "corpfn") {
+        html = renderGroupDetail();
       } else if (id === "root") {
-        const p = data.leadership.find(l => l.name === ORG_CONSTANTS.CEO_NAME);
+        const p = data.leadership.find(l => l.id === "frankIII");
         html = renderPersonDetail(p.name, p.title, p.note);
       } else {
-        return;
+        const p = data.leadership.find(l => l.id === id);
+        if (!p) return;
+        html = renderPersonDetail(p.name, p.title, p.note);
       }
       panel.innerHTML = html;
       panel.classList.add("show");

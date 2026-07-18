@@ -8,11 +8,26 @@
     { "l": "Other offices", "v": "Wilmington DE · Rockville MD · Philadelphia · D.C." }
   ],
   "leadership": [
-    { "name": "Frank Kelly III", "title": "CEO", "note": "President since 1994, CEO since 2007. CLU, RHU, REBC — past president, Maryland & Baltimore Associations of Health Underwriters." },
-    { "name": "John Kelly", "title": "Chief Innovation & Strategy Officer", "note": "President of Strategies and Advisory — the \"front half\" of the circle: sell and invest." },
-    { "name": "David Kelly", "title": "Chief Organizational Officer", "note": "President of Payroll and Advantage — the \"back half\" of the circle: administer and process." },
-    { "name": "Bryan Kelly", "title": "EVP, Kelly Benefits & Advantage", "note": "Fourth brother in the family leadership team." },
-    { "name": "Katherine Vahdani", "title": "Chief Technology Officer", "note": "Joined April 2026 — leads a 70-person tech team; first non-family C-suite technology hire." }
+    { "id": "fx3", "name": "The Honorable Francis X. Kelly Jr.", "title": "Chairman & Co-Founder", "parent": "root", "note": "Co-founded the company with his wife Janet in 1976; continues to serve as Chairman." },
+    { "id": "frankIII", "name": "Frank Kelly III", "title": "Chief Executive Officer", "parent": "root", "note": "CLU, RHU, REBC. President since 1994, CEO since 2007 — past president, Maryland & Baltimore Associations of Health Underwriters." },
+    { "id": "johnKelly", "name": "John Kelly", "title": "Chief Innovation & Strategy Officer · President, Strategies & Advisory", "parent": "strategies", "cross": ["advisory"], "note": "" },
+    { "id": "davidKellySr", "name": "David Kelly", "title": "Chief Organizational Officer · President, Payroll & Advantage", "parent": "payroll", "cross": ["advantage"], "note": "" },
+    { "id": "bryanKelly", "name": "Bryan Kelly", "title": "EVP, Kelly Benefits Advantage", "parent": "advantage", "note": "Fourth brother in the family leadership team." },
+    { "id": "trish", "name": "Trish Backer-Miceli", "title": "VP, Human Resources", "parent": "root", "note": "" },
+    { "id": "craig", "name": "Craig Horner", "title": "Chief Financial & Compliance Officer", "parent": "root", "note": "CPA." },
+    { "id": "jen", "name": "Jen Silberzahn", "title": "SVP, Marketing & Communications", "parent": "root", "note": "" },
+    { "id": "wes", "name": "Wesley Mace", "title": "Chief Product Officer · COO, Advantage & Payroll", "parent": "root", "cross": ["advantage", "payroll"], "note": "" },
+    { "id": "brianP", "name": "Brian Pfeifer", "title": "Growth Leader, Payroll", "parent": "payroll", "note": "" },
+    { "id": "frankieIV", "name": "Frankie Kelly IV", "title": "Operations Leader, Advantage", "parent": "advantage", "note": "CPA." },
+    { "id": "sandra", "name": "Sandra Ugol", "title": "Corporate VP, Learning & Development", "parent": "root", "note": "" },
+    { "id": "katherine", "name": "Katherine Vahdani", "title": "Chief Technology Officer", "parent": "root", "note": "Joined April 2026 — leads a 70-person tech team; first non-family C-suite technology hire." },
+    { "id": "justin", "name": "Justin Cross", "title": "COO, Kelly Benefits Strategies", "parent": "strategies", "note": "" },
+    { "id": "adamP", "name": "Adam Polash", "title": "Operations Leader, Payroll", "parent": "payroll", "note": "CSM, PMP." },
+    { "id": "rasoul", "name": "Rasoul Motavalli", "title": "Chief Information Officer & CISO", "parent": "root", "note": "CSM, PMP." },
+    { "id": "stephenK", "name": "Stephen Kelly", "title": "Growth Leader, Advantage", "parent": "advantage", "note": "" },
+    { "id": "johnKellyJr", "name": "John Kelly Jr.", "title": "VP & Financial Advisor, Advisory", "parent": "advisory", "note": "" },
+    { "id": "josh", "name": "Joshua Freeman", "title": "Strategy & Innovation Leader · Chief of Staff to the Chief Innovation & Strategy Officer", "parent": "strategies", "note": "" },
+    { "id": "davidKellyJr", "name": "David Kelly Jr.", "title": "VP, Business Development — Capital Region, Strategies", "parent": "strategies", "note": "" }
   ],
   "history": [
     { "date": "1976", "deal": "Frank & Janet Kelly launch Francis X. Kelly Associates, Inc.", "value": "", "sig": "Started from the bedroom of their Maryland home, pooling small companies together through trade associations to find affordable health coverage." },
