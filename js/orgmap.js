@@ -6,9 +6,10 @@
   function renderBox(node) {
     const lines = (node.lines || []).map(l => `<div class="ocn-line">${l}</div>`).join("");
     const statusClass = node.type === "function" ? (node.confirmed ? " ocn-confirmed" : " ocn-estimated") : "";
+    const collapsible = node.type === "vertical" && node.children && node.children.length;
     return `
-      <div class="ocn ocn-${node.type}${node.seat ? " ocn-seat" : ""}${statusClass}" data-id="${escAttr(node.id)}" tabindex="0" role="button">
-        <div class="ocn-name">${node.name}</div>
+      <div class="ocn ocn-${node.type}${node.seat ? " ocn-seat" : ""}${statusClass}${collapsible ? " oc-toggle" : ""}" data-id="${escAttr(node.id)}" tabindex="0" role="button">
+        <div class="ocn-name">${node.name}${collapsible ? '<span class="ocn-chevron">▸</span>' : ""}</div>
         ${node.role ? `<div class="ocn-role">${node.role}</div>` : ""}
         ${lines}
         ${node.seat ? '<div class="ocn-seat-badge">YOU ARE HERE</div>' : ""}
@@ -57,8 +58,9 @@
 
   function renderNode(node) {
     const children = node.children || [];
+    const listClass = node.type === "vertical" && children.length ? " oc-fn-list" : "";
     const childrenHtml = children.length
-      ? `<ul>${children.map(c => `<li>${renderNode(c)}</li>`).join("")}</ul>`
+      ? `<ul class="${listClass}">${children.map(c => `<li>${renderNode(c)}</li>`).join("")}</ul>`
       : "";
     return renderBox(node) + childrenHtml;
   }
@@ -71,10 +73,18 @@
     const tree = buildTree(companyData);
     container.innerHTML = `<ul class="orgchart"><li>${renderNode(tree)}</li></ul>`;
 
+    function handleActivate(el) {
+      if (onNodeClick) onNodeClick(el.dataset.id);
+      if (el.classList.contains("oc-toggle")) {
+        const ul = el.nextElementSibling;
+        if (ul) ul.classList.toggle("oc-expanded");
+        el.classList.toggle("oc-expanded");
+      }
+    }
     container.querySelectorAll(".ocn").forEach(el => {
-      el.addEventListener("click", () => { if (onNodeClick) onNodeClick(el.dataset.id); });
+      el.addEventListener("click", () => handleActivate(el));
       el.addEventListener("keydown", (e) => {
-        if (e.key === "Enter" || e.key === " ") { e.preventDefault(); if (onNodeClick) onNodeClick(el.dataset.id); }
+        if (e.key === "Enter" || e.key === " ") { e.preventDefault(); handleActivate(el); }
       });
     });
   };

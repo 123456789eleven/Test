@@ -34,7 +34,7 @@
 
         <div class="orgmap-wrap" id="orgmapWrap">
           <div class="orgmap-head">
-            <p class="cap">The company as it's actually structured: four divisions and their leaders, the corporate functions (HR, Finance, Marketing, Technology) that support all four, and — down through Kelly Benefits Advantage — every one of its five verticals broken out to the individual job functions inside each. Click any box for detail; green borders mean a confirmed function, gray means estimated.</p>
+            <p class="cap">The company as it's actually structured: four divisions and their leaders, the corporate functions (HR, Finance, Marketing, Technology) that support all four, and — down through Kelly Benefits Advantage — every one of its five verticals. Click a vertical's ▸ to expand its individual job functions in place; green borders mean confirmed, gray means estimated.</p>
             <button id="orgmapFullscreen" class="orgmap-fs-btn">⛶ Fullscreen</button>
           </div>
           <div id="coOrgMap" class="orgmap-container"></div>

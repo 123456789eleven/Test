@@ -326,6 +326,11 @@
   .ocn-function.ocn-confirmed { border-color: var(--good); }
   .ocn-function.ocn-confirmed .ocn-role { color: var(--good); }
   .ocn-function.ocn-estimated .ocn-role { color: var(--ink-muted); }
+  .oc-toggle { position: relative; }
+  .ocn-chevron { display: inline-block; margin-left: 4px; font-size: 0.7em; color: var(--ink-muted); transition: transform .15s ease; }
+  .oc-toggle.oc-expanded .ocn-chevron { transform: rotate(90deg); }
+  ul.oc-fn-list { display: none; }
+  ul.oc-fn-list.oc-expanded { display: flex; }
   .ocn-name { font-family: "Inter", sans-serif; font-weight: 700; font-size: 0.92rem; color: var(--ink); }
   .ocn-role { font-size: 0.74rem; color: var(--ink-soft); margin-top: 2px; }
   .ocn-line { font-size: 0.74rem; color: var(--ink-soft); margin-top: 6px; line-height: 1.4; text-align: left; }
