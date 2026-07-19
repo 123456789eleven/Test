@@ -34,7 +34,7 @@
 
         <div class="orgmap-wrap" id="orgmapWrap">
           <div class="orgmap-head">
-            <p class="cap">The company as it's actually structured: four divisions and their leaders, Kelly Benefits Advantage's five internal verticals, and the corporate functions (HR, Finance, Marketing, Technology) that support all four. Click any box for detail.</p>
+            <p class="cap">The company as it's actually structured: four divisions and their leaders, the corporate functions (HR, Finance, Marketing, Technology) that support all four, and — down through Kelly Benefits Advantage — every one of its five verticals broken out to the individual job functions inside each. Click any box for detail; green borders mean a confirmed function, gray means estimated.</p>
             <button id="orgmapFullscreen" class="orgmap-fs-btn">⛶ Fullscreen</button>
           </div>
           <div id="coOrgMap" class="orgmap-container"></div>
@@ -243,6 +243,11 @@
         html = renderVerticalDetail(id);
       } else if (id === "corpfn") {
         html = renderGroupDetail();
+      } else if (id.includes("-fn-")) {
+        const [key, idxStr] = id.split("-fn-");
+        const v = data.verticals[key];
+        const [label, confirmed] = v.funcs[parseInt(idxStr, 10)];
+        html = renderPersonDetail(label, `${v.name} · ${confirmed ? "Confirmed" : "Estimated — verify"}`, "");
       } else if (id === "root") {
         const p = data.leadership.find(l => l.id === "frankIII");
         html = renderPersonDetail(p.name, p.title, p.note);

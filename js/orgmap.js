@@ -5,8 +5,9 @@
 
   function renderBox(node) {
     const lines = (node.lines || []).map(l => `<div class="ocn-line">${l}</div>`).join("");
+    const statusClass = node.type === "function" ? (node.confirmed ? " ocn-confirmed" : " ocn-estimated") : "";
     return `
-      <div class="ocn ocn-${node.type}${node.seat ? " ocn-seat" : ""}" data-id="${escAttr(node.id)}" tabindex="0" role="button">
+      <div class="ocn ocn-${node.type}${node.seat ? " ocn-seat" : ""}${statusClass}" data-id="${escAttr(node.id)}" tabindex="0" role="button">
         <div class="ocn-name">${node.name}</div>
         ${node.role ? `<div class="ocn-role">${node.role}</div>` : ""}
         ${lines}
@@ -32,7 +33,11 @@
           id: key, type: "vertical", name: v.name,
           role: v.confirmed ? "Confirmed" : "Estimated — verify",
           seat: key === "connect",
-          lines: []
+          lines: [],
+          children: v.funcs.map(([label, confirmed], i) => ({
+            id: `${key}-fn-${i}`, type: "function", name: label,
+            role: confirmed ? "Confirmed" : "Estimated", confirmed
+          }))
         }));
       }
       return node;
