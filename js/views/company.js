@@ -32,8 +32,11 @@
       <div class="view active" id="coview-overview">
         <div class="snapshot" id="coSnapshot"></div>
 
-        <div class="orgmap-wrap">
-          <p class="cap">Every division, Kelly Benefits Advantage's five internal verticals, and where technology and enrollment cut across all of them — one connected map instead of three separate diagrams. Click any box for detail; hover to trace exactly what connects to what.</p>
+        <div class="orgmap-wrap" id="orgmapWrap">
+          <div class="orgmap-head">
+            <p class="cap">Every division, Kelly Benefits Advantage's five internal verticals, and where technology and enrollment cut across all of them — one connected map instead of three separate diagrams. Click any box for detail; hover to trace exactly what connects to what.</p>
+            <button id="orgmapFullscreen" class="orgmap-fs-btn">⛶ Fullscreen</button>
+          </div>
           <div id="coOrgMap" class="orgmap-container"></div>
           <div class="orgmap-legend">
             <span><i class="lg-swatch lg-tree"></i>Org structure</span>
@@ -263,6 +266,21 @@
     }
 
     renderOrgMap("coOrgMap", { companyData: data, onNodeClick: handleOrgNodeClick });
+
+    document.getElementById("orgmapFullscreen").addEventListener("click", () => {
+      const wrap = document.getElementById("orgmapWrap");
+      if (!document.fullscreenElement) {
+        wrap.requestFullscreen();
+      } else {
+        document.exitFullscreen();
+      }
+    });
+    document.addEventListener("fullscreenchange", () => {
+      const wrap = document.getElementById("orgmapWrap");
+      const btn = document.getElementById("orgmapFullscreen");
+      if (!wrap || !btn) return;
+      btn.textContent = document.fullscreenElement === wrap ? "✕ Exit fullscreen" : "⛶ Fullscreen";
+    });
 
     SearchIndex.register("Kelly Benefits", [
       ...data.divisions.map(d => ({ title: `Kelly Benefits ${d.name}`, snippet: d.desc, route: "company" })),
