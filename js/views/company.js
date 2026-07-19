@@ -34,16 +34,11 @@
 
         <div class="orgmap-wrap" id="orgmapWrap">
           <div class="orgmap-head">
-            <p class="cap">Every division, Kelly Benefits Advantage's five internal verticals, and where technology and enrollment cut across all of them — one connected map instead of three separate diagrams. Click any box for detail; hover to trace exactly what connects to what.</p>
+            <p class="cap">The company as it's actually structured: four divisions and their leaders, Kelly Benefits Advantage's five internal verticals, and the corporate functions (HR, Finance, Marketing, Technology) that support all four. Click any box for detail.</p>
             <button id="orgmapFullscreen" class="orgmap-fs-btn">⛶ Fullscreen</button>
           </div>
           <div id="coOrgMap" class="orgmap-container"></div>
-          <div class="orgmap-legend">
-            <span><i class="lg-swatch lg-tree"></i>Org structure</span>
-            <span><i class="lg-swatch lg-flow"></i>Workflow (Win → Construct → …)</span>
-            <span><i class="lg-swatch lg-cross"></i>Cross-cutting (Technology)</span>
-            <span><i class="lg-swatch lg-dot"></i>Shares enrollment responsibility</span>
-          </div>
+          <p class="orgmap-caption">Workflow within Advantage: Win → Construct → then splits into Protect, Connect, and Serve. Construct, Connect, and Serve also share enrollment responsibility.</p>
         </div>
 
         <div id="orgDetail"></div>
