@@ -337,6 +337,18 @@
   .ocn-line:first-of-type { margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--border); }
   .ocn-seat-badge { font-size: 0.6rem; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 700; color: var(--manager); margin-top: 6px; }
 
+  /* ---- Kelly Benefits: company-wide workflow (distinct from the org chart above) ---- */
+  .workflow-card { background: var(--surface); border-radius: var(--radius-lg); box-shadow: var(--shadow-card); padding: 22px 24px; margin-bottom: 26px; }
+  .workflow-card h3 { font-size: 1.05rem; margin-bottom: 4px; }
+  .workflow-card .cap { color: var(--ink-soft); font-size: 0.88rem; line-height: 1.5; margin: 6px 0 24px; max-width: 74ch; }
+  .wf-row { display: flex; align-items: stretch; justify-content: center; gap: 14px; flex-wrap: wrap; }
+  .wf-step { border: 1.5px solid var(--accent); border-radius: var(--radius-md); padding: 14px 22px; text-align: center; min-width: 140px; display: flex; flex-direction: column; justify-content: center; }
+  .wf-name { font-family: "Inter", sans-serif; font-weight: 700; font-size: 0.94rem; color: var(--ink); }
+  .wf-role { font-size: 0.78rem; color: var(--ink-soft); margin-top: 3px; }
+  .wf-arrow { display: flex; align-items: center; color: var(--accent); font-size: 1.4rem; flex: none; }
+  .wf-loop { text-align: center; margin-top: 22px; font-size: 0.84rem; color: var(--ink-soft); }
+  @media (max-width: 760px) { .wf-row { flex-direction: column; align-items: center; } .wf-arrow { transform: rotate(90deg); } }
+
   .orgmap-legend { display: flex; gap: 20px; flex-wrap: wrap; margin-top: 16px; font-size: 0.78rem; color: var(--ink-soft); }
   .orgmap-legend span { display: flex; align-items: center; gap: 6px; }
   .lg-swatch { display: inline-block; width: 16px; height: 2px; }

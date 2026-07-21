@@ -44,6 +44,22 @@
         <div id="orgDetail"></div>
 
         <div class="integration-box" id="coIntegrationNote"></div>
+
+        <div class="workflow-card">
+          <h3>How the client relationship actually flows</h3>
+          <p class="cap">The org chart above shows who reports to whom. This shows something different — the path a single client relationship travels through all four divisions, on repeat, for as long as they stay a client.</p>
+          <div class="wf-row">
+            <div class="wf-step"><div class="wf-name">Strategies</div><div class="wf-role">Sell &amp; Consult</div></div>
+            <div class="wf-arrow">→</div>
+            <div class="wf-step"><div class="wf-name">Advantage</div><div class="wf-role">Administer</div></div>
+            <div class="wf-arrow">→</div>
+            <div class="wf-step"><div class="wf-name">Payroll</div><div class="wf-role">Process</div></div>
+            <div class="wf-arrow">→</div>
+            <div class="wf-step"><div class="wf-name">Advisory</div><div class="wf-role">Invest</div></div>
+          </div>
+          <div class="wf-loop">↺ &nbsp;Renews back into Strategies as the relationship continues — a closed loop, not four separate businesses</div>
+        </div>
+
         <div class="crosscutting-box">
           <h4>Where "enrollment" and "reconciliation" actually sit</h4>
           <p id="coEnrollmentNote"></p>
