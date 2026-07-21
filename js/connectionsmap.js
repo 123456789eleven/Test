@@ -8,7 +8,7 @@
     if (!container || typeof d3 === "undefined") return;
 
     const width = Math.max(container.clientWidth || 0, 900);
-    const height = 640;
+    const height = Math.max(640, Math.round((typeof window !== "undefined" ? window.innerHeight : 800) * 0.72));
     const cx = width / 2, cy = height / 2;
     const hubRadius = Math.min(width, height) * 0.26;
 
@@ -82,7 +82,10 @@
 
     const linkLayer = document.createElementNS(svgNS, "g");
     svg.appendChild(linkLayer);
-    allLinks.forEach(l => {
+    // Only the real process connections are drawn -- "belongs to a vertical" links stay
+    // in the simulation (for layout/clustering) but aren't rendered, since drawing all 27
+    // of them added visual noise without adding information the zone coloring didn't already give.
+    processLinks.forEach(l => {
       const s = nodeById[typeof l.source === "object" ? l.source.id : l.source];
       const t = nodeById[typeof l.target === "object" ? l.target.id : l.target];
       if (!s || !t) return;
@@ -132,6 +135,7 @@
       });
       nodeLayer.querySelectorAll(".cmap-node").forEach(el => {
         el.classList.toggle("dim", !connected.has(el.dataset.id));
+        el.classList.toggle("cmap-label-visible", connected.has(el.dataset.id));
       });
       linkLayer.querySelectorAll(".cmap-link").forEach(el => {
         const touches = el.dataset.a === id || el.dataset.b === id;

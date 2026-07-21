@@ -70,8 +70,13 @@
 
       <div class="view" id="coview-connections">
         <div class="cmap-wrap" id="cmapWrap">
-          <h3>How every job function within Advantage actually connects</h3>
-          <p class="cap">Each of Advantage's 5 verticals is a hub (larger circle); their job functions branch out around them. Thin lines are handoffs and shared systems between functions — including across verticals. Click any node to trace its direct connections; everything else fades.</p>
+          <div class="cmap-head">
+            <div>
+              <h3>How every job function within Advantage actually connects</h3>
+              <p class="cap">Each of Advantage's 5 verticals is a hub (larger circle); their job functions branch out around them. Thin lines are handoffs and shared systems between functions — including across verticals. Click any node to trace its direct connections; everything else fades.</p>
+            </div>
+            <button id="cmapFullscreen" class="cmap-fs-btn">⛶ Fullscreen</button>
+          </div>
           <div id="cmapContainer" class="cmap-container"></div>
           <div class="cmap-legend">
             <span><i style="background:#6366f1"></i>Win</span>
@@ -425,6 +430,21 @@
     }
 
     const cmapControl = renderConnectionsMap("cmapContainer", { companyData: data, onNodeClick: renderCmapDetail });
+
+    document.getElementById("cmapFullscreen").addEventListener("click", () => {
+      const wrap = document.getElementById("cmapWrap");
+      if (!document.fullscreenElement) {
+        wrap.requestFullscreen();
+      } else {
+        document.exitFullscreen();
+      }
+    });
+    document.addEventListener("fullscreenchange", () => {
+      const wrap = document.getElementById("cmapWrap");
+      const btn = document.getElementById("cmapFullscreen");
+      if (!wrap || !btn) return;
+      btn.textContent = document.fullscreenElement === wrap ? "✕ Exit fullscreen" : "⛶ Fullscreen";
+    });
 
     document.getElementById("orgmapFullscreen").addEventListener("click", () => {
       const wrap = document.getElementById("orgmapWrap");
