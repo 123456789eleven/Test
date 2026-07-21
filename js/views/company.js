@@ -24,6 +24,7 @@
 
       <div class="tabs" id="coTabs">
         <button data-view="overview" class="active">Overview</button>
+        <button data-view="connections">Connections</button>
         <button data-view="people">People &amp; History</button>
         <button data-view="strategy">Strategy</button>
         <button data-view="notes">Workbench</button>
@@ -65,6 +66,23 @@
           <p id="coEnrollmentNote"></p>
           <p id="coReconciliationNote"></p>
         </div>
+      </div>
+
+      <div class="view" id="coview-connections">
+        <div class="cmap-wrap" id="cmapWrap">
+          <h3>How every job function within Advantage actually connects</h3>
+          <p class="cap">Each of Advantage's 5 verticals is a hub (larger circle); their job functions branch out around them. Thin lines are handoffs and shared systems between functions — including across verticals. Click any node to trace its direct connections; everything else fades.</p>
+          <div id="cmapContainer" class="cmap-container"></div>
+          <div class="cmap-legend">
+            <span><i style="background:#6366f1"></i>Win</span>
+            <span><i style="background:#06b6d4"></i>Construct</span>
+            <span><i style="background:#d97706"></i>Protect</span>
+            <span><i style="background:#059669"></i>Connect</span>
+            <span><i style="background:#e11d48"></i>Serve</span>
+            <span>— faded circle = estimated function</span>
+          </div>
+        </div>
+        <div id="cmapDetail"></div>
       </div>
 
       <div class="view" id="coview-people">
@@ -347,6 +365,66 @@
     }
 
     renderOrgMap("coOrgMap", { companyData: data, onNodeClick: handleOrgNodeClick });
+
+    function renderCmapDetail(node) {
+      const panel = document.getElementById("cmapDetail");
+      let html = "";
+      if (node.kind === "hub") {
+        const v = data.verticals[node.id];
+        html = `
+          <div class="ad-head">
+            <h3>${v.name}</h3>
+            <span class="ad-status ${v.confirmed ? "confirmed" : "unconfirmed"}">${v.confirmed ? "Confirmed" : "Estimated — verify"}</span>
+            <button id="closeCmapDetail">Close ✕</button>
+          </div>
+          <p style="color:var(--ink-soft); font-size:0.9rem; margin-top:4px;">${v.desc}</p>
+        `;
+      } else {
+        const found = findFunction(node.id);
+        if (!found) return;
+        const { func, vertical } = found;
+        const conns = (data.processConnections || []).filter(c => c.from === func.id || c.to === func.id);
+        const feedsInto = conns.filter(c => c.type === "handoff" && c.from === func.id).map(c => ({ id: c.to, note: c.note }));
+        const fedBy = conns.filter(c => c.type === "handoff" && c.to === func.id).map(c => ({ id: c.from, note: c.note }));
+        const shared = conns.filter(c => c.type === "shared").map(c => ({ id: c.from === func.id ? c.to : c.from, note: c.note }));
+        function linkGroup(title, arrow, items) {
+          if (!items.length) return "";
+          return `
+            <div class="fn-conn-group">
+              <div class="fn-conn-title">${title}</div>
+              ${items.map(it => {
+                const target = findFunction(it.id);
+                const label = target ? `${target.func.label} (${target.vertical.name})` : it.id;
+                return `<button class="fn-conn-link" data-focus="${it.id}"><span class="fn-conn-arrow">${arrow}</span> ${label}<span class="fn-conn-note">${it.note}</span></button>`;
+              }).join("")}
+            </div>
+          `;
+        }
+        html = `
+          <div class="ad-head">
+            <h3>${func.label}</h3>
+            <span class="ad-status ${func.confirmed ? "confirmed" : "unconfirmed"}">${func.confirmed ? "Confirmed" : "Estimated — verify"}</span>
+            <button id="closeCmapDetail">Close ✕</button>
+          </div>
+          <p style="color:var(--ink-soft); font-size:0.9rem; margin-top:4px;">Part of <strong>${vertical.name}</strong>.</p>
+          ${linkGroup("Feeds into →", "→", feedsInto)}
+          ${linkGroup("Fed by ←", "←", fedBy)}
+          ${linkGroup("Shares systems with ⇄", "⇄", shared)}
+          ${!feedsInto.length && !fedBy.length && !shared.length ? '<p class="notes-empty">No modeled connections yet for this function.</p>' : ""}
+        `;
+      }
+      panel.innerHTML = html;
+      panel.classList.add("show");
+      document.getElementById("closeCmapDetail").addEventListener("click", () => panel.classList.remove("show"));
+      panel.querySelectorAll(".fn-conn-link").forEach(btn => {
+        btn.addEventListener("click", () => {
+          cmapControl.focus(btn.dataset.focus);
+          renderCmapDetail({ kind: "function", id: btn.dataset.focus });
+        });
+      });
+    }
+
+    const cmapControl = renderConnectionsMap("cmapContainer", { companyData: data, onNodeClick: renderCmapDetail });
 
     document.getElementById("orgmapFullscreen").addEventListener("click", () => {
       const wrap = document.getElementById("orgmapWrap");

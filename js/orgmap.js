@@ -7,8 +7,9 @@
     const lines = (node.lines || []).map(l => `<div class="ocn-line">${l}</div>`).join("");
     const statusClass = node.type === "function" ? (node.confirmed ? " ocn-confirmed" : " ocn-estimated") : "";
     const collapsible = node.type === "vertical" && node.children && node.children.length;
+    const accentStyle = (node.accentColor && !node.seat) ? ` style="border-top-color:${node.accentColor}; border-top-width:3px;"` : "";
     return `
-      <div class="ocn ocn-${node.type}${node.seat ? " ocn-seat" : ""}${statusClass}${collapsible ? " oc-toggle" : ""}" data-id="${escAttr(node.id)}" tabindex="0" role="button">
+      <div class="ocn ocn-${node.type}${node.seat ? " ocn-seat" : ""}${statusClass}${collapsible ? " oc-toggle" : ""}" data-id="${escAttr(node.id)}" tabindex="0" role="button"${accentStyle}>
         <div class="ocn-name">${node.name}${collapsible ? '<span class="ocn-chevron">▸</span>' : ""}${node.linked ? '<span class="ocn-link-dot" title="Connects to other functions">🔗</span>' : ""}</div>
         ${node.role ? `<div class="ocn-role">${node.role}</div>` : ""}
         ${lines}
@@ -33,15 +34,16 @@
         lines: people.map(p => `${p.name} — ${p.title}`)
       };
       if (d.id === "advantage") {
+        const palette = window.VERTICAL_COLORS || {};
         node.children = Object.entries(companyData.verticals).map(([key, v]) => ({
           id: key, type: "vertical", name: v.name,
           role: v.confirmed ? "Confirmed" : "Estimated — verify",
           seat: key === "connect",
-          lines: [],
+          lines: [], accentColor: palette[key],
           children: v.funcs.map(f => ({
             id: f.id, type: "function", name: f.label,
             role: f.confirmed ? "Confirmed" : "Estimated", confirmed: f.confirmed,
-            linked: connectedIds.has(f.id)
+            linked: connectedIds.has(f.id), accentColor: palette[key]
           }))
         }));
       }
