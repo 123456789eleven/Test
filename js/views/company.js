@@ -34,7 +34,7 @@
 
         <div class="orgmap-wrap" id="orgmapWrap">
           <div class="orgmap-head">
-            <p class="cap">The company as it's actually structured: four divisions and their leaders, the corporate functions (HR, Finance, Marketing, Technology) that support all four, and — down through Kelly Benefits Advantage — every one of its five verticals. Click a vertical's ▸ to expand its individual job functions in place; green borders mean confirmed, gray means estimated.</p>
+            <p class="cap">The company as it's actually structured: four divisions and their leaders, the corporate functions (HR, Finance, Marketing, Technology) that support all four, and — down through Kelly Benefits Advantage — every one of its five verticals. Click a vertical's ▸ to expand its individual job functions in place; green borders mean confirmed, gray means estimated. A 🔗 on a function means it's connected to others — click it to see what feeds it, what it feeds, and what it shares systems with.</p>
             <button id="orgmapFullscreen" class="orgmap-fs-btn">⛶ Fullscreen</button>
           </div>
           <div id="coOrgMap" class="orgmap-container"></div>
@@ -222,9 +222,53 @@
           <button id="closeOrgDetail">Close ✕</button>
         </div>
         <p style="color:var(--ink-soft); font-size:0.9rem; margin-top:4px;">${v.desc}</p>
-        <ul class="ad-func-list">${v.funcs.map(([label, confirmed]) => `
-          <li><span class="ad-pill ${confirmed ? "confirmed" : "estimated"}">${confirmed ? "confirmed" : "est."}</span> ${label}</li>
+        <ul class="ad-func-list">${v.funcs.map(f => `
+          <li><span class="ad-pill ${f.confirmed ? "confirmed" : "estimated"}">${f.confirmed ? "confirmed" : "est."}</span> ${f.label}</li>
         `).join("")}</ul>
+      `;
+    }
+
+    function findFunction(id) {
+      for (const [key, v] of Object.entries(data.verticals)) {
+        const f = v.funcs.find(fn => fn.id === id);
+        if (f) return { func: f, vertical: v, verticalKey: key };
+      }
+      return null;
+    }
+
+    function renderFunctionDetail(id) {
+      const found = findFunction(id);
+      const { func, vertical } = found;
+      const conns = (data.processConnections || []).filter(c => c.from === id || c.to === id);
+      const feedsInto = conns.filter(c => c.type === "handoff" && c.from === id).map(c => ({ id: c.to, note: c.note }));
+      const fedBy = conns.filter(c => c.type === "handoff" && c.to === id).map(c => ({ id: c.from, note: c.note }));
+      const shared = conns.filter(c => c.type === "shared").map(c => ({ id: c.from === id ? c.to : c.from, note: c.note }));
+
+      function linkGroup(title, arrow, items) {
+        if (!items.length) return "";
+        return `
+          <div class="fn-conn-group">
+            <div class="fn-conn-title">${title}</div>
+            ${items.map(it => {
+              const target = findFunction(it.id);
+              const label = target ? `${target.func.label} (${target.vertical.name})` : it.id;
+              return `<button class="fn-conn-link" data-jump="${it.id}"><span class="fn-conn-arrow">${arrow}</span> ${label}<span class="fn-conn-note">${it.note}</span></button>`;
+            }).join("")}
+          </div>
+        `;
+      }
+
+      return `
+        <div class="ad-head">
+          <h3>${func.label}</h3>
+          <span class="ad-status ${func.confirmed ? "confirmed" : "unconfirmed"}">${func.confirmed ? "Confirmed" : "Estimated — verify"}</span>
+          <button id="closeOrgDetail">Close ✕</button>
+        </div>
+        <p style="color:var(--ink-soft); font-size:0.9rem; margin-top:4px;">Part of <strong>${vertical.name}</strong>.</p>
+        ${linkGroup("Feeds into →", "→", feedsInto)}
+        ${linkGroup("Fed by ←", "←", fedBy)}
+        ${linkGroup("Shares systems with ⇄", "⇄", shared)}
+        ${!feedsInto.length && !fedBy.length && !shared.length ? '<p class="notes-empty">No modeled connections yet for this function.</p>' : ""}
       `;
     }
 
@@ -250,7 +294,7 @@
       `;
     }
 
-    function handleOrgNodeClick(id) {
+    function renderDetailContent(id) {
       const panel = document.getElementById("orgDetail");
       let html = "";
       if (data.divisions.some(d => d.id === id)) {
@@ -259,26 +303,47 @@
         html = renderVerticalDetail(id);
       } else if (id === "corpfn") {
         html = renderGroupDetail();
-      } else if (id.includes("-fn-")) {
-        const [key, idxStr] = id.split("-fn-");
-        const v = data.verticals[key];
-        const [label, confirmed] = v.funcs[parseInt(idxStr, 10)];
-        html = renderPersonDetail(label, `${v.name} · ${confirmed ? "Confirmed" : "Estimated — verify"}`, "");
+      } else if (findFunction(id)) {
+        html = renderFunctionDetail(id);
       } else if (id === "root") {
         const p = data.leadership.find(l => l.id === "frankIII");
         html = renderPersonDetail(p.name, p.title, p.note);
       } else {
         const p = data.leadership.find(l => l.id === id);
-        if (!p) return;
+        if (!p) return false;
         html = renderPersonDetail(p.name, p.title, p.note);
       }
       panel.innerHTML = html;
       panel.classList.add("show");
       document.getElementById("closeOrgDetail").addEventListener("click", () => panel.classList.remove("show"));
-      panel.scrollIntoView({ behavior: "smooth", block: "nearest" });
+      panel.querySelectorAll(".fn-conn-link").forEach(btn => {
+        btn.addEventListener("click", () => jumpToNode(btn.dataset.jump));
+      });
       requestAnimationFrame(() => requestAnimationFrame(() => {
         panel.querySelectorAll(".co-hbar-fill[data-w]").forEach(el => { el.style.width = el.dataset.w + "%"; });
       }));
+      return true;
+    }
+
+    function handleOrgNodeClick(id) {
+      if (!renderDetailContent(id)) return;
+      document.getElementById("orgDetail").scrollIntoView({ behavior: "smooth", block: "nearest" });
+    }
+
+    function jumpToNode(targetId) {
+      const el = document.querySelector(`.ocn[data-id="${targetId}"]`);
+      if (el) {
+        const ul = el.closest("ul.oc-fn-list");
+        if (ul && !ul.classList.contains("oc-expanded")) {
+          ul.classList.add("oc-expanded");
+          const toggle = ul.previousElementSibling;
+          if (toggle && toggle.classList.contains("oc-toggle")) toggle.classList.add("oc-expanded");
+        }
+        el.scrollIntoView({ behavior: "smooth", block: "center" });
+        el.classList.add("ocn-jump-highlight");
+        setTimeout(() => el.classList.remove("ocn-jump-highlight"), 1600);
+      }
+      renderDetailContent(targetId);
     }
 
     renderOrgMap("coOrgMap", { companyData: data, onNodeClick: handleOrgNodeClick });

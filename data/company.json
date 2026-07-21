@@ -100,29 +100,78 @@
     "win": {
       "name": "Win", "confirmed": false,
       "desc": "New business — getting the client. Not yet confirmed in detail; the name implies sales enablement rather than direct sales.",
-      "funcs": [ ["Proposal / RFP response support", false], ["Pre-sale technical & data scoping", false], ["New business underwriting / eligibility review", false], ["New broker & producer proposal support", false] ]
+      "funcs": [
+        { "id": "win-rfp", "label": "Proposal / RFP response support", "confirmed": false },
+        { "id": "win-scoping", "label": "Pre-sale technical & data scoping", "confirmed": false },
+        { "id": "win-underwriting", "label": "New business underwriting / eligibility review", "confirmed": false },
+        { "id": "win-broker-support", "label": "New broker & producer proposal support", "confirmed": false }
+      ]
     },
     "construct": {
       "name": "Construct", "confirmed": true,
       "desc": "Confirmed: implementation and integration — building out a new client's setup before it goes live.",
-      "funcs": [ ["Implementation project management", false], ["EDI / data feed setup for new clients", false], ["Plan build & system configuration", false], ["Testing & QA of new client setups", false], ["Initial eligibility load", false], ["Carrier connection setup", false], ["Initial enrollment setup (onboarding)", false] ]
+      "funcs": [
+        { "id": "construct-pm", "label": "Implementation project management", "confirmed": false },
+        { "id": "construct-edi", "label": "EDI / data feed setup for new clients", "confirmed": false },
+        { "id": "construct-planbuild", "label": "Plan build & system configuration", "confirmed": false },
+        { "id": "construct-qa", "label": "Testing & QA of new client setups", "confirmed": false },
+        { "id": "construct-eligibility-load", "label": "Initial eligibility load", "confirmed": false },
+        { "id": "construct-carrier", "label": "Carrier connection setup", "confirmed": false },
+        { "id": "construct-enrollment-setup", "label": "Initial enrollment setup (onboarding)", "confirmed": false }
+      ]
     },
     "protect": {
       "name": "Protect", "confirmed": false,
       "desc": "Believed to include broker management — not yet confirmed. The name suggests a compliance/risk function.",
-      "funcs": [ ["Broker / producer relationship management", false], ["Compliance (ERISA / ACA / HIPAA)", false], ["Audit & quality assurance", false], ["Risk management", false], ["Regulatory / legal monitoring", false] ]
+      "funcs": [
+        { "id": "protect-broker-mgmt", "label": "Broker / producer relationship management", "confirmed": false },
+        { "id": "protect-compliance", "label": "Compliance (ERISA / ACA / HIPAA)", "confirmed": false },
+        { "id": "protect-audit", "label": "Audit & quality assurance", "confirmed": false },
+        { "id": "protect-risk", "label": "Risk management", "confirmed": false },
+        { "id": "protect-legal", "label": "Regulatory / legal monitoring", "confirmed": false }
+      ]
     },
     "connect": {
       "name": "Connect", "confirmed": true,
       "desc": "Confirmed: this is your seat — COBRA administration.",
-      "funcs": [ ["COBRA administration", true], ["State continuation coverage", false], ["ACA reporting (1094-C / 1095-C)", false], ["Direct billing", false], ["Eligibility & billing reconciliation", false], ["Ongoing data feed monitoring", false] ]
+      "funcs": [
+        { "id": "connect-cobra", "label": "COBRA administration", "confirmed": true },
+        { "id": "connect-state", "label": "State continuation coverage", "confirmed": false },
+        { "id": "connect-aca", "label": "ACA reporting (1094-C / 1095-C)", "confirmed": false },
+        { "id": "connect-billing", "label": "Direct billing", "confirmed": false },
+        { "id": "connect-reconciliation", "label": "Eligibility & billing reconciliation", "confirmed": false },
+        { "id": "connect-monitoring", "label": "Ongoing data feed monitoring", "confirmed": false }
+      ]
     },
     "serve": {
       "name": "Serve", "confirmed": true,
       "desc": "Confirmed: dedicated service — the coworkers near your cubicle.",
-      "funcs": [ ["Dedicated account / client service reps", true], ["Participant / member call center support", false], ["Annual open enrollment support", false], ["Claims / reimbursement processing (FSA/HRA)", false], ["Renewals support", false] ]
+      "funcs": [
+        { "id": "serve-account", "label": "Dedicated account / client service reps", "confirmed": true },
+        { "id": "serve-callcenter", "label": "Participant / member call center support", "confirmed": false },
+        { "id": "serve-oe", "label": "Annual open enrollment support", "confirmed": false },
+        { "id": "serve-claims", "label": "Claims / reimbursement processing (FSA/HRA)", "confirmed": false },
+        { "id": "serve-renewals", "label": "Renewals support", "confirmed": false }
+      ]
     }
   },
+  "processConnectionsNote": "A working model of how work actually moves between Advantage's functions — inferred from the vertical-level workflow and standard TPA operating patterns, not independently confirmed function-by-function. Treat it as a draft to correct against how the work actually happens in your seat.",
+  "processConnections": [
+    { "from": "win-scoping", "to": "construct-edi", "type": "handoff", "note": "Pre-sale data scoping informs the EDI feed build" },
+    { "from": "win-underwriting", "to": "construct-eligibility-load", "type": "handoff", "note": "Underwriting determines who's eligible before the initial load" },
+    { "from": "construct-edi", "to": "connect-monitoring", "type": "handoff", "note": "The initial EDI setup becomes what's monitored on an ongoing basis" },
+    { "from": "construct-eligibility-load", "to": "connect-reconciliation", "type": "handoff", "note": "The initial load is the baseline reconciliation checks against" },
+    { "from": "construct-enrollment-setup", "to": "serve-oe", "type": "handoff", "note": "Onboarding enrollment setup is what annual open enrollment builds on" },
+    { "from": "construct-carrier", "to": "connect-billing", "type": "handoff", "note": "Direct billing depends on carrier connections already being live" },
+    { "from": "construct-planbuild", "to": "protect-audit", "type": "handoff", "note": "New plan builds get audited for compliance after configuration" },
+    { "from": "connect-cobra", "to": "serve-callcenter", "type": "handoff", "note": "COBRA participant questions route to the call center" },
+    { "from": "connect-reconciliation", "to": "serve-claims", "type": "handoff", "note": "Reconciled eligibility data feeds claims processing" },
+    { "from": "protect-compliance", "to": "connect-aca", "type": "shared", "note": "Same regulatory compliance framework" },
+    { "from": "protect-broker-mgmt", "to": "win-broker-support", "type": "shared", "note": "Same broker / producer relationship system" },
+    { "from": "protect-compliance", "to": "construct-planbuild", "type": "shared", "note": "Compliance reviews the same plan builds Construct configures" },
+    { "from": "serve-callcenter", "to": "connect-state", "type": "shared", "note": "Same participant-facing case system" },
+    { "from": "construct-eligibility-load", "to": "connect-monitoring", "type": "shared", "note": "Both touch the same ongoing data feed system" }
+  ],
   "swot": {
     "strengths": [
       "Integration across all four divisions — one client relationship instead of four vendors",

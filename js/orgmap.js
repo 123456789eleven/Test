@@ -9,7 +9,7 @@
     const collapsible = node.type === "vertical" && node.children && node.children.length;
     return `
       <div class="ocn ocn-${node.type}${node.seat ? " ocn-seat" : ""}${statusClass}${collapsible ? " oc-toggle" : ""}" data-id="${escAttr(node.id)}" tabindex="0" role="button">
-        <div class="ocn-name">${node.name}${collapsible ? '<span class="ocn-chevron">▸</span>' : ""}</div>
+        <div class="ocn-name">${node.name}${collapsible ? '<span class="ocn-chevron">▸</span>' : ""}${node.linked ? '<span class="ocn-link-dot" title="Connects to other functions">🔗</span>' : ""}</div>
         ${node.role ? `<div class="ocn-role">${node.role}</div>` : ""}
         ${lines}
         ${node.seat ? '<div class="ocn-seat-badge">YOU ARE HERE</div>' : ""}
@@ -22,6 +22,9 @@
     const byDivision = (divId) => leadership.filter(l => l.parent === divId || (l.cross && l.cross.includes(divId)));
     const corpPeople = leadership.filter(l => l.parent === "root" && !EXEC_IDS.includes(l.id));
     const execPeople = leadership.filter(l => EXEC_IDS.includes(l.id));
+    const connections = companyData.processConnections || [];
+    const connectedIds = new Set();
+    connections.forEach(c => { connectedIds.add(c.from); connectedIds.add(c.to); });
 
     const divisionNodes = companyData.divisions.map(d => {
       const people = byDivision(d.id);
@@ -35,9 +38,10 @@
           role: v.confirmed ? "Confirmed" : "Estimated — verify",
           seat: key === "connect",
           lines: [],
-          children: v.funcs.map(([label, confirmed], i) => ({
-            id: `${key}-fn-${i}`, type: "function", name: label,
-            role: confirmed ? "Confirmed" : "Estimated", confirmed
+          children: v.funcs.map(f => ({
+            id: f.id, type: "function", name: f.label,
+            role: f.confirmed ? "Confirmed" : "Estimated", confirmed: f.confirmed,
+            linked: connectedIds.has(f.id)
           }))
         }));
       }

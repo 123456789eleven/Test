@@ -445,6 +445,22 @@
   .ad-pill.confirmed { color: var(--good); }
   .ad-pill.estimated { color: var(--ink-muted); }
 
+  /* ---- Kelly Benefits: process connections (click-to-reveal, no drawn lines) ---- */
+  .ocn-link-dot { margin-left: 5px; font-size: 0.7em; filter: grayscale(1) opacity(0.6); }
+  .ocn-jump-highlight { animation: ocnPulse 1.6s ease; }
+  @keyframes ocnPulse { 0%, 100% { box-shadow: none; } 15%, 45% { box-shadow: 0 0 0 4px var(--accent-wash); border-color: var(--accent); } }
+  @media (prefers-reduced-motion: reduce) { .ocn-jump-highlight { animation: none; border-color: var(--accent); } }
+  .fn-conn-group { margin-top: 16px; }
+  .fn-conn-title { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--ink-soft); font-weight: 700; margin-bottom: 8px; }
+  .fn-conn-link {
+    display: block; width: 100%; text-align: left; font: inherit; font-size: 0.86rem; padding: 9px 0; border: none; border-top: 1px solid var(--border);
+    background: none; color: var(--ink); cursor: pointer;
+  }
+  .fn-conn-link:first-of-type { border-top: none; }
+  .fn-conn-link:hover { color: var(--accent); }
+  .fn-conn-arrow { color: var(--accent); font-weight: 700; margin-right: 4px; }
+  .fn-conn-note { display: block; font-size: 0.78rem; color: var(--ink-muted); margin-top: 2px; }
+
   .crosscutting-box { border-left: 3px solid var(--manager); background: var(--manager-soft); border-radius: 0 var(--radius-md) var(--radius-md) 0; padding: 14px 18px; margin-top: 22px; font-size: 0.9rem; line-height: 1.65; color: var(--ink-soft); }
   .crosscutting-box h4 { font-family: "Inter", sans-serif; font-size: 0.9rem; margin-bottom: 8px; color: var(--manager); }
   .crosscutting-box p { margin: 0 0 8px; }
