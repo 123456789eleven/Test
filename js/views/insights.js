@@ -1,10 +1,17 @@
 async function renderInsightsView(mount) {
   mount.innerHTML = `
-    <div class="page-head">
-      <h1>Industry Insights</h1>
-      <p>Regulatory changes, TPA industry trends, and practical tips — with the underlying data, not just the headline.</p>
-      <div class="refresh-badge"><span class="pulse"></span><span id="lastUpdated">Last updated —</span></div>
+    <div class="kb-hero">
+      <div class="kb-hero-content">
+        <h1>Industry Insights</h1>
+        <p>Regulatory changes, TPA industry trends, and practical tips — with the underlying data, not just the headline.</p>
+      </div>
+      <div class="kb-hero-stats">
+        <div class="kb-stat"><div class="kb-stat-big" id="heroInsightCount">—</div><div class="kb-stat-label">Insights tracked, refreshed daily</div></div>
+        <div class="kb-stat"><div class="kb-stat-big">$845B</div><div class="kb-stat-label">Projected TPA/claims-admin market size by 2031 (~7.4% CAGR)</div></div>
+        <div class="kb-stat"><div class="kb-stat-big">$500K</div><div class="kb-stat-label">Max annual compliance exposure cap per client</div></div>
+      </div>
     </div>
+    <div class="refresh-badge"><span class="pulse"></span><span id="lastUpdated">Last updated —</span></div>
 
     <div class="live-card">
       <h3><span class="live-dot"></span>Live sources</h3>
@@ -68,6 +75,8 @@ async function renderInsightsView(mount) {
     document.getElementById("insightsFeed").innerHTML = `<div style="color:var(--warn);">Couldn't load Insights data (${err.message}).</div>`;
     return;
   }
+
+  document.getElementById("heroInsightCount").textContent = insights.length;
 
   const CAT_LABEL = { reg: "Regulatory", trend: "Industry trend", tip: "Practical tip" };
   function renderFeed(filter) {

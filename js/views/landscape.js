@@ -6,9 +6,16 @@
 
   async function renderLandscapeView(mount) {
     mount.innerHTML = `
-      <div class="page-head">
-        <h1>Industry Landscape</h1>
-        <p>Who the major players in benefits administration actually are, sized up by revenue, headcount, and business model — the competitive picture behind the regulatory detail on the Insights page.</p>
+      <div class="kb-hero">
+        <div class="kb-hero-content">
+          <h1>Industry Landscape</h1>
+          <p>Who the major players in benefits administration actually are, sized up by revenue, headcount, and business model — the competitive picture behind the regulatory detail on the Insights page.</p>
+        </div>
+        <div class="kb-hero-stats">
+          <div class="kb-stat"><div class="kb-stat-big">$20.6B</div><div class="kb-stat-label">ADP's FY2025 revenue — 3× the combined specialists below</div></div>
+          <div class="kb-stat"><div class="kb-stat-big" id="heroDealCount">—</div><div class="kb-stat-label">M&amp;A deals tracked since 2023 — active consolidation</div></div>
+          <div class="kb-stat"><div class="kb-stat-big" id="heroCompetitorCount">—</div><div class="kb-stat-label">Direct benefits-admin competitors profiled</div></div>
+        </div>
       </div>
 
       <div class="scale-note">
@@ -146,6 +153,8 @@
     }
     const { companies, mnaDeals, forces } = data;
     const specialists = companies.filter(c => c.name !== "ADP");
+    document.getElementById("heroDealCount").textContent = mnaDeals.length;
+    document.getElementById("heroCompetitorCount").textContent = specialists.length;
 
     const maxRev = Math.max(...specialists.map(c => c.revenue));
     document.getElementById("lsChartRevenue").innerHTML = specialists.slice().sort((a, b) => b.revenue - a.revenue).map(c => `
