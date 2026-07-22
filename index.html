@@ -144,13 +144,21 @@
   footer.app-footer { border-top: 1px solid var(--border); padding: 18px clamp(16px, 3vw, 40px); font-size: 0.76rem; color: var(--ink-muted); }
 
   /* ---- Today's Briefing (homepage) ---- */
-  .brief-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 30px; }
-  @media (max-width: 900px) { .brief-grid { grid-template-columns: 1fr; } }
+  .brief-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; margin-bottom: 30px; }
   .brief-card {
     display: block; background: var(--surface); border-radius: var(--radius-lg); box-shadow: var(--shadow-card);
     padding: 20px 22px; text-decoration: none; color: inherit; transition: transform .18s ease, box-shadow .18s ease;
+    border-left: 3px solid var(--border);
   }
   a.brief-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-modal); }
+  .brief-card.bc-insight { border-left-color: var(--accent); }
+  .brief-card.bc-landscape { border-left-color: var(--good); }
+  .brief-card.bc-fit { border-left-color: var(--manager); }
+  .brief-card.bc-workbench { border-left-color: #8b5cf6; }
+  .brief-card.bc-insight .brief-eyebrow { color: var(--accent); }
+  .brief-card.bc-landscape .brief-eyebrow { color: var(--good); }
+  .brief-card.bc-fit .brief-eyebrow { color: var(--manager); }
+  .brief-card.bc-workbench .brief-eyebrow { color: #8b5cf6; }
   .brief-eyebrow { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--accent); font-weight: 700; margin-bottom: 10px; }
   .brief-card h3 { font-size: 1rem; line-height: 1.35; margin: 0 0 8px; }
   .brief-card p { font-size: 0.86rem; color: var(--ink-soft); line-height: 1.55; margin: 0; max-width: 46ch; display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden; }
