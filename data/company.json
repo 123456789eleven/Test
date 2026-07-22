@@ -96,9 +96,10 @@
       "caption": "AUM figures from firm disclosures / SEC ADV filings as reported in trade press. Nearly 20 similar retirement-advisory aggregators exist — this is a sample, not exhaustive."
     }
   ],
+  "verticalsNote": "Advantage's five verticals reflect this project's own seat and were built up over time with more scrutiny. Strategies', Payroll's, and Advisory's verticals are a standard-industry-pattern estimate for a benefits brokerage, payroll bureau, and retirement advisory respectively — not confirmed against how Kelly Benefits actually organizes them. Treat those three divisions' breakdowns as a draft to correct.",
   "verticals": {
     "win": {
-      "name": "Win", "confirmed": false,
+      "division": "advantage", "name": "Win", "confirmed": false,
       "desc": "New business — getting the client. Not yet confirmed in detail; the name implies sales enablement rather than direct sales.",
       "funcs": [
         { "id": "win-rfp", "label": "Proposal / RFP response support", "confirmed": false },
@@ -108,7 +109,7 @@
       ]
     },
     "construct": {
-      "name": "Construct", "confirmed": true,
+      "division": "advantage", "name": "Construct", "confirmed": true,
       "desc": "Confirmed: implementation and integration — building out a new client's setup before it goes live.",
       "funcs": [
         { "id": "construct-pm", "label": "Implementation project management", "confirmed": false },
@@ -121,7 +122,7 @@
       ]
     },
     "protect": {
-      "name": "Protect", "confirmed": false,
+      "division": "advantage", "name": "Protect", "confirmed": false,
       "desc": "Believed to include broker management — not yet confirmed. The name suggests a compliance/risk function.",
       "funcs": [
         { "id": "protect-broker-mgmt", "label": "Broker / producer relationship management", "confirmed": false },
@@ -132,7 +133,7 @@
       ]
     },
     "connect": {
-      "name": "Connect", "confirmed": true,
+      "division": "advantage", "name": "Connect", "confirmed": true,
       "desc": "Confirmed: this is your seat — COBRA administration.",
       "funcs": [
         { "id": "connect-cobra", "label": "COBRA administration", "confirmed": true },
@@ -144,7 +145,7 @@
       ]
     },
     "serve": {
-      "name": "Serve", "confirmed": true,
+      "division": "advantage", "name": "Serve", "confirmed": true,
       "desc": "Confirmed: dedicated service — the coworkers near your cubicle.",
       "funcs": [
         { "id": "serve-account", "label": "Dedicated account / client service reps", "confirmed": true },
@@ -152,6 +153,126 @@
         { "id": "serve-oe", "label": "Annual open enrollment support", "confirmed": false },
         { "id": "serve-claims", "label": "Claims / reimbursement processing (FSA/HRA)", "confirmed": false },
         { "id": "serve-renewals", "label": "Renewals support", "confirmed": false }
+      ]
+    },
+    "strat-new": {
+      "division": "strategies", "name": "New Business", "confirmed": false,
+      "desc": "Estimated: winning new clients — the front end of the consulting relationship.",
+      "funcs": [
+        { "id": "strat-new-rfp", "label": "Proposal / RFP response", "confirmed": false },
+        { "id": "strat-new-prospect", "label": "Prospecting & lead qualification", "confirmed": false },
+        { "id": "strat-new-marketing", "label": "Competitive marketing analysis", "confirmed": false },
+        { "id": "strat-new-broker", "label": "Broker & producer recruitment support", "confirmed": false }
+      ]
+    },
+    "strat-design": {
+      "division": "strategies", "name": "Plan Design & Consulting", "confirmed": false,
+      "desc": "Estimated: the actual benefits strategy work — plan design, carrier negotiation, renewals.",
+      "funcs": [
+        { "id": "strat-design-strategy", "label": "Benefits strategy & plan design", "confirmed": false },
+        { "id": "strat-design-carrier", "label": "Carrier marketing & renewal negotiation", "confirmed": false },
+        { "id": "strat-design-underwriting", "label": "Underwriting & rate analysis", "confirmed": false },
+        { "id": "strat-design-medicare", "label": "Medicare & ancillary lines consulting", "confirmed": false }
+      ]
+    },
+    "strat-service": {
+      "division": "strategies", "name": "Client Service", "confirmed": false,
+      "desc": "Estimated: the ongoing consulting relationship after the sale.",
+      "funcs": [
+        { "id": "strat-service-account", "label": "Dedicated account consulting", "confirmed": false },
+        { "id": "strat-service-renewal", "label": "Annual renewal management", "confirmed": false },
+        { "id": "strat-service-oe", "label": "Open enrollment strategy support", "confirmed": false },
+        { "id": "strat-service-education", "label": "Client & employee education", "confirmed": false }
+      ]
+    },
+    "strat-comply": {
+      "division": "strategies", "name": "Compliance & Communications", "confirmed": false,
+      "desc": "Estimated: keeping client plans compliant and participants informed.",
+      "funcs": [
+        { "id": "strat-comply-erisa", "label": "ERISA / ACA compliance guidance", "confirmed": false },
+        { "id": "strat-comply-comms", "label": "Open enrollment communications", "confirmed": false },
+        { "id": "strat-comply-materials", "label": "Benefits education materials", "confirmed": false },
+        { "id": "strat-comply-regwatch", "label": "Regulatory update tracking", "confirmed": false }
+      ]
+    },
+    "pay-setup": {
+      "division": "payroll", "name": "Implementation", "confirmed": false,
+      "desc": "Estimated: new client payroll setup before the first live run.",
+      "funcs": [
+        { "id": "pay-setup-onboard", "label": "New client onboarding & data conversion", "confirmed": false },
+        { "id": "pay-setup-tax", "label": "Tax ID & agency registration", "confirmed": false },
+        { "id": "pay-setup-integration", "label": "Benefits deduction integration setup", "confirmed": false },
+        { "id": "pay-setup-garnish", "label": "Garnishment & new-hire reporting setup", "confirmed": false }
+      ]
+    },
+    "pay-process": {
+      "division": "payroll", "name": "Payroll Processing", "confirmed": false,
+      "desc": "Estimated: the core processing cycle, run after run.",
+      "funcs": [
+        { "id": "pay-process-cycle", "label": "Regular payroll processing cycles", "confirmed": false },
+        { "id": "pay-process-offcycle", "label": "Off-cycle & bonus runs", "confirmed": false },
+        { "id": "pay-process-deposit", "label": "Direct deposit & pay card administration", "confirmed": false },
+        { "id": "pay-process-multistate", "label": "Multi-state payroll compliance", "confirmed": false }
+      ]
+    },
+    "pay-tax": {
+      "division": "payroll", "name": "Tax & Compliance", "confirmed": false,
+      "desc": "Estimated: the regulatory side of running payroll across 50 states.",
+      "funcs": [
+        { "id": "pay-tax-filing", "label": "Payroll tax filing (federal / state / local)", "confirmed": false },
+        { "id": "pay-tax-newhire", "label": "New hire registry reporting", "confirmed": false },
+        { "id": "pay-tax-garnish", "label": "Garnishment administration", "confirmed": false },
+        { "id": "pay-tax-yearend", "label": "W-2 / year-end processing", "confirmed": false }
+      ]
+    },
+    "pay-support": {
+      "division": "payroll", "name": "Client Support", "confirmed": false,
+      "desc": "Estimated: keeping payroll clients running smoothly day to day.",
+      "funcs": [
+        { "id": "pay-support-helpdesk", "label": "Payroll help desk & issue resolution", "confirmed": false },
+        { "id": "pay-support-training", "label": "Client training on payroll systems", "confirmed": false },
+        { "id": "pay-support-reports", "label": "Reporting & analytics requests", "confirmed": false },
+        { "id": "pay-support-yearend", "label": "Year-end client support", "confirmed": false }
+      ]
+    },
+    "adv-consult": {
+      "division": "advisory", "name": "Plan Consulting", "confirmed": false,
+      "desc": "Estimated: retirement plan design and fiduciary consulting.",
+      "funcs": [
+        { "id": "adv-consult-design", "label": "Retirement plan design consulting", "confirmed": false },
+        { "id": "adv-consult-fiduciary", "label": "Fiduciary governance consulting", "confirmed": false },
+        { "id": "adv-consult-committee", "label": "Plan committee support", "confirmed": false },
+        { "id": "adv-consult-vendor", "label": "Vendor / recordkeeper selection", "confirmed": false }
+      ]
+    },
+    "adv-research": {
+      "division": "advisory", "name": "Investment Research", "confirmed": false,
+      "desc": "Estimated: the investment due-diligence side of the advisory business.",
+      "funcs": [
+        { "id": "adv-research-duediligence", "label": "Fund lineup due diligence", "confirmed": false },
+        { "id": "adv-research-monitoring", "label": "Investment performance monitoring", "confirmed": false },
+        { "id": "adv-research-ips", "label": "Investment policy statement development", "confirmed": false },
+        { "id": "adv-research-fees", "label": "Benchmarking & fee analysis", "confirmed": false }
+      ]
+    },
+    "adv-participant": {
+      "division": "advisory", "name": "Participant Services", "confirmed": false,
+      "desc": "Estimated: the employee-facing side of retirement plan administration.",
+      "funcs": [
+        { "id": "adv-participant-education", "label": "Employee financial education & enrollment meetings", "confirmed": false },
+        { "id": "adv-participant-guidance", "label": "One-on-one participant guidance", "confirmed": false },
+        { "id": "adv-participant-comms", "label": "Retirement readiness communications", "confirmed": false },
+        { "id": "adv-participant-support", "label": "Ongoing participant support", "confirmed": false }
+      ]
+    },
+    "adv-comply": {
+      "division": "advisory", "name": "Compliance", "confirmed": false,
+      "desc": "Estimated: the regulatory side of running an SEC-registered advisory practice.",
+      "funcs": [
+        { "id": "adv-comply-fiduciary", "label": "ERISA fiduciary compliance support", "confirmed": false },
+        { "id": "adv-comply-5500", "label": "Form 5500 preparation support", "confirmed": false },
+        { "id": "adv-comply-docs", "label": "Plan document administration", "confirmed": false },
+        { "id": "adv-comply-regwatch", "label": "Regulatory update tracking", "confirmed": false }
       ]
     }
   },

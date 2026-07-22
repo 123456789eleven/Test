@@ -2,6 +2,17 @@
   const EXEC_IDS = ["fx3", "frankIII"];
   const svgNS = "http://www.w3.org/2000/svg";
 
+  // One color per vertical, grouped by division family. Advantage's five were the original,
+  // user-confirmed set — left unchanged. The other three divisions' verticals are new (see
+  // company.json's verticalsNote) and use their division's existing hub color as a family.
+  const VERTICAL_COLORS = {
+    win: "#6366f1", construct: "#06b6d4", protect: "#d97706", connect: "#059669", serve: "#e11d48",
+    "strat-new": "#3b82f6", "strat-design": "#2563eb", "strat-service": "#60a5fa", "strat-comply": "#1d4ed8",
+    "pay-setup": "#06b6d4", "pay-process": "#0891b2", "pay-tax": "#22d3ee", "pay-support": "#0e7490",
+    "adv-consult": "#8b5cf6", "adv-research": "#7c3aed", "adv-participant": "#a78bfa", "adv-comply": "#6d28d9"
+  };
+  window.VERTICAL_COLORS = VERTICAL_COLORS;
+
   function escAttr(s) { return String(s).replace(/"/g, "&quot;"); }
   function initials(name) {
     const words = name.replace(/^The Honorable\s+/, "").split(/\s+/).filter(w => /^[A-Z]/.test(w));
@@ -30,7 +41,7 @@
 
   function renderBox(node) {
     const statusClass = node.type === "function" ? (node.confirmed ? " ocn-confirmed" : " ocn-estimated") : "";
-    const collapsible = node.type === "vertical" && node.children && node.children.length;
+    const collapsible = (node.type === "vertical" || node.type === "division") && node.children && node.children.length;
     const accentStyle = (node.accentColor && !node.seat) ? ` style="border-top-color:${node.accentColor}; border-top-width:3px;"` : "";
     return `
       <div class="ocn ocn-${node.type}${node.seat ? " ocn-seat" : ""}${statusClass}${collapsible ? " oc-toggle" : ""}" data-id="${escAttr(node.id)}" tabindex="0" role="button"${accentStyle}>
@@ -51,22 +62,23 @@
     const connectedIds = new Set();
     connections.forEach(c => { connectedIds.add(c.from); connectedIds.add(c.to); });
 
+    const allVerticals = Object.entries(companyData.verticals || {});
     const divisionNodes = companyData.divisions.map(d => {
       const node = {
         id: d.id, type: "division", name: d.name, role: d.role,
         people: byDivision(d.id)
       };
-      if (d.id === "advantage") {
-        const palette = window.VERTICAL_COLORS || {};
-        node.children = Object.entries(companyData.verticals).map(([key, v]) => ({
+      const ownVerticals = allVerticals.filter(([, v]) => v.division === d.id);
+      if (ownVerticals.length) {
+        node.children = ownVerticals.map(([key, v]) => ({
           id: key, type: "vertical", name: v.name,
           role: v.confirmed ? "Confirmed" : "Estimated — verify",
           seat: key === "connect",
-          people: [], accentColor: palette[key],
+          people: [], accentColor: VERTICAL_COLORS[key],
           children: v.funcs.map(f => ({
             id: f.id, type: "function", name: f.label,
             role: f.confirmed ? "Confirmed" : "Estimated", confirmed: f.confirmed,
-            linked: connectedIds.has(f.id), accentColor: palette[key]
+            linked: connectedIds.has(f.id), accentColor: VERTICAL_COLORS[key]
           }))
         }));
       }
@@ -87,7 +99,7 @@
 
   function renderNode(node) {
     const children = node.children || [];
-    const listClass = node.type === "vertical" && children.length ? " oc-fn-list" : "";
+    const listClass = (node.type === "vertical" || node.type === "division") && children.length ? " oc-fn-list" : "";
     const childrenHtml = children.length
       ? `<ul class="${listClass}">${children.map(c => `<li>${renderNode(c)}</li>`).join("")}</ul>`
       : "";
@@ -102,6 +114,14 @@
     const tree = buildTree(companyData);
     container.innerHTML = `<ul class="orgchart"><li>${renderNode(tree)}</li></ul>`;
     container.style.position = "relative";
+
+    // Pre-expand this project's own seat (Advantage → Connect) so it's visible without clicking;
+    // the other three divisions' department breakdowns are new/estimated, so they start collapsed.
+    ["advantage", "connect"].forEach(id => {
+      const toggle = container.querySelector(`.oc-toggle[data-id="${id}"]`);
+      const list = toggle && toggle.nextElementSibling;
+      if (toggle && list) { toggle.classList.add("oc-expanded"); list.classList.add("oc-expanded"); }
+    });
 
     const overlay = document.createElementNS(svgNS, "svg");
     overlay.setAttribute("class", "ocn-overlay");
