@@ -1,3 +1,11 @@
+function setSidebarOpen(open) {
+  const sidebar = document.getElementById("sidebar");
+  const backdrop = document.getElementById("sidebarBackdrop");
+  if (sidebar) sidebar.classList.toggle("open", open);
+  if (backdrop) backdrop.classList.toggle("show", open);
+  document.body.classList.toggle("sidebar-lock", open);
+}
+
 const Router = {
   routes: {},
   register(path, renderFn) { this.routes[path] = renderFn; },
@@ -8,7 +16,13 @@ const Router = {
       a.classList.toggle("active", a.dataset.route === route);
     });
     const mount = document.getElementById("viewMount");
-    mount.innerHTML = '<div class="loading">Loading…</div>';
+    mount.innerHTML = `
+      <div class="view-skeleton">
+        <div class="sk-block sk-hero"></div>
+        <div class="sk-block sk-line" style="width:60%;"></div>
+        <div class="sk-block sk-line" style="width:80%;"></div>
+      </div>
+    `;
     const renderFn = this.routes[route];
     if (renderFn) {
       try {
@@ -20,7 +34,7 @@ const Router = {
     } else {
       mount.innerHTML = `<div class="loading">Unknown route: ${route}</div>`;
     }
-    document.getElementById("sidebar").classList.remove("open");
+    setSidebarOpen(false);
     window.scrollTo(0, 0);
   },
   init() {
@@ -31,6 +45,8 @@ const Router = {
 
 document.addEventListener("DOMContentLoaded", () => {
   const toggle = document.getElementById("menuToggle");
+  const backdrop = document.getElementById("sidebarBackdrop");
   const sidebar = document.getElementById("sidebar");
-  if (toggle) toggle.addEventListener("click", () => sidebar.classList.toggle("open"));
+  if (toggle) toggle.addEventListener("click", () => setSidebarOpen(!sidebar.classList.contains("open")));
+  if (backdrop) backdrop.addEventListener("click", () => setSidebarOpen(false));
 });
