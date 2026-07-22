@@ -492,22 +492,20 @@
   .cmap-wrap:fullscreen { background: var(--page); padding: 24px; display: flex; flex-direction: column; }
   .cmap-wrap:fullscreen .cmap-container { flex: 1; }
   .cmap-svg { display: block; }
-  .cmap-sector { opacity: 0.05; transition: opacity .2s ease; }
-  .cmap-sector.dim { opacity: 0.02; }
-  .cmap-spoke { stroke: var(--border); stroke-width: 1; transition: opacity .2s ease; }
-  .cmap-spoke.dim { opacity: 0.35; }
-  .cmap-link { fill: none; stroke: var(--ink-muted); stroke-width: 1.3; opacity: 0.55; transition: opacity .15s ease, stroke-width .15s ease; }
-  .cmap-link-handoff { stroke-width: 1.5; }
-  .cmap-link-shared { stroke-dasharray: 2 3; }
-  .cmap-link.hi { stroke: var(--accent); stroke-width: 2.2; opacity: 1; }
-  .cmap-link.dim { opacity: 0.08; }
+  .cmap-spoke { stroke-width: 1.2; opacity: 0.4; transition: opacity .2s ease; }
+  .cmap-spoke.dim { opacity: 0.15; }
+  .cmap-link { fill: none; stroke-width: 2.2; opacity: 0.75; transition: opacity .15s ease, stroke-width .15s ease; }
+  .cmap-link-cross { stroke: #ec4899; }
+  .cmap-link-serves { stroke: #f59e0b; stroke-dasharray: 2 4; }
+  .cmap-link.hi { stroke-width: 3; opacity: 1; }
+  .cmap-link.dim { opacity: 0.1; }
   .cmap-node.dim { opacity: 0.25; }
-  .cmap-arrowhead { fill: var(--ink-muted); }
   .cmap-node { cursor: pointer; transition: opacity .15s ease; }
   .cmap-node:focus-visible .cmap-circle { stroke: var(--ink); stroke-width: 2; }
-  .cmap-circle { stroke: var(--page); stroke-width: 1.5; transition: r .15s ease; }
-  .cmap-node:hover .cmap-circle { stroke-width: 2.5; }
-  .cmap-node-hub .cmap-circle { stroke: var(--surface); stroke-width: 3; }
+  .cmap-circle { stroke: var(--page); stroke-width: 2; transition: r .15s ease; }
+  .cmap-node:hover .cmap-circle { stroke-width: 3; }
+  .cmap-node-hub .cmap-circle { stroke: var(--surface); stroke-width: 3.5; }
+  .cmap-initials { font-family: "Inter", sans-serif; font-size: 11px; font-weight: 700; fill: #ffffff; text-anchor: middle; pointer-events: none; }
   .cmap-label { font-family: "Inter", sans-serif; font-size: 9px; fill: var(--ink-muted); transition: opacity .15s ease, fill .15s ease; }
   .cmap-label-hub { font-size: 12.5px; font-weight: 700; fill: var(--ink); }
   .cmap-node:hover .cmap-label, .cmap-node:focus-visible .cmap-label { fill: var(--ink); }

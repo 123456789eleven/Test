@@ -81,19 +81,20 @@
         <div class="cmap-wrap" id="cmapWrap">
           <div class="cmap-head">
             <div>
-              <h3>How every job function within Advantage actually connects</h3>
-              <p class="cap">Each of Advantage's 5 verticals is a hub (larger circle); their job functions branch out around them. Thin lines are handoffs and shared systems between functions — including across verticals. Click any node to trace its direct connections; everything else fades.</p>
+              <h3>How the whole company actually connects</h3>
+              <p class="cap">Every senior leader, grouped by division — plus the real cross-division ties (John Kelly spans Strategies &amp; Advisory, David Kelly spans Payroll &amp; Advantage, Wesley Mace spans Product and both operating divisions) and Corporate Functions' reach across all four. Click anyone to trace their direct connections; everything else fades.</p>
             </div>
             <button id="cmapFullscreen" class="cmap-fs-btn">⛶ Fullscreen</button>
           </div>
           <div id="cmapContainer" class="cmap-container"></div>
           <div class="cmap-legend">
-            <span><i style="background:#6366f1"></i>Win</span>
-            <span><i style="background:#06b6d4"></i>Construct</span>
-            <span><i style="background:#d97706"></i>Protect</span>
-            <span><i style="background:#059669"></i>Connect</span>
-            <span><i style="background:#e11d48"></i>Serve</span>
-            <span>— faded circle = estimated function</span>
+            <span><i style="background:#f59e0b"></i>Executive</span>
+            <span><i style="background:#3b82f6"></i>Strategies</span>
+            <span><i style="background:#10b981"></i>Advantage</span>
+            <span><i style="background:#06b6d4"></i>Payroll</span>
+            <span><i style="background:#8b5cf6"></i>Advisory</span>
+            <span><i style="background:#ec4899"></i>Corporate Functions</span>
+            <span>— bright curved lines = real cross-division ties</span>
           </div>
         </div>
         <div id="cmapDetail"></div>
@@ -401,58 +402,31 @@
       const panel = document.getElementById("cmapDetail");
       let html = "";
       if (node.kind === "hub") {
-        const v = data.verticals[node.id];
-        html = `
-          <div class="ad-head">
-            <h3>${v.name}</h3>
-            <span class="ad-status ${v.confirmed ? "confirmed" : "unconfirmed"}">${v.confirmed ? "Confirmed" : "Estimated — verify"}</span>
-            <button id="closeCmapDetail">Close ✕</button>
-          </div>
-          <p style="color:var(--ink-soft); font-size:0.9rem; margin-top:4px;">${v.desc}</p>
-        `;
-      } else {
-        const found = findFunction(node.id);
-        if (!found) return;
-        const { func, vertical } = found;
-        const conns = (data.processConnections || []).filter(c => c.from === func.id || c.to === func.id);
-        const feedsInto = conns.filter(c => c.type === "handoff" && c.from === func.id).map(c => ({ id: c.to, note: c.note }));
-        const fedBy = conns.filter(c => c.type === "handoff" && c.to === func.id).map(c => ({ id: c.from, note: c.note }));
-        const shared = conns.filter(c => c.type === "shared").map(c => ({ id: c.from === func.id ? c.to : c.from, note: c.note }));
-        function linkGroup(title, arrow, items) {
-          if (!items.length) return "";
-          return `
-            <div class="fn-conn-group">
-              <div class="fn-conn-title">${title}</div>
-              ${items.map(it => {
-                const target = findFunction(it.id);
-                const label = target ? `${target.func.label} (${target.vertical.name})` : it.id;
-                return `<button class="fn-conn-link" data-focus="${it.id}"><span class="fn-conn-arrow">${arrow}</span> ${label}<span class="fn-conn-note">${it.note}</span></button>`;
-              }).join("")}
+        if (node.id === "executive") {
+          const people = data.leadership.filter(l => ["fx3", "frankIII"].includes(l.id));
+          html = `
+            <div class="dd-head">
+              <div><h2>Executive</h2><div class="dd-leaders">Top leadership, company-wide</div></div>
+              <button id="closeCmapDetail">Close ✕</button>
             </div>
+            <ul class="ad-func-list">${people.map(p => `<li><strong style="flex:none; min-width:170px;">${p.name}</strong> ${p.title}</li>`).join("")}</ul>
           `;
+        } else if (node.id === "corpfn") {
+          html = renderGroupDetail();
+        } else {
+          html = renderDivisionDetail(data.divisions.find(d => d.id === node.id));
         }
-        html = `
-          <div class="ad-head">
-            <h3>${func.label}</h3>
-            <span class="ad-status ${func.confirmed ? "confirmed" : "unconfirmed"}">${func.confirmed ? "Confirmed" : "Estimated — verify"}</span>
-            <button id="closeCmapDetail">Close ✕</button>
-          </div>
-          <p style="color:var(--ink-soft); font-size:0.9rem; margin-top:4px;">Part of <strong>${vertical.name}</strong>.</p>
-          ${linkGroup("Feeds into →", "→", feedsInto)}
-          ${linkGroup("Fed by ←", "←", fedBy)}
-          ${linkGroup("Shares systems with ⇄", "⇄", shared)}
-          ${!feedsInto.length && !fedBy.length && !shared.length ? '<p class="notes-empty">No modeled connections yet for this function.</p>' : ""}
-        `;
+      } else {
+        const p = data.leadership.find(l => l.id === node.id);
+        if (!p) return;
+        html = renderPersonDetail(p.name, p.title, p.note);
       }
       panel.innerHTML = html;
       panel.classList.add("show");
       document.getElementById("closeCmapDetail").addEventListener("click", () => panel.classList.remove("show"));
-      panel.querySelectorAll(".fn-conn-link").forEach(btn => {
-        btn.addEventListener("click", () => {
-          cmapControl.focus(btn.dataset.focus);
-          renderCmapDetail({ kind: "function", id: btn.dataset.focus });
-        });
-      });
+      requestAnimationFrame(() => requestAnimationFrame(() => {
+        panel.querySelectorAll(".co-hbar-fill[data-w]").forEach(el => { el.style.width = el.dataset.w + "%"; });
+      }));
     }
 
     const cmapControl = renderConnectionsMap("cmapContainer", { companyData: data, onNodeClick: renderCmapDetail });
