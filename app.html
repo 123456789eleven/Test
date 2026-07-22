@@ -7,7 +7,7 @@
 <link rel="icon" href="favicon.svg" type="image/svg+xml" />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Playfair+Display:wght@500;600&display=swap" rel="stylesheet" />
 <style>
   :root {
     --page: #f6f7fa; --surface: #ffffff; --surface-alt: #eef0f5;
@@ -98,6 +98,27 @@
   .page-head { max-width: 76ch; margin-bottom: 28px; }
   .page-head h1 { font-size: 1.9rem; }
   .page-head p { color: var(--ink-soft); font-size: 0.96rem; margin: 10px 0 0; line-height: 1.55; }
+
+  /* ---- Kelly Benefits: executive hero header ---- */
+  .kb-hero {
+    position: relative; border-radius: var(--radius-lg); overflow: hidden; padding: 34px 32px; margin-bottom: 26px;
+    background:
+      radial-gradient(circle at 15% 20%, rgba(95,168,224,0.30), transparent 55%),
+      radial-gradient(circle at 90% 85%, rgba(232,147,90,0.18), transparent 50%),
+      linear-gradient(160deg, #0d1f29, #142c3a 65%, #1a3542);
+    color: #f4f8fb;
+  }
+  .kb-hero-content { max-width: 74ch; position: relative; }
+  .kb-hero-content h1 { font-size: clamp(1.6rem, 3vw, 2.1rem); color: #ffffff; }
+  .kb-hero-content p { color: rgba(244,248,251,0.78); font-size: 0.96rem; margin: 10px 0 0; line-height: 1.6; }
+  .kb-hero-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-top: 26px; position: relative; }
+  @media (max-width: 700px) { .kb-hero-stats { grid-template-columns: 1fr; } }
+  .kb-stat {
+    background: rgba(255,255,255,0.07); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255,255,255,0.14); border-radius: var(--radius-md); padding: 16px 18px;
+  }
+  .kb-stat-big { font-family: "Playfair Display", serif; font-size: 2.1rem; font-weight: 600; color: #ffffff; line-height: 1; }
+  .kb-stat-label { font-size: 0.78rem; color: rgba(244,248,251,0.72); margin-top: 8px; line-height: 1.4; }
 
   footer.app-footer { border-top: 1px solid var(--border); padding: 18px clamp(16px, 3vw, 40px); font-size: 0.76rem; color: var(--ink-muted); }
 

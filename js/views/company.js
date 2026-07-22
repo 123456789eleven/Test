@@ -11,9 +11,16 @@
 
   async function renderCompanyView(mount) {
     mount.innerHTML = `
-      <div class="page-head">
-        <h1>Kelly Benefits — The Full Circle</h1>
-        <p>A privately-held, family-owned benefits company built around four connected divisions — each one sells into (or draws from) the next, forming a closed loop of the client relationship rather than a single-service business.</p>
+      <div class="kb-hero">
+        <div class="kb-hero-content">
+          <h1>Kelly Benefits — The Full Circle</h1>
+          <p>A privately-held, family-owned benefits company built around four connected divisions — each one sells into (or draws from) the next, forming a closed loop of the client relationship rather than a single-service business.</p>
+        </div>
+        <div class="kb-hero-stats">
+          <div class="kb-stat"><div class="kb-stat-big">50</div><div class="kb-stat-label">Years since founding — 50th anniversary this year</div></div>
+          <div class="kb-stat"><div class="kb-stat-big">10K+</div><div class="kb-stat-label">Corporate clients, 600,000+ covered lives</div></div>
+          <div class="kb-stat"><div class="kb-stat-big">23</div><div class="kb-stat-label">Years ranked #1 in Maryland (2002–2024)</div></div>
+        </div>
       </div>
 
       <div class="fit-box">
@@ -31,6 +38,7 @@
       </div>
 
       <div class="view active" id="coview-overview">
+        <p class="section-label">Company details</p>
         <div class="snapshot" id="coSnapshot"></div>
 
         <div class="orgmap-wrap" id="orgmapWrap">
@@ -184,7 +192,8 @@
       return;
     }
 
-    document.getElementById("coSnapshot").innerHTML = data.snapshot.map(s => `
+    const heroCovered = ["Founded", "Scale", "Recognition"];
+    document.getElementById("coSnapshot").innerHTML = data.snapshot.filter(s => !heroCovered.includes(s.l)).map(s => `
       <div class="snap-card"><div class="l">${s.l}</div><div class="v">${s.v}</div></div>`).join("");
 
     document.getElementById("coLeadership").innerHTML = data.leadership.map(p => `
