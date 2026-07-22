@@ -38,7 +38,12 @@ const Router = {
     window.scrollTo(0, 0);
   },
   init() {
-    window.addEventListener("hashchange", () => this.navigate());
+    window.addEventListener("hashchange", () => {
+      // In-page anchors (e.g. "#sec-connections" from a page's own sub-nav) aren't routes —
+      // only "#/..." hashes (or none, meaning the default route) should trigger a re-render.
+      if (window.location.hash && !window.location.hash.startsWith("#/")) return;
+      this.navigate();
+    });
     this.navigate();
   }
 };
