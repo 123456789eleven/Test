@@ -38,8 +38,7 @@
 
       <div class="view active" id="coview-overview">
         <nav class="kb-subnav" id="kbSubnav">
-          <a href="#sec-structure" data-sec="structure" class="active">Structure</a>
-          <a href="#sec-connections" data-sec="connections">Connections</a>
+          <a href="#sec-structure" data-sec="structure" class="active">Structure &amp; Connections</a>
           <a href="#sec-cobra" data-sec="cobra">COBRA Process</a>
         </nav>
 
@@ -49,8 +48,11 @@
 
           <div class="orgmap-wrap" id="orgmapWrap">
             <div class="orgmap-head">
-              <p class="cap">The company as it's actually structured: four divisions and their leaders, the corporate functions (HR, Finance, Marketing, Technology) that support all four, and — down through Kelly Benefits Advantage — every one of its five verticals. Click a vertical's ▸ to expand its individual job functions in place; green borders mean confirmed, gray means estimated. A 🔗 on a function means it's connected to others — click it to see what feeds it, what it feeds, and what it shares systems with.</p>
-              <button id="orgmapFullscreen" class="orgmap-fs-btn">⛶ Fullscreen</button>
+              <p class="cap">One chart: the real reporting structure and the real human connections that cut across it. Four divisions, their leaders, the corporate functions that support all four, and — down through Kelly Benefits Advantage — every one of its five verticals. Click a vertical's ▸ to expand its job functions; a 🔗 means it connects to others in the workflow. Click any person with a <span class="ocn-cross-dot" style="display:inline-block; vertical-align:middle;"></span> mark to trace who they connect to outside their own division — John Kelly, David Kelly, and Wesley Mace all hold roles spanning two divisions. Click Corporate Functions (◈) to see its reach across all four.</p>
+              <div style="display:flex; gap:8px; flex:none;">
+                <button id="orgmapShowAll" class="orgmap-connect-btn">🔗 Show all connections</button>
+                <button id="orgmapFullscreen" class="orgmap-fs-btn">⛶ Fullscreen</button>
+              </div>
             </div>
             <div id="coOrgMap" class="orgmap-container"></div>
             <p class="orgmap-caption">Workflow within Advantage: Win → Construct → then splits into Protect, Connect, and Serve. Construct, Connect, and Serve also share enrollment responsibility.</p>
@@ -62,35 +64,11 @@
 
           <div class="workflow-card">
             <h3>How the client relationship actually flows</h3>
-            <p class="cap">The org chart above shows who reports to whom. This shows something different — the direction work and data actually move as a single client relationship travels through all four divisions, on repeat, for as long as they stay a client. Click any division or arrow for detail.</p>
+            <p class="cap">The org chart above shows who reports to whom, and who connects across divisions. This shows something different — the direction work and data actually move as a single client relationship travels through all four divisions, on repeat, for as long as they stay a client. Click any division or arrow for detail.</p>
             <div id="flowContainer"></div>
             <div class="flow-detail" id="flowDetail"></div>
             <p class="chart-caption" id="flowNote" style="margin-top:14px;"></p>
           </div>
-        </section>
-
-        <section id="sec-connections" class="kb-section">
-          <p class="kb-section-bridge">The chart above shows the formal structure — who reports to whom. This shows something the org chart can't: the real human ties that cut across it.</p>
-          <div class="cmap-wrap" id="cmapWrap">
-            <div class="cmap-head">
-              <div>
-                <h3>How the whole company actually connects</h3>
-                <p class="cap">Every senior leader, grouped by division — plus the real cross-division ties (John Kelly spans Strategies &amp; Advisory, David Kelly spans Payroll &amp; Advantage, Wesley Mace spans Product and both operating divisions) and Corporate Functions' reach across all four. Click anyone to trace their direct connections; everything else fades.</p>
-              </div>
-              <button id="cmapFullscreen" class="cmap-fs-btn">⛶ Fullscreen</button>
-            </div>
-            <div id="cmapContainer" class="cmap-container"></div>
-            <div class="cmap-legend">
-              <span><i style="background:#f59e0b"></i>Executive</span>
-              <span><i style="background:#3b82f6"></i>Strategies</span>
-              <span><i style="background:#10b981"></i>Advantage</span>
-              <span><i style="background:#06b6d4"></i>Payroll</span>
-              <span><i style="background:#8b5cf6"></i>Advisory</span>
-              <span><i style="background:#ec4899"></i>Corporate Functions</span>
-              <span>— bright curved lines = real cross-division ties</span>
-            </div>
-          </div>
-          <div id="cmapDetail"></div>
         </section>
 
         <section id="sec-cobra" class="kb-section">
@@ -398,7 +376,7 @@
       renderDetailContent(targetId);
     }
 
-    renderOrgMap("coOrgMap", { companyData: data, onNodeClick: handleOrgNodeClick });
+    const orgMapControl = renderOrgMap("coOrgMap", { companyData: data, onNodeClick: handleOrgNodeClick });
 
     function renderFlowEdgeDetail(edge) {
       const panel = document.getElementById("flowDetail");
@@ -410,52 +388,9 @@
     }
     renderDivisionFlow("flowContainer", { companyData: data, onNodeClick: handleOrgNodeClick, onEdgeClick: renderFlowEdgeDetail });
 
-    function renderCmapDetail(node) {
-      const panel = document.getElementById("cmapDetail");
-      let html = "";
-      if (node.kind === "hub") {
-        if (node.id === "executive") {
-          const people = data.leadership.filter(l => ["fx3", "frankIII"].includes(l.id));
-          html = `
-            <div class="dd-head">
-              <div><h2>Executive</h2><div class="dd-leaders">Top leadership, company-wide</div></div>
-              <button id="closeCmapDetail">Close ✕</button>
-            </div>
-            <ul class="ad-func-list">${people.map(p => `<li><strong style="flex:none; min-width:170px;">${p.name}</strong> ${p.title}</li>`).join("")}</ul>
-          `;
-        } else if (node.id === "corpfn") {
-          html = renderGroupDetail();
-        } else {
-          html = renderDivisionDetail(data.divisions.find(d => d.id === node.id));
-        }
-      } else {
-        const p = data.leadership.find(l => l.id === node.id);
-        if (!p) return;
-        html = renderPersonDetail(p.name, p.title, p.note);
-      }
-      panel.innerHTML = html;
-      panel.classList.add("show");
-      document.getElementById("closeCmapDetail").addEventListener("click", () => panel.classList.remove("show"));
-      requestAnimationFrame(() => requestAnimationFrame(() => {
-        panel.querySelectorAll(".co-hbar-fill[data-w]").forEach(el => { el.style.width = el.dataset.w + "%"; });
-      }));
-    }
-
-    const cmapControl = renderConnectionsMap("cmapContainer", { companyData: data, onNodeClick: renderCmapDetail });
-
-    document.getElementById("cmapFullscreen").addEventListener("click", () => {
-      const wrap = document.getElementById("cmapWrap");
-      if (!document.fullscreenElement) {
-        wrap.requestFullscreen();
-      } else {
-        document.exitFullscreen();
-      }
-    });
-    document.addEventListener("fullscreenchange", () => {
-      const wrap = document.getElementById("cmapWrap");
-      const btn = document.getElementById("cmapFullscreen");
-      if (!wrap || !btn) return;
-      btn.textContent = document.fullscreenElement === wrap ? "✕ Exit fullscreen" : "⛶ Fullscreen";
+    document.getElementById("orgmapShowAll").addEventListener("click", (e) => {
+      orgMapControl.showAllConnections();
+      e.target.classList.toggle("on");
     });
 
     document.getElementById("orgmapFullscreen").addEventListener("click", () => {
@@ -480,7 +415,7 @@
         link.classList.add("active");
       });
     });
-    const spySections = ["structure", "connections", "cobra"]
+    const spySections = ["structure", "cobra"]
       .map(id => document.getElementById("sec-" + id))
       .filter(Boolean);
     if (spySections.length && "IntersectionObserver" in window) {

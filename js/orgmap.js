@@ -1,18 +1,42 @@
 (function () {
   const EXEC_IDS = ["fx3", "frankIII"];
+  const svgNS = "http://www.w3.org/2000/svg";
 
   function escAttr(s) { return String(s).replace(/"/g, "&quot;"); }
+  function initials(name) {
+    const words = name.replace(/^The Honorable\s+/, "").split(/\s+/).filter(w => /^[A-Z]/.test(w));
+    return (words[0]?.[0] || "") + (words[words.length - 1]?.[0] || "");
+  }
+
+  function renderPeopleList(people) {
+    if (!people || !people.length) return "";
+    return `
+      <ul class="ocn-people">
+        ${people.map(p => `
+          <li>
+            <button class="ocn-person" data-id="${escAttr(p.id)}" data-cross="${escAttr((p.cross || []).join(","))}" title="${escAttr(p.name)} — ${escAttr(p.title)}">
+              <span class="ocn-avatar">${initials(p.name)}</span>
+              <span class="ocn-person-info">
+                <span class="ocn-person-name">${p.name}</span>
+                <span class="ocn-person-title">${p.title}</span>
+              </span>
+              ${p.cross && p.cross.length ? '<span class="ocn-cross-dot" title="Also connects to another division — click to see"></span>' : ""}
+            </button>
+          </li>
+        `).join("")}
+      </ul>
+    `;
+  }
 
   function renderBox(node) {
-    const lines = (node.lines || []).map(l => `<div class="ocn-line">${l}</div>`).join("");
     const statusClass = node.type === "function" ? (node.confirmed ? " ocn-confirmed" : " ocn-estimated") : "";
     const collapsible = node.type === "vertical" && node.children && node.children.length;
     const accentStyle = (node.accentColor && !node.seat) ? ` style="border-top-color:${node.accentColor}; border-top-width:3px;"` : "";
     return `
       <div class="ocn ocn-${node.type}${node.seat ? " ocn-seat" : ""}${statusClass}${collapsible ? " oc-toggle" : ""}" data-id="${escAttr(node.id)}" tabindex="0" role="button"${accentStyle}>
-        <div class="ocn-name">${node.name}${collapsible ? '<span class="ocn-chevron">▸</span>' : ""}${node.linked ? '<span class="ocn-link-dot" title="Connects to other functions">🔗</span>' : ""}</div>
+        <div class="ocn-name">${node.name}${collapsible ? '<span class="ocn-chevron">▸</span>' : ""}${node.linked ? '<span class="ocn-link-dot" title="Connects to other functions">🔗</span>' : ""}${node.reach ? '<span class="ocn-reach-dot" title="Connects to all four divisions — click to see">◈</span>' : ""}</div>
         ${node.role ? `<div class="ocn-role">${node.role}</div>` : ""}
-        ${lines}
+        ${renderPeopleList(node.people)}
         ${node.seat ? '<div class="ocn-seat-badge">YOU ARE HERE</div>' : ""}
       </div>
     `;
@@ -20,7 +44,7 @@
 
   function buildTree(companyData) {
     const leadership = companyData.leadership;
-    const byDivision = (divId) => leadership.filter(l => l.parent === divId || (l.cross && l.cross.includes(divId)));
+    const byDivision = (divId) => leadership.filter(l => l.parent === divId);
     const corpPeople = leadership.filter(l => l.parent === "root" && !EXEC_IDS.includes(l.id));
     const execPeople = leadership.filter(l => EXEC_IDS.includes(l.id));
     const connections = companyData.processConnections || [];
@@ -28,10 +52,9 @@
     connections.forEach(c => { connectedIds.add(c.from); connectedIds.add(c.to); });
 
     const divisionNodes = companyData.divisions.map(d => {
-      const people = byDivision(d.id);
       const node = {
         id: d.id, type: "division", name: d.name, role: d.role,
-        lines: people.map(p => `${p.name} — ${p.title}`)
+        people: byDivision(d.id)
       };
       if (d.id === "advantage") {
         const palette = window.VERTICAL_COLORS || {};
@@ -39,7 +62,7 @@
           id: key, type: "vertical", name: v.name,
           role: v.confirmed ? "Confirmed" : "Estimated — verify",
           seat: key === "connect",
-          lines: [], accentColor: palette[key],
+          people: [], accentColor: palette[key],
           children: v.funcs.map(f => ({
             id: f.id, type: "function", name: f.label,
             role: f.confirmed ? "Confirmed" : "Estimated", confirmed: f.confirmed,
@@ -52,12 +75,12 @@
 
     const corpNode = {
       id: "corpfn", type: "group", name: "Corporate Functions", role: "Shared services, all divisions",
-      lines: corpPeople.map(p => `${p.name} — ${p.title}`)
+      reach: true, people: corpPeople
     };
 
     return {
       id: "root", type: "root", name: "Kelly Benefits",
-      lines: execPeople.map(p => `${p.name} — ${p.title}`),
+      people: execPeople,
       children: [...divisionNodes, corpNode]
     };
   }
@@ -78,6 +101,100 @@
 
     const tree = buildTree(companyData);
     container.innerHTML = `<ul class="orgchart"><li>${renderNode(tree)}</li></ul>`;
+    container.style.position = "relative";
+
+    const overlay = document.createElementNS(svgNS, "svg");
+    overlay.setAttribute("class", "ocn-overlay");
+    container.appendChild(overlay);
+
+    const divisionIds = companyData.divisions.map(d => d.id);
+    let activeMode = null; // { kind: "person", id } | { kind: "corpfn" } | { kind: "all" }
+
+    function nodeCenter(id) {
+      const el = container.querySelector(`.ocn[data-id="${CSS.escape(id)}"], .ocn-person[data-id="${CSS.escape(id)}"]`);
+      if (!el) return null;
+      const box = el.getBoundingClientRect();
+      const wrap = container.getBoundingClientRect();
+      return {
+        x: box.left - wrap.left + container.scrollLeft + box.width / 2,
+        y: box.top - wrap.top + container.scrollTop + box.height / 2
+      };
+    }
+
+    function drawLines(pairs) {
+      overlay.setAttribute("width", container.scrollWidth);
+      overlay.setAttribute("height", container.scrollHeight);
+      overlay.innerHTML = "";
+      pairs.forEach(([fromId, toId]) => {
+        const a = nodeCenter(fromId), b = nodeCenter(toId);
+        if (!a || !b) return;
+        const mx = (a.x + b.x) / 2, my = Math.min(a.y, b.y) - 46;
+        const path = document.createElementNS(svgNS, "path");
+        path.setAttribute("d", `M${a.x.toFixed(1)},${a.y.toFixed(1)} Q${mx.toFixed(1)},${my.toFixed(1)} ${b.x.toFixed(1)},${b.y.toFixed(1)}`);
+        path.setAttribute("class", "ocn-overlay-line");
+        overlay.appendChild(path);
+        [a, b].forEach(pt => {
+          const dot = document.createElementNS(svgNS, "circle");
+          dot.setAttribute("cx", pt.x.toFixed(1)); dot.setAttribute("cy", pt.y.toFixed(1)); dot.setAttribute("r", 4);
+          dot.setAttribute("class", "ocn-overlay-dot");
+          overlay.appendChild(dot);
+        });
+      });
+    }
+
+    function pairsAndHighlightForMode(mode) {
+      if (mode.kind === "person") {
+        const person = companyData.leadership.find(l => l.id === mode.id);
+        if (!person) return { pairs: [], ids: [] };
+        return {
+          pairs: (person.cross || []).map(divId => [person.id, divId]),
+          ids: [person.id, person.parent, ...(person.cross || [])]
+        };
+      }
+      if (mode.kind === "corpfn") {
+        return { pairs: divisionIds.map(divId => ["corpfn", divId]), ids: ["corpfn", ...divisionIds] };
+      }
+      // "all"
+      const pairs = [];
+      companyData.leadership.forEach(p => { (p.cross || []).forEach(divId => pairs.push([p.id, divId])); });
+      divisionIds.forEach(divId => pairs.push(["corpfn", divId]));
+      return { pairs, ids: [] };
+    }
+
+    function clearLines() {
+      activeMode = null;
+      overlay.innerHTML = "";
+      container.querySelectorAll(".ocn-active").forEach(el => el.classList.remove("ocn-active"));
+    }
+
+    function highlight(ids) {
+      container.querySelectorAll(".ocn-active").forEach(el => el.classList.remove("ocn-active"));
+      ids.forEach(id => {
+        const el = container.querySelector(`.ocn[data-id="${CSS.escape(id)}"], .ocn-person[data-id="${CSS.escape(id)}"]`);
+        if (el) el.classList.add("ocn-active");
+      });
+    }
+
+    function activate(mode) {
+      if (activeMode && activeMode.kind === mode.kind && activeMode.id === mode.id) { clearLines(); return; }
+      activeMode = mode;
+      const { pairs, ids } = pairsAndHighlightForMode(mode);
+      drawLines(pairs);
+      highlight(ids);
+    }
+
+    function showPersonConnections(person) { activate({ kind: "person", id: person.id }); }
+    function showCorpfnReach() { activate({ kind: "corpfn" }); }
+    function showAllConnections() { activate({ kind: "all" }); }
+
+    function redrawActive() {
+      if (!activeMode) return;
+      const { pairs, ids } = pairsAndHighlightForMode(activeMode);
+      drawLines(pairs);
+      highlight(ids);
+    }
+
+    window.addEventListener("resize", redrawActive);
 
     function handleActivate(el) {
       if (onNodeClick) onNodeClick(el.dataset.id);
@@ -85,7 +202,9 @@
         const ul = el.nextElementSibling;
         if (ul) ul.classList.toggle("oc-expanded");
         el.classList.toggle("oc-expanded");
+        requestAnimationFrame(redrawActive);
       }
+      if (el.dataset.id === "corpfn") showCorpfnReach();
     }
     container.querySelectorAll(".ocn").forEach(el => {
       el.addEventListener("click", () => handleActivate(el));
@@ -93,5 +212,18 @@
         if (e.key === "Enter" || e.key === " ") { e.preventDefault(); handleActivate(el); }
       });
     });
+
+    container.querySelectorAll(".ocn-person").forEach(btn => {
+      btn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        const id = btn.dataset.id;
+        if (onNodeClick) onNodeClick(id);
+        const person = companyData.leadership.find(l => l.id === id);
+        if (person && person.cross && person.cross.length) showPersonConnections(person);
+      });
+      btn.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") e.stopPropagation(); });
+    });
+
+    return { showAllConnections, clearLines, redraw: redrawActive };
   };
 })();
