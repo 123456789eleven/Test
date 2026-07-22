@@ -31,81 +31,88 @@
 
       <div class="tabs" id="coTabs">
         <button data-view="overview" class="active">Overview</button>
-        <button data-view="connections">Connections</button>
-        <button data-view="cobra">COBRA Process</button>
         <button data-view="people">People &amp; History</button>
         <button data-view="strategy">Strategy</button>
         <button data-view="notes">Workbench</button>
       </div>
 
       <div class="view active" id="coview-overview">
-        <p class="section-label">Company details</p>
-        <div class="snapshot" id="coSnapshot"></div>
+        <nav class="kb-subnav" id="kbSubnav">
+          <a href="#sec-structure" data-sec="structure" class="active">Structure</a>
+          <a href="#sec-connections" data-sec="connections">Connections</a>
+          <a href="#sec-cobra" data-sec="cobra">COBRA Process</a>
+        </nav>
 
-        <div class="orgmap-wrap" id="orgmapWrap">
-          <div class="orgmap-head">
-            <p class="cap">The company as it's actually structured: four divisions and their leaders, the corporate functions (HR, Finance, Marketing, Technology) that support all four, and — down through Kelly Benefits Advantage — every one of its five verticals. Click a vertical's ▸ to expand its individual job functions in place; green borders mean confirmed, gray means estimated. A 🔗 on a function means it's connected to others — click it to see what feeds it, what it feeds, and what it shares systems with.</p>
-            <button id="orgmapFullscreen" class="orgmap-fs-btn">⛶ Fullscreen</button>
-          </div>
-          <div id="coOrgMap" class="orgmap-container"></div>
-          <p class="orgmap-caption">Workflow within Advantage: Win → Construct → then splits into Protect, Connect, and Serve. Construct, Connect, and Serve also share enrollment responsibility.</p>
-        </div>
+        <section id="sec-structure" class="kb-section">
+          <p class="section-label">Company details</p>
+          <div class="snapshot" id="coSnapshot"></div>
 
-        <div id="orgDetail"></div>
-
-        <div class="integration-box" id="coIntegrationNote"></div>
-
-        <div class="workflow-card">
-          <h3>How the client relationship actually flows</h3>
-          <p class="cap">The org chart above shows who reports to whom. This shows something different — the path a single client relationship travels through all four divisions, on repeat, for as long as they stay a client.</p>
-          <div class="wf-row">
-            <div class="wf-step"><div class="wf-name">Strategies</div><div class="wf-role">Sell &amp; Consult</div></div>
-            <div class="wf-arrow">→</div>
-            <div class="wf-step"><div class="wf-name">Advantage</div><div class="wf-role">Administer</div></div>
-            <div class="wf-arrow">→</div>
-            <div class="wf-step"><div class="wf-name">Payroll</div><div class="wf-role">Process</div></div>
-            <div class="wf-arrow">→</div>
-            <div class="wf-step"><div class="wf-name">Advisory</div><div class="wf-role">Invest</div></div>
-          </div>
-          <div class="wf-loop">↺ &nbsp;Renews back into Strategies as the relationship continues — a closed loop, not four separate businesses</div>
-        </div>
-
-        <div class="crosscutting-box">
-          <h4>Where "enrollment" and "reconciliation" actually sit</h4>
-          <p id="coEnrollmentNote"></p>
-          <p id="coReconciliationNote"></p>
-        </div>
-      </div>
-
-      <div class="view" id="coview-connections">
-        <div class="cmap-wrap" id="cmapWrap">
-          <div class="cmap-head">
-            <div>
-              <h3>How the whole company actually connects</h3>
-              <p class="cap">Every senior leader, grouped by division — plus the real cross-division ties (John Kelly spans Strategies &amp; Advisory, David Kelly spans Payroll &amp; Advantage, Wesley Mace spans Product and both operating divisions) and Corporate Functions' reach across all four. Click anyone to trace their direct connections; everything else fades.</p>
+          <div class="orgmap-wrap" id="orgmapWrap">
+            <div class="orgmap-head">
+              <p class="cap">The company as it's actually structured: four divisions and their leaders, the corporate functions (HR, Finance, Marketing, Technology) that support all four, and — down through Kelly Benefits Advantage — every one of its five verticals. Click a vertical's ▸ to expand its individual job functions in place; green borders mean confirmed, gray means estimated. A 🔗 on a function means it's connected to others — click it to see what feeds it, what it feeds, and what it shares systems with.</p>
+              <button id="orgmapFullscreen" class="orgmap-fs-btn">⛶ Fullscreen</button>
             </div>
-            <button id="cmapFullscreen" class="cmap-fs-btn">⛶ Fullscreen</button>
+            <div id="coOrgMap" class="orgmap-container"></div>
+            <p class="orgmap-caption">Workflow within Advantage: Win → Construct → then splits into Protect, Connect, and Serve. Construct, Connect, and Serve also share enrollment responsibility.</p>
           </div>
-          <div id="cmapContainer" class="cmap-container"></div>
-          <div class="cmap-legend">
-            <span><i style="background:#f59e0b"></i>Executive</span>
-            <span><i style="background:#3b82f6"></i>Strategies</span>
-            <span><i style="background:#10b981"></i>Advantage</span>
-            <span><i style="background:#06b6d4"></i>Payroll</span>
-            <span><i style="background:#8b5cf6"></i>Advisory</span>
-            <span><i style="background:#ec4899"></i>Corporate Functions</span>
-            <span>— bright curved lines = real cross-division ties</span>
-          </div>
-        </div>
-        <div id="cmapDetail"></div>
-      </div>
 
-      <div class="view" id="coview-cobra">
-        <div class="cobra-intro">
-          <h3>The real COBRA administration process, start to finish</h3>
-          <p class="cap" id="cobraSourceNote">Loading…</p>
-        </div>
-        <div id="cobraProcess"></div>
+          <div id="orgDetail"></div>
+
+          <div class="integration-box" id="coIntegrationNote"></div>
+
+          <div class="workflow-card">
+            <h3>How the client relationship actually flows</h3>
+            <p class="cap">The org chart above shows who reports to whom. This shows something different — the path a single client relationship travels through all four divisions, on repeat, for as long as they stay a client.</p>
+            <div class="wf-row">
+              <div class="wf-step"><div class="wf-name">Strategies</div><div class="wf-role">Sell &amp; Consult</div></div>
+              <div class="wf-arrow">→</div>
+              <div class="wf-step"><div class="wf-name">Advantage</div><div class="wf-role">Administer</div></div>
+              <div class="wf-arrow">→</div>
+              <div class="wf-step"><div class="wf-name">Payroll</div><div class="wf-role">Process</div></div>
+              <div class="wf-arrow">→</div>
+              <div class="wf-step"><div class="wf-name">Advisory</div><div class="wf-role">Invest</div></div>
+            </div>
+            <div class="wf-loop">↺ &nbsp;Renews back into Strategies as the relationship continues — a closed loop, not four separate businesses</div>
+          </div>
+        </section>
+
+        <section id="sec-connections" class="kb-section">
+          <p class="kb-section-bridge">The chart above shows the formal structure — who reports to whom. This shows something the org chart can't: the real human ties that cut across it.</p>
+          <div class="cmap-wrap" id="cmapWrap">
+            <div class="cmap-head">
+              <div>
+                <h3>How the whole company actually connects</h3>
+                <p class="cap">Every senior leader, grouped by division — plus the real cross-division ties (John Kelly spans Strategies &amp; Advisory, David Kelly spans Payroll &amp; Advantage, Wesley Mace spans Product and both operating divisions) and Corporate Functions' reach across all four. Click anyone to trace their direct connections; everything else fades.</p>
+              </div>
+              <button id="cmapFullscreen" class="cmap-fs-btn">⛶ Fullscreen</button>
+            </div>
+            <div id="cmapContainer" class="cmap-container"></div>
+            <div class="cmap-legend">
+              <span><i style="background:#f59e0b"></i>Executive</span>
+              <span><i style="background:#3b82f6"></i>Strategies</span>
+              <span><i style="background:#10b981"></i>Advantage</span>
+              <span><i style="background:#06b6d4"></i>Payroll</span>
+              <span><i style="background:#8b5cf6"></i>Advisory</span>
+              <span><i style="background:#ec4899"></i>Corporate Functions</span>
+              <span>— bright curved lines = real cross-division ties</span>
+            </div>
+          </div>
+          <div id="cmapDetail"></div>
+        </section>
+
+        <section id="sec-cobra" class="kb-section">
+          <p class="kb-section-bridge">All of that exists to do the actual work. Here's exactly how one process — COBRA administration, the Connect vertical above — really runs, phase by phase.</p>
+          <div class="cobra-intro">
+            <h3>The real COBRA administration process, start to finish</h3>
+            <p class="cap" id="cobraSourceNote">Loading…</p>
+          </div>
+          <div id="cobraProcess"></div>
+          <div class="crosscutting-box">
+            <h4>Where "enrollment" and "reconciliation" actually sit</h4>
+            <p id="coEnrollmentNote"></p>
+            <p id="coReconciliationNote"></p>
+          </div>
+        </section>
       </div>
 
       <div class="view" id="coview-people">
@@ -275,6 +282,7 @@
         <ul class="ad-func-list">${v.funcs.map(f => `
           <li><span class="ad-pill ${f.confirmed ? "confirmed" : "estimated"}">${f.confirmed ? "confirmed" : "est."}</span> ${f.label}</li>
         `).join("")}</ul>
+        ${key === "connect" ? `<a href="#sec-cobra" class="fn-conn-link" style="margin-top:12px;">→ See the full COBRA process, step by step</a>` : ""}
       `;
     }
 
@@ -460,6 +468,27 @@
       if (!wrap || !btn) return;
       btn.textContent = document.fullscreenElement === wrap ? "✕ Exit fullscreen" : "⛶ Fullscreen";
     });
+
+    const subnavLinks = document.querySelectorAll("#kbSubnav a");
+    subnavLinks.forEach(link => {
+      link.addEventListener("click", () => {
+        subnavLinks.forEach(l => l.classList.remove("active"));
+        link.classList.add("active");
+      });
+    });
+    const spySections = ["structure", "connections", "cobra"]
+      .map(id => document.getElementById("sec-" + id))
+      .filter(Boolean);
+    if (spySections.length && "IntersectionObserver" in window) {
+      const spy = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (!entry.isIntersecting) return;
+          const secId = entry.target.id.replace("sec-", "");
+          subnavLinks.forEach(l => l.classList.toggle("active", l.dataset.sec === secId));
+        });
+      }, { rootMargin: "-96px 0px -70% 0px", threshold: 0 });
+      spySections.forEach(s => spy.observe(s));
+    }
 
     SearchIndex.register("Kelly Benefits", [
       ...data.divisions.map(d => ({ title: `Kelly Benefits ${d.name}`, snippet: d.desc, route: "company" })),

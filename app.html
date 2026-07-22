@@ -7,7 +7,7 @@
 <link rel="icon" href="favicon.svg" type="image/svg+xml" />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Playfair+Display:wght@500;600&display=swap" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@0,500;0,600;1,500&display=swap" rel="stylesheet" />
 <style>
   :root {
     --page: #f6f7fa; --surface: #ffffff; --surface-alt: #eef0f5;
@@ -190,6 +190,26 @@
   .tabs button { font: inherit; font-size: 0.86rem; font-weight: 600; padding: 8px 16px; border: none; border-radius: 8px; background: transparent; color: var(--ink-soft); cursor: pointer; white-space: nowrap; transition: background .18s ease, color .18s ease, box-shadow .18s ease; }
   .tabs button.active { background: var(--surface); color: var(--ink); box-shadow: 0 1px 3px rgba(20,22,31,0.1); }
   .tabs button:hover:not(.active) { color: var(--ink); }
+
+  /* ---- Kelly Benefits: unified Overview/Connections/COBRA page (sticky scroll-spy sub-nav) ---- */
+  html { scroll-behavior: smooth; }
+  @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+  .kb-subnav {
+    display: flex; gap: 4px; position: sticky; top: 63px; z-index: 15; margin: 0 0 30px;
+    background: var(--page); padding: 10px 0; border-bottom: 1px solid var(--border);
+  }
+  .kb-subnav a {
+    font-size: 0.82rem; font-weight: 600; letter-spacing: 0.01em; color: var(--ink-soft); text-decoration: none;
+    padding: 8px 16px; border-radius: 999px; transition: background .18s ease, color .18s ease;
+  }
+  .kb-subnav a:hover { color: var(--ink); }
+  .kb-subnav a.active { background: var(--accent-wash); color: var(--accent); }
+  .kb-section { scroll-margin-top: 118px; padding-top: 6px; }
+  .kb-section + .kb-section { margin-top: 56px; padding-top: 40px; border-top: 1px solid var(--border); }
+  .kb-section-bridge {
+    max-width: 62ch; font-size: 1.02rem; line-height: 1.6; color: var(--ink-soft); margin: 0 0 26px;
+    font-family: "Playfair Display", Georgia, serif; font-style: italic;
+  }
   .view { display: none; }
   .view.active { display: block; }
 
@@ -475,7 +495,7 @@
   .fn-conn-title { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--ink-soft); font-weight: 700; margin-bottom: 8px; }
   .fn-conn-link {
     display: block; width: 100%; text-align: left; font: inherit; font-size: 0.86rem; padding: 9px 0; border: none; border-top: 1px solid var(--border);
-    background: none; color: var(--ink); cursor: pointer;
+    background: none; color: var(--ink); cursor: pointer; text-decoration: none;
   }
   .fn-conn-link:first-of-type { border-top: none; }
   .fn-conn-link:hover { color: var(--accent); }
