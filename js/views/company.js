@@ -32,6 +32,7 @@
       <div class="tabs" id="coTabs">
         <button data-view="overview" class="active">Overview</button>
         <button data-view="connections">Connections</button>
+        <button data-view="cobra">COBRA Process</button>
         <button data-view="people">People &amp; History</button>
         <button data-view="strategy">Strategy</button>
         <button data-view="notes">Workbench</button>
@@ -96,6 +97,14 @@
           </div>
         </div>
         <div id="cmapDetail"></div>
+      </div>
+
+      <div class="view" id="coview-cobra">
+        <div class="cobra-intro">
+          <h3>The real COBRA administration process, start to finish</h3>
+          <p class="cap" id="cobraSourceNote">Loading…</p>
+        </div>
+        <div id="cobraProcess"></div>
       </div>
 
       <div class="view" id="coview-people">
@@ -195,6 +204,14 @@
     const heroCovered = ["Founded", "Scale", "Recognition"];
     document.getElementById("coSnapshot").innerHTML = data.snapshot.filter(s => !heroCovered.includes(s.l)).map(s => `
       <div class="snap-card"><div class="l">${s.l}</div><div class="v">${s.v}</div></div>`).join("");
+
+    try {
+      const cobraData = await fetch("data/cobra-process.json").then(r => r.json());
+      document.getElementById("cobraSourceNote").textContent = cobraData.intro;
+      renderCobraProcess("cobraProcess", cobraData);
+    } catch (err) {
+      document.getElementById("cobraSourceNote").textContent = `Couldn't load the COBRA process data (${err.message}).`;
+    }
 
     document.getElementById("coLeadership").innerHTML = data.leadership.map(p => `
       <div class="leader-card"><div class="name">${p.name}</div><div class="title">${p.title}</div><div class="note">${p.note}</div></div>`).join("");

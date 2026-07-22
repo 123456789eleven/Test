@@ -1,0 +1,178 @@
+{
+  "source": "COBRA Flowchart - KBA Process (internal document)",
+  "intro": "The actual step-by-step COBRA administration process at Kelly Benefits Advantage — every process step, who's responsible, and the SLA timeframe, exactly as documented internally. This is real operational detail, not an inferred model.",
+  "phases": [
+    {
+      "id": "setup",
+      "title": "Enrollment & Notice Setup",
+      "summary": "What happens before anyone ever has a qualifying event — the plan documentation and rights notices every enrolled employee is owed from day one.",
+      "steps": [
+        { "type": "process", "text": "Group health plan provides a Summary Plan Description (SPD) to participant", "responsibility": "Client/broker", "time": "Within 90 days after person becomes participant" },
+        { "type": "process", "text": "Kelly Benefits mails General Notice of COBRA Rights to enrolled employee and spouse/dependents (if any)", "responsibility": "Kelly Benefits (system generated)", "time": "Generated within a week after enrollment (required within 90 days after person becomes participant)" },
+        { "type": "decision", "text": "Enrolled employee or dependent requests any plan documents", "branches": [
+          { "label": "Requested", "steps": [
+            { "type": "process", "text": "Group health plan provides requested plan documents", "responsibility": "Client/broker", "time": "Within 30 days of request" }
+          ] }
+        ] }
+      ]
+    },
+    {
+      "id": "election",
+      "title": "Qualifying Event → Election",
+      "summary": "From the client's notification of a qualifying event through the qualified beneficiary's decision to elect or decline.",
+      "steps": [
+        { "type": "process", "text": "Client notifies Kelly Benefits of an employee and/or dependent's COBRA qualifying event", "responsibility": "Client", "time": "" },
+        { "type": "process", "text": "Kelly Benefits sends a COBRA election notice to qualified beneficiaries", "responsibility": "System generated", "time": "Generated within a week of termination being processed" },
+        { "type": "decision", "text": "Qualified beneficiary elects COBRA coverage, or does not elect (to elect within at least 60 days of the election notice being sent, or the date of coverage loss, whichever is later)", "branches": [
+          { "label": "Does not elect", "steps": [
+            { "type": "process", "text": "Qualified beneficiary does not receive COBRA coverage. No further action.", "responsibility": "N/A", "time": "N/A" }
+          ] },
+          { "label": "Elects COBRA coverage", "steps": [] }
+        ] }
+      ]
+    },
+    {
+      "id": "initial-premium",
+      "title": "Initial Premium & Enrollment",
+      "summary": "The two different paths a new COBRA enrollment takes depending on whether the initial premium arrives with the election or separately — and what happens if it's short or never comes.",
+      "steps": [
+        { "type": "process", "text": "Initial premium payment due", "responsibility": "Qualified beneficiary", "time": "Within at least 45 days of COBRA election decision being sent" },
+        { "type": "decision", "text": "Did the qualified beneficiary send the initial premium together with their election, or send the election alone?", "branches": [
+          { "label": "Sent initial premium with election", "steps": [
+            { "type": "process", "text": "Kelly Benefits (1) enrolls qualified beneficiary in COBRA coverage (in Admin and at carrier); (2) applies premium to their first coverage month; (3) generates first bill indicating payment made and mails it (including payment and KTBSonline instructions)", "responsibility": "(1) & (3) COBRA team; (2) Credit & Collections", "time": "(1) Typically 7–10 business days from receipt; (2) 1–3 business days; (3) when payment is applied" },
+            { "type": "process", "text": "→ Continues into Active Coverage & Billing", "responsibility": "", "time": "" }
+          ] },
+          { "label": "Sent election only (premium separately)", "steps": [
+            { "type": "process", "text": "Kelly Benefits enrolls qualified beneficiary in COBRA coverage (in Admin only, not at carrier); first bill is generated and mailed (including payment and KTBSonline instructions)", "responsibility": "COBRA team", "time": "Typically 7–10 business days from receipt" },
+            { "type": "decision", "text": "Qualified beneficiary pays the initial premium, or does not", "branches": [
+              { "label": "Does not pay initial premium", "steps": [
+                { "type": "process", "text": "Kelly Benefits terminates coverage due to non-payment (no notice is sent, since the initial premium was never paid)", "responsibility": "Credit & Collections", "time": "Around the 5th of the following coverage month" }
+              ] },
+              { "label": "Pays initial premium", "steps": [
+                { "type": "process", "text": "Kelly Benefits enrolls qualified beneficiary in COBRA coverage at the carrier", "responsibility": "COBRA team", "time": "Typically 7–10 business days from receipt of payment" },
+                { "type": "decision", "text": "Is the payment short by the lesser of $50 or 10% of the required amount (an 'insignificant underpayment')?", "branches": [
+                  { "label": "Insignificant underpayment", "steps": [
+                    { "type": "process", "text": "Send a Notice of Insignificant Premium Underpayment email to the qualified beneficiary", "responsibility": "Credit & Collections", "time": "Around the 5th of the following coverage month" },
+                    { "type": "decision", "text": "Does the qualified beneficiary pay the remaining amount due within 2 weeks of the notice email?", "branches": [
+                      { "label": "Pays remaining amount", "steps": [
+                        { "type": "process", "text": "Pays remaining amount due", "responsibility": "Qualified beneficiary", "time": "Within 2 weeks from notice email being sent" }
+                      ] },
+                      { "label": "Does not pay", "steps": [
+                        { "type": "process", "text": "Kelly Benefits terminates coverage due to non-payment", "responsibility": "Credit & Collections", "time": "Around the 5th of the following coverage month" }
+                      ] }
+                    ] }
+                  ] },
+                  { "label": "Full payment", "steps": [
+                    { "type": "process", "text": "→ Continues into Active Coverage & Billing", "responsibility": "", "time": "" }
+                  ] }
+                ] }
+              ] }
+            ] }
+          ] }
+        ] }
+      ]
+    },
+    {
+      "id": "active-coverage",
+      "title": "Active Coverage & Ongoing Billing",
+      "summary": "The recurring monthly cycle once coverage is live — and the two ways it ends.",
+      "steps": [
+        { "type": "process", "text": "Kelly Benefits generates monthly COBRA bill on KTBSonline, with payment due date. Tied to the generation of the client bill (i.e. if the client bill is restricted, the COBRA bill will be restricted)", "responsibility": "Kelly Benefits (system generated)", "time": "Typically by the 7th of the month prior to the coverage month" },
+        { "type": "process", "text": "Subsequent monthly premium payment due", "responsibility": "Qualified beneficiary", "time": "Due by the first day of the coverage month, or by the due date on the bill, with a 30-day grace period" },
+        { "type": "decision", "text": "Qualified beneficiary pays premium, or does not", "branches": [
+          { "label": "Pays premium", "steps": [
+            { "type": "process", "text": "Coverage continues — cycle repeats monthly", "responsibility": "", "time": "" }
+          ] },
+          { "label": "Does not pay premium", "steps": [
+            { "type": "process", "text": "Kelly Benefits terminates coverage due to non-payment and sends notice of early termination due to non-payment", "responsibility": "Credit & Collections", "time": "Around the 5th of the following coverage month (i.e. March non-pays are termed on 4/5); or 2 weeks from notice email being sent, if it was an insignificant underpayment case" }
+          ] }
+        ] },
+        { "type": "decision", "text": "How does coverage end?", "branches": [
+          { "label": "Reaches end of COBRA eligibility", "steps": [
+            { "type": "process", "text": "No further action", "responsibility": "N/A", "time": "N/A" }
+          ] },
+          { "label": "Requests to cancel coverage", "steps": [
+            { "type": "process", "text": "Kelly Benefits terminates qualified beneficiary's COBRA account", "responsibility": "COBRA team", "time": "Typically 7–10 business days from receipt of request" }
+          ] }
+        ] }
+      ]
+    },
+    {
+      "id": "renewal",
+      "title": "Annual Renewal",
+      "summary": "What happens when the client's plans come up for renewal — a genuinely different process depending on which pod the client sits in, and whether the renewal was actively elected or defaulted.",
+      "steps": [
+        { "type": "decision", "text": "Plans are up for annual renewal — which pod is the client in?", "branches": [
+          { "label": "Small Group (SG) Pod", "steps": [
+            { "type": "process", "text": "Kelly Benefits mails a letter to the client providing instructions on what to provide to qualified beneficiaries for renewal, plus a census of active and pending beneficiaries", "responsibility": "COBRA team", "time": "2 months prior to renewal" }
+          ] },
+          { "label": "KBS Pod / Large Group (LG) Pod", "steps": [
+            { "type": "process", "text": "The COBRA team emails the assigned account manager (KBS pod) / broker manager (LG pod) asking them to confirm by a specific date that they'll compile the COBRA Renewal Packet", "responsibility": "COBRA team", "time": "2 months prior to renewal; confirmation requested by the 15th of that month" },
+            { "type": "decision", "text": "Does the Account Manager / Broker Manager confirm they'll provide renewal info?", "branches": [
+              { "label": "Confirms", "steps": [
+                { "type": "process", "text": "Compiles the COBRA Renewal Packet (new rates, benefit summaries, and renewal election form)", "responsibility": "Account manager (KBS pod) / Broker manager (LG pod)", "time": "By the 15th of the month prior to the renewal effective date" },
+                { "type": "process", "text": "Mails the Renewal Packet to qualified beneficiaries (or outsourced to a third-party printer for a Major Account client)", "responsibility": "COBRA team", "time": "Within 5 business days of receipt" }
+              ] },
+              { "label": "Does not confirm", "steps": [
+                { "type": "process", "text": "Kelly Benefits mails the generic Open Enrollment/Renewal Notification letter to the qualified beneficiary, asking them to reach out to the client for more info about the renewal", "responsibility": "COBRA team", "time": "15th of the month prior to the renewal effective date" }
+              ] }
+            ] }
+          ] }
+        ] },
+        { "type": "process", "text": "Separately: Client compiles the new plan rates, benefit summaries, and renewal election form, and sends it to qualified beneficiaries", "responsibility": "Client", "time": "Within 210 days after the end of the plan year in which changes became effective, or within 60 days after a material reduction is adopted (legal requirement — Kelly Benefits doesn't set the client's deadline)" },
+        { "type": "process", "text": "Kelly Benefits restricts the client's renewal month bill until renewal plans are installed / Open Enrollment is completed (this keeps COBRA direct-bills from generating during the transition)", "responsibility": "Dedicated service or Implementation", "time": "Typically by the 1st of the month prior to the renewal month" },
+        { "type": "process", "text": "Renewal plans installed / OE completed → Kelly Benefits reviews a preview bill for corrections (LG/KBS pods only) and unrestricts the client's renewal month bill", "responsibility": "(1) Broker/account manager; (2) Dedicated service (LG/KBS) or Implementation (SG)", "time": "When preview bill audit completed (LG/KBS), or when renewal plans are all installed (SG)" },
+        { "type": "process", "text": "Qualified beneficiary has renewal information and can elect plan/coverage-level changes", "responsibility": "Qualified beneficiary", "time": "Until the end of the renewal month" },
+        { "type": "decision", "text": "Was there a plan or carrier change requiring an active election, or did everything renew as-is (enrollment defaulted)?", "branches": [
+          { "label": "Plan/carrier change — not defaulted", "steps": [
+            { "type": "decision", "text": "Does the qualified beneficiary take action?", "branches": [
+              { "label": "Takes no action", "steps": [
+                { "type": "process", "text": "If the qualified beneficiary has no active plans left (all plans changed at renewal and no election made), Kelly Benefits terminates the COBRA account and sends notice of early termination due to no renewal application. If they still have some active plans (partial default), no action is taken.", "responsibility": "COBRA team", "time": "End of the renewal month" }
+              ] },
+              { "label": "Makes renewal elections", "steps": [
+                { "type": "process", "text": "Kelly Benefits enrolls qualified beneficiaries in their elected plans", "responsibility": "COBRA team", "time": "Typically 7–10 business days from receipt of elections" }
+              ] }
+            ] }
+          ] },
+          { "label": "Renewed as-is — defaulted", "steps": [
+            { "type": "process", "text": "COBRA coverage continues for plans elected and/or defaulted", "responsibility": "", "time": "" }
+          ] }
+        ] },
+        { "type": "decision", "text": "Does the qualified beneficiary have active coverage in the renewal month?", "branches": [
+          { "label": "Has active coverage", "steps": [
+            { "type": "process", "text": "COBRA bill for the renewal month is generated and posted to KTBSonline, with (1) the renewal date as the due date if generated before the renewal date, or (2) 14 days after the bill generation date as the due date if generated after the renewal date", "responsibility": "Dedicated service", "time": "When the client bill is generated" }
+          ] },
+          { "label": "No active coverage", "steps": [
+            { "type": "process", "text": "No bill is generated", "responsibility": "N/A", "time": "" }
+          ] }
+        ] }
+      ]
+    },
+    {
+      "id": "effective-date",
+      "title": "Termination Date & Carrier Discrepancy Handling",
+      "summary": "What happens when a qualifying event's timing runs up against carrier retroactivity rules — a real source of friction between what's requested and what the carrier will actually approve.",
+      "steps": [
+        { "type": "decision", "text": "Does the notification of the qualifying event fall within the carrier's retroactivity rules, or exceed them?", "branches": [
+          { "label": "Within carrier retroactivity rules", "steps": [
+            { "type": "process", "text": "Kelly Benefits terminates for the requested effective date", "responsibility": "(1) Enrollment team, or (2) KTBSonline", "time": "(1) Within 5–7 business days of receipt from client, or (2) same day" }
+          ] },
+          { "label": "Exceeds carrier retroactivity rules", "steps": [
+            { "type": "process", "text": "Kelly Benefits terminates for a current effective date, and requests the original effective date from the carrier (unless the carrier is CareFirst Facets)", "responsibility": "Enrollment team", "time": "Within 5–7 business days of receipt from client" },
+            { "type": "decision", "text": "How does the carrier respond?", "branches": [
+              { "label": "Approves the original effective date", "steps": [
+                { "type": "process", "text": "Kelly Benefits updates to match the termination date approved by the carrier", "responsibility": "Enrollment team", "time": "Within 5–7 business days of receipt from carrier" }
+              ] },
+              { "label": "Approves an alternate effective date", "steps": [
+                { "type": "process", "text": "Kelly Benefits updates to match the termination date approved by the carrier (original or alternate)", "responsibility": "Enrollment team", "time": "Within 5–7 business days of receipt from carrier" }
+              ] },
+              { "label": "Rejects any date beyond a current effective date", "steps": [
+                { "type": "process", "text": "Kelly Benefits notifies the client that the member had to be terminated for a date other than the originally requested date", "responsibility": "Dedicated Service (large groups) or MIF team (small groups)", "time": "Within 5–7 business days of receipt from carrier" }
+              ] }
+            ] }
+          ] }
+        ] }
+      ]
+    }
+  ]
+}
