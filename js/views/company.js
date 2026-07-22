@@ -62,17 +62,10 @@
 
           <div class="workflow-card">
             <h3>How the client relationship actually flows</h3>
-            <p class="cap">The org chart above shows who reports to whom. This shows something different — the path a single client relationship travels through all four divisions, on repeat, for as long as they stay a client.</p>
-            <div class="wf-row">
-              <div class="wf-step"><div class="wf-name">Strategies</div><div class="wf-role">Sell &amp; Consult</div></div>
-              <div class="wf-arrow">→</div>
-              <div class="wf-step"><div class="wf-name">Advantage</div><div class="wf-role">Administer</div></div>
-              <div class="wf-arrow">→</div>
-              <div class="wf-step"><div class="wf-name">Payroll</div><div class="wf-role">Process</div></div>
-              <div class="wf-arrow">→</div>
-              <div class="wf-step"><div class="wf-name">Advisory</div><div class="wf-role">Invest</div></div>
-            </div>
-            <div class="wf-loop">↺ &nbsp;Renews back into Strategies as the relationship continues — a closed loop, not four separate businesses</div>
+            <p class="cap">The org chart above shows who reports to whom. This shows something different — the direction work and data actually move as a single client relationship travels through all four divisions, on repeat, for as long as they stay a client. Click any division or arrow for detail.</p>
+            <div id="flowContainer"></div>
+            <div class="flow-detail" id="flowDetail"></div>
+            <p class="chart-caption" id="flowNote" style="margin-top:14px;"></p>
           </div>
         </section>
 
@@ -232,6 +225,7 @@
       </div>`).join("");
 
     document.getElementById("coIntegrationNote").innerHTML = `<b>${data.integrationNote.split(" — ")[0]} —</b> ${data.integrationNote.split(" — ").slice(1).join(" — ")}`;
+    if (data.divisionFlowNote) document.getElementById("flowNote").textContent = data.divisionFlowNote;
 
     document.getElementById("coEnrollmentNote").innerHTML = `<b>Enrollment</b> ${data.crossCutting.enrollment.replace(/^Enrollment\s*/, "")}`;
     document.getElementById("coReconciliationNote").innerHTML = `<b>Reconciliation</b> ${data.crossCutting.reconciliation.replace(/^Reconciliation\s*/, "")}`;
@@ -405,6 +399,16 @@
     }
 
     renderOrgMap("coOrgMap", { companyData: data, onNodeClick: handleOrgNodeClick });
+
+    function renderFlowEdgeDetail(edge) {
+      const panel = document.getElementById("flowDetail");
+      if (!panel) return;
+      const fromName = (data.divisions.find(d => d.id === edge.from) || {}).name || edge.from;
+      const toName = (data.divisions.find(d => d.id === edge.to) || {}).name || edge.to;
+      panel.innerHTML = `<b>${fromName} → ${toName}: ${edge.label}.</b> ${edge.detail}`;
+      panel.classList.add("show");
+    }
+    renderDivisionFlow("flowContainer", { companyData: data, onNodeClick: handleOrgNodeClick, onEdgeClick: renderFlowEdgeDetail });
 
     function renderCmapDetail(node) {
       const panel = document.getElementById("cmapDetail");

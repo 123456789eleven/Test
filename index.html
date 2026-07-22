@@ -434,14 +434,22 @@
   /* ---- Kelly Benefits: company-wide workflow (distinct from the org chart above) ---- */
   .workflow-card { background: var(--surface); border-radius: var(--radius-lg); box-shadow: var(--shadow-card); padding: 22px 24px; margin-bottom: 26px; }
   .workflow-card h3 { font-size: 1.05rem; margin-bottom: 4px; }
-  .workflow-card .cap { color: var(--ink-soft); font-size: 0.88rem; line-height: 1.5; margin: 6px 0 24px; max-width: 74ch; }
-  .wf-row { display: flex; align-items: stretch; justify-content: center; gap: 14px; flex-wrap: wrap; }
-  .wf-step { border: 1.5px solid var(--accent); border-radius: var(--radius-md); padding: 14px 22px; text-align: center; min-width: 140px; display: flex; flex-direction: column; justify-content: center; }
-  .wf-name { font-family: "Inter", sans-serif; font-weight: 700; font-size: 0.94rem; color: var(--ink); }
-  .wf-role { font-size: 0.78rem; color: var(--ink-soft); margin-top: 3px; }
-  .wf-arrow { display: flex; align-items: center; color: var(--accent); font-size: 1.4rem; flex: none; }
-  .wf-loop { text-align: center; margin-top: 22px; font-size: 0.84rem; color: var(--ink-soft); }
-  @media (max-width: 760px) { .wf-row { flex-direction: column; align-items: center; } .wf-arrow { transform: rotate(90deg); } }
+  .workflow-card .cap { color: var(--ink-soft); font-size: 0.88rem; line-height: 1.5; margin: 6px 0 20px; max-width: 74ch; }
+  .flow-svg { display: block; margin: 0 auto; max-width: 100%; height: auto; }
+  .flow-edge { fill: none; stroke-width: 2.4; opacity: 0.75; cursor: pointer; transition: opacity .15s ease, stroke-width .15s ease; }
+  .flow-edge:hover, .flow-edge:focus { opacity: 1; stroke-width: 3.4; outline: none; }
+  .flow-edge-label {
+    font-size: 11px; font-weight: 700; fill: var(--ink-soft); cursor: pointer;
+    paint-order: stroke; stroke: var(--surface); stroke-width: 5px;
+  }
+  .flow-node { cursor: pointer; }
+  .flow-node circle { transition: filter .15s ease; }
+  .flow-node:hover circle, .flow-node:focus circle { filter: brightness(1.12); outline: none; }
+  .flow-node-name { font-size: 13px; font-weight: 700; fill: #fff; }
+  .flow-node-role { font-size: 10px; fill: rgba(255,255,255,0.82); }
+  .flow-detail { margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border); font-size: 0.88rem; color: var(--ink-soft); line-height: 1.55; display: none; }
+  .flow-detail.show { display: block; }
+  .flow-detail b { color: var(--ink); }
 
   .orgmap-legend { display: flex; gap: 20px; flex-wrap: wrap; margin-top: 16px; font-size: 0.78rem; color: var(--ink-soft); }
   .orgmap-legend span { display: flex; align-items: center; gap: 6px; }
@@ -684,6 +692,7 @@
 <script src="js/migrate.js"></script>
 <script src="js/auth.js"></script>
 <script src="js/orgmap.js"></script>
+<script src="js/divisionflow.js"></script>
 <script src="js/connectionsmap.js"></script>
 <script src="js/cobraprocess.js"></script>
 <script src="js/router.js"></script>

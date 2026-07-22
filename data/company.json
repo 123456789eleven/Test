@@ -202,5 +202,12 @@
   "crossCutting": {
     "enrollment": "Enrollment isn't one thing — it likely spans three verticals: initial enrollment setup during onboarding (Construct), COBRA elections specifically (Connect), and ongoing annual open enrollment support (Serve). Worth confirming whether Advantage even splits it that way, or handles it as one continuous function.",
     "reconciliation": "Reconciliation (eligibility, billing) most plausibly sits in Connect — it's the same \"keep two systems in sync\" work as COBRA admin — but could also be a Serve function if it's framed as client-facing account maintenance rather than backend data work."
-  }
+  },
+  "divisionFlowNote": "A working model of how one client relationship moves through all four divisions in sequence — inferred from each division's stated role, not independently confirmed handoff-by-handoff. Treat it as a draft to correct.",
+  "divisionFlow": [
+    { "from": "strategies", "to": "advantage", "label": "New client sold & scoped", "detail": "Strategies closes the deal and hands the signed plan design to Advantage, which owns implementation and day-to-day administration from here forward." },
+    { "from": "advantage", "to": "payroll", "label": "Eligibility & deductions sync", "detail": "Advantage's enrollment and eligibility data feeds Payroll's deduction processing, so a COBRA election or a new hire's enrollment shows up correctly on the next pay cycle." },
+    { "from": "payroll", "to": "advisory", "label": "Contribution data to plan investment", "detail": "Payroll's contribution data flows into Advisory's retirement and investment plan administration for the same client's employees." },
+    { "from": "advisory", "to": "strategies", "label": "Renewal & relationship review", "detail": "As the plan year turns over, Advisory's account standing feeds back into Strategies' renewal conversation with the client — closing the loop rather than ending it." }
+  ]
 }
