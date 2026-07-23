@@ -48,36 +48,35 @@
 
           <div class="orgmap-wrap" id="orgmapWrap">
             <div class="orgmap-head">
-              <p class="cap">One chart: the real reporting structure, every division's departments and job functions, and the real human connections that cut across it all. Four divisions, their leaders, and the corporate functions that support all four. Click a division's ▸ to expand into its departments, then again into individual job functions — Advantage's are the most refined since that's this project's own seat; Strategies', Payroll's, and Advisory's are a standard-industry-pattern estimate, marked as such. A 🔗 means a function connects to others in the workflow. Click any person with a <span class="ocn-cross-dot" style="display:inline-block; vertical-align:middle;"></span> mark to trace who they connect to outside their own division — John Kelly, David Kelly, and Wesley Mace all hold roles spanning two divisions. Click Corporate Functions (◈) to see its reach across all four.</p>
+              <p class="cap">Click ▸ to expand a division into departments and functions. Click a person with <span class="ocn-cross-dot" style="display:inline-block; vertical-align:middle;"></span>, a function with 🔗, or Corporate Functions (◈) to draw its connections.</p>
               <div style="display:flex; gap:8px; flex:none;">
                 <button id="orgmapShowAll" class="orgmap-connect-btn">🔗 Show all connections</button>
                 <button id="orgmapFullscreen" class="orgmap-fs-btn">⛶ Fullscreen</button>
               </div>
             </div>
             <div id="coOrgMap" class="orgmap-container"></div>
-            <p class="orgmap-caption">Workflow within Advantage: Win → Construct → then splits into Protect, Connect, and Serve. Construct, Connect, and Serve also share enrollment responsibility.</p>
           </div>
 
           <div id="orgDetail"></div>
 
-          <div class="integration-box" id="coIntegrationNote"></div>
-
           <div class="workflow-card">
-            <h3>How the client relationship actually flows</h3>
-            <p class="cap">The org chart above shows who reports to whom, and who connects across divisions. This shows something different — the direction work and data actually move as a single client relationship travels through all four divisions, on repeat, for as long as they stay a client. Click any division or arrow for detail.</p>
+            <h3>How the client relationship flows between divisions</h3>
             <div id="flowContainer"></div>
             <div class="flow-detail" id="flowDetail"></div>
-            <p class="chart-caption" id="flowNote" style="margin-top:14px;"></p>
           </div>
         </section>
 
         <section id="sec-cobra" class="kb-section">
-          <p class="kb-section-bridge">All of that exists to do the actual work. Here's exactly how one process — COBRA administration, the Connect vertical above — really runs, phase by phase.</p>
-          <div class="cobra-intro">
-            <h3>The real COBRA administration process, start to finish</h3>
-            <p class="cap" id="cobraSourceNote">Loading…</p>
+          <div class="cobra-wrap" id="cobraWrap">
+            <div class="cobra-head">
+              <div>
+                <h3>The real COBRA administration process, start to finish</h3>
+                <p class="cobra-source" id="cobraSourceNote">Loading…</p>
+              </div>
+              <button id="cobraFullscreen" class="orgmap-fs-btn">⛶ Fullscreen</button>
+            </div>
+            <div id="cobraProcess"></div>
           </div>
-          <div id="cobraProcess"></div>
           <div class="crosscutting-box">
             <h4>Where "enrollment" and "reconciliation" actually sit</h4>
             <p id="coEnrollmentNote"></p>
@@ -201,9 +200,6 @@
         <div class="tl-deal">${h.deal}${h.value ? ` <span class="mono" style="font-weight:400; color:var(--ink-muted); font-size:0.8rem;">— ${h.value}</span>` : ""}</div>
         <div class="tl-sig">${h.sig}</div>
       </div>`).join("");
-
-    document.getElementById("coIntegrationNote").innerHTML = `<b>${data.integrationNote.split(" — ")[0]} —</b> ${data.integrationNote.split(" — ").slice(1).join(" — ")}`;
-    if (data.divisionFlowNote) document.getElementById("flowNote").textContent = data.divisionFlowNote;
 
     document.getElementById("coEnrollmentNote").innerHTML = `<b>Enrollment</b> ${data.crossCutting.enrollment.replace(/^Enrollment\s*/, "")}`;
     document.getElementById("coReconciliationNote").innerHTML = `<b>Reconciliation</b> ${data.crossCutting.reconciliation.replace(/^Reconciliation\s*/, "")}`;
@@ -404,6 +400,21 @@
     document.addEventListener("fullscreenchange", () => {
       const wrap = document.getElementById("orgmapWrap");
       const btn = document.getElementById("orgmapFullscreen");
+      if (!wrap || !btn) return;
+      btn.textContent = document.fullscreenElement === wrap ? "✕ Exit fullscreen" : "⛶ Fullscreen";
+    });
+
+    document.getElementById("cobraFullscreen").addEventListener("click", () => {
+      const wrap = document.getElementById("cobraWrap");
+      if (!document.fullscreenElement) {
+        wrap.requestFullscreen();
+      } else {
+        document.exitFullscreen();
+      }
+    });
+    document.addEventListener("fullscreenchange", () => {
+      const wrap = document.getElementById("cobraWrap");
+      const btn = document.getElementById("cobraFullscreen");
       if (!wrap || !btn) return;
       btn.textContent = document.fullscreenElement === wrap ? "✕ Exit fullscreen" : "⛶ Fullscreen";
     });

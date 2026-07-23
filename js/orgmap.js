@@ -128,7 +128,20 @@
     container.appendChild(overlay);
 
     const divisionIds = companyData.divisions.map(d => d.id);
-    let activeMode = null; // { kind: "person", id } | { kind: "corpfn" } | { kind: "all" }
+    const funcToVertical = {};
+    Object.entries(companyData.verticals || {}).forEach(([vKey, v]) => {
+      (v.funcs || []).forEach(f => { funcToVertical[f.id] = vKey; });
+    });
+    let activeMode = null; // { kind: "person"|"function", id } | { kind: "corpfn" } | { kind: "all" }
+
+    function expandVertical(vKey) {
+      const toggle = container.querySelector(`.oc-toggle[data-id="${CSS.escape(vKey)}"]`);
+      const list = toggle && toggle.nextElementSibling;
+      if (toggle && list && !list.classList.contains("oc-expanded")) {
+        toggle.classList.add("oc-expanded");
+        list.classList.add("oc-expanded");
+      }
+    }
 
     function nodeCenter(id) {
       const el = container.querySelector(`.ocn[data-id="${CSS.escape(id)}"], .ocn-person[data-id="${CSS.escape(id)}"]`);
@@ -174,10 +187,20 @@
       if (mode.kind === "corpfn") {
         return { pairs: divisionIds.map(divId => ["corpfn", divId]), ids: ["corpfn", ...divisionIds] };
       }
+      if (mode.kind === "function") {
+        const conns = (companyData.processConnections || []).filter(c => c.from === mode.id || c.to === mode.id);
+        const ids = [mode.id];
+        const pairs = conns.map(c => {
+          ids.push(c.from === mode.id ? c.to : c.from);
+          return [c.from, c.to];
+        });
+        return { pairs, ids };
+      }
       // "all"
       const pairs = [];
       companyData.leadership.forEach(p => { (p.cross || []).forEach(divId => pairs.push([p.id, divId])); });
       divisionIds.forEach(divId => pairs.push(["corpfn", divId]));
+      (companyData.processConnections || []).forEach(c => pairs.push([c.from, c.to]));
       return { pairs, ids: [] };
     }
 
@@ -205,7 +228,22 @@
 
     function showPersonConnections(person) { activate({ kind: "person", id: person.id }); }
     function showCorpfnReach() { activate({ kind: "corpfn" }); }
-    function showAllConnections() { activate({ kind: "all" }); }
+
+    function showFunctionConnections(id) {
+      const conns = (companyData.processConnections || []).filter(c => c.from === id || c.to === id);
+      if (!conns.length) return;
+      const relatedIds = new Set([id]);
+      conns.forEach(c => { relatedIds.add(c.from); relatedIds.add(c.to); });
+      relatedIds.forEach(fid => { const vKey = funcToVertical[fid]; if (vKey) expandVertical(vKey); });
+      requestAnimationFrame(() => activate({ kind: "function", id }));
+    }
+
+    function showAllConnections() {
+      const allFuncIds = new Set();
+      (companyData.processConnections || []).forEach(c => { allFuncIds.add(c.from); allFuncIds.add(c.to); });
+      allFuncIds.forEach(fid => { const vKey = funcToVertical[fid]; if (vKey) expandVertical(vKey); });
+      requestAnimationFrame(() => activate({ kind: "all" }));
+    }
 
     function redrawActive() {
       if (!activeMode) return;
@@ -225,6 +263,7 @@
         requestAnimationFrame(redrawActive);
       }
       if (el.dataset.id === "corpfn") showCorpfnReach();
+      if (el.classList.contains("ocn-function")) showFunctionConnections(el.dataset.id);
     }
     container.querySelectorAll(".ocn").forEach(el => {
       el.addEventListener("click", () => handleActivate(el));

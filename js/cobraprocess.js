@@ -13,12 +13,8 @@
     `;
   }
 
-  function renderStepList(steps) {
-    return `
-      <div class="cflow">
-        ${steps.map((step, i) => renderStepRow(step, i < steps.length - 1)).join("")}
-      </div>
-    `;
+  function renderStepRows(steps) {
+    return steps.map((step, i) => renderStepRow(step, i < steps.length - 1)).join("");
   }
 
   function renderStepRow(step, hasNext) {
@@ -34,7 +30,7 @@
             ${step.branches.map(b => `
               <div class="cflow-branch-col">
                 <div class="cflow-branch-label">${b.label}</div>
-                ${b.steps && b.steps.length ? renderStepList(b.steps) : '<div class="cflow-branch-empty">No further step recorded — continues</div>'}
+                ${b.steps && b.steps.length ? `<div class="cflow">${renderStepRows(b.steps)}</div>` : '<div class="cflow-branch-empty">No further step recorded — continues</div>'}
               </div>
             `).join("")}
           </div>
@@ -54,31 +50,27 @@
     `;
   }
 
-  function renderPhase(phase, index) {
+  function renderPhaseMarker(phase, index) {
     return `
-      <div class="cobra-phase${index === 0 ? " cobra-expanded" : ""}" data-phase="${phase.id}">
-        <button class="cobra-phase-head">
-          <div>
-            <h3>${phase.title}</h3>
-            <p class="cap">${phase.summary}</p>
-          </div>
-          <span class="cobra-phase-toggle">▸</span>
-        </button>
-        <div class="cobra-phase-body">
-          ${renderStepList(phase.steps)}
+      <div class="cflow-step">
+        <div class="cflow-phase-marker">
+          <span class="cflow-phase-num">${index + 1}</span>
+          <span class="cflow-phase-title">${phase.title}</span>
         </div>
       </div>
+      <div class="cflow-connector"></div>
     `;
   }
 
   window.renderCobraProcess = function (containerId, data) {
     const container = document.getElementById(containerId);
     if (!container) return;
-    container.innerHTML = data.phases.map(renderPhase).join("");
-    container.querySelectorAll(".cobra-phase-head").forEach(btn => {
-      btn.addEventListener("click", () => {
-        btn.closest(".cobra-phase").classList.toggle("cobra-expanded");
-      });
+    const parts = [];
+    data.phases.forEach((phase, pi) => {
+      parts.push(renderPhaseMarker(phase, pi));
+      parts.push(renderStepRows(phase.steps));
+      if (pi < data.phases.length - 1) parts.push('<div class="cflow-connector"></div>');
     });
+    container.innerHTML = `<div class="cflow">${parts.join("")}</div>`;
   };
 })();

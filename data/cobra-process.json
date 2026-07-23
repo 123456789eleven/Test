@@ -1,6 +1,6 @@
 {
   "source": "COBRA Flowchart - KBA Process (internal document)",
-  "intro": "The actual step-by-step COBRA administration process at Kelly Benefits Advantage — every process step, who's responsible, and the SLA timeframe, exactly as documented internally. This is real operational detail, not an inferred model.",
+  "intro": "Real, sourced from Kelly Benefits' internal process documentation — not an inferred model.",
   "phases": [
     {
       "id": "setup",

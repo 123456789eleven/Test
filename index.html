@@ -238,10 +238,6 @@
   .kb-subnav a.active { background: var(--accent-wash); color: var(--accent); }
   .kb-section { scroll-margin-top: 118px; padding-top: 6px; }
   .kb-section + .kb-section { margin-top: 56px; padding-top: 40px; border-top: 1px solid var(--border); }
-  .kb-section-bridge {
-    max-width: 62ch; font-size: 1.02rem; line-height: 1.6; color: var(--ink-soft); margin: 0 0 26px;
-    font-family: "Fraunces Display", Georgia, serif; font-style: italic;
-  }
   .view { display: none; }
   .view.active { display: block; }
 
@@ -359,7 +355,6 @@
   .orgmap-fs-btn { flex: none; font: inherit; font-size: 0.8rem; font-weight: 600; padding: 8px 14px; border-radius: 999px; border: none; background: var(--surface-alt); color: var(--ink-soft); cursor: pointer; white-space: nowrap; }
   .orgmap-fs-btn:hover { background: var(--accent-wash); color: var(--accent); }
   .orgmap-container { width: 100%; overflow-x: auto; overflow-y: visible; padding: 4px 4px 20px; }
-  .orgmap-caption { color: var(--ink-muted); font-size: 0.8rem; line-height: 1.5; margin: 14px 2px 0; max-width: 74ch; }
   .orgmap-wrap:fullscreen { background: var(--page); padding: 28px; display: flex; flex-direction: column; }
   .orgmap-wrap:fullscreen .orgmap-container { flex: 1; max-height: none; }
 
@@ -500,9 +495,6 @@
   .co-hbar-row .val { font-size: 0.82rem; font-weight: 600; text-align: right; }
   .chart-caption { font-size: 0.8rem; color: var(--ink-muted); margin-top: 10px; }
 
-  .integration-box { border-left: 3px solid var(--manager); background: var(--manager-soft); border-radius: 0 var(--radius-md) var(--radius-md) 0; padding: 14px 18px; margin-bottom: 26px; font-size: 0.92rem; line-height: 1.6; color: var(--ink-soft); }
-  .integration-box b { color: var(--manager); }
-
   /* ---- Where I fit ---- */
   .fit-box { background: var(--surface); border-radius: var(--radius-lg); box-shadow: var(--shadow-card); padding: 18px 22px; margin-bottom: 26px; }
   .fit-box .lbl { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--ink-soft); font-weight: 700; margin-bottom: 8px; }
@@ -590,20 +582,20 @@
   .fn-conn-note { display: block; font-size: 0.78rem; color: var(--ink-muted); margin-top: 2px; }
 
   /* ---- Kelly Benefits: COBRA process (real internal flowchart, transcribed) ---- */
-  .cobra-intro { max-width: 78ch; margin-bottom: 22px; }
-  .cobra-intro h3 { font-size: 1.15rem; margin-bottom: 6px; }
-  .cobra-intro .cap { color: var(--ink-soft); font-size: 0.9rem; line-height: 1.55; }
-  .cobra-phase { background: var(--surface); border-radius: var(--radius-lg); box-shadow: var(--shadow-card); margin-bottom: 16px; overflow: hidden; }
-  .cobra-phase-head {
-    width: 100%; display: flex; justify-content: space-between; align-items: flex-start; gap: 16px;
-    padding: 20px 22px; border: none; background: none; text-align: left; cursor: pointer; font: inherit;
+  .cobra-wrap { background: var(--surface); border-radius: var(--radius-lg); box-shadow: var(--shadow-card); padding: 22px 24px 26px; margin-bottom: 26px; }
+  .cobra-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; margin-bottom: 18px; }
+  .cobra-head h3 { font-size: 1.05rem; color: var(--ink); }
+  .cobra-source { color: var(--ink-muted); font-size: 0.78rem; margin-top: 4px; }
+  .cobra-wrap:fullscreen { background: var(--page); padding: 28px; overflow-y: auto; }
+  .cflow-phase-marker {
+    display: flex; align-items: center; gap: 12px; background: var(--ink); color: var(--page);
+    padding: 9px 22px; border-radius: 999px; max-width: 480px; width: 100%; box-sizing: border-box; justify-content: center;
   }
-  .cobra-phase-head h3 { font-size: 1.02rem; color: var(--ink); }
-  .cobra-phase-head .cap { color: var(--ink-soft); font-size: 0.85rem; line-height: 1.5; margin-top: 6px; max-width: 68ch; }
-  .cobra-phase-toggle { flex: none; color: var(--ink-muted); font-size: 0.85rem; transition: transform .15s ease; margin-top: 3px; }
-  .cobra-phase.cobra-expanded .cobra-phase-toggle { transform: rotate(90deg); }
-  .cobra-phase-body { display: none; padding: 0 22px 22px; }
-  .cobra-phase.cobra-expanded .cobra-phase-body { display: block; }
+  .cflow-phase-num {
+    flex: none; width: 22px; height: 22px; border-radius: 50%; background: var(--accent); color: var(--accent-ink);
+    font-size: 0.7rem; font-weight: 700; display: flex; align-items: center; justify-content: center;
+  }
+  .cflow-phase-title { font-size: 0.9rem; font-weight: 700; }
 
   .cobra-badge { font-size: 0.72rem; padding: 3px 9px; border-radius: 999px; flex: none; }
   .cobra-badge-who { background: var(--accent-wash); color: var(--accent); }
