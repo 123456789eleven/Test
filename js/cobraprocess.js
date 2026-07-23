@@ -1,30 +1,56 @@
 (function () {
-  function renderStep(step) {
+  function isTransition(step) {
+    return typeof step.text === "string" && step.text.trim().startsWith("→");
+  }
+
+  function renderMeta(step) {
+    if (!step.responsibility && !step.time) return "";
+    return `
+      <div class="cflow-node-meta">
+        ${step.responsibility ? `<span class="cobra-badge cobra-badge-who">${step.responsibility}</span>` : ""}
+        ${step.time ? `<span class="cobra-badge cobra-badge-time">${step.time}</span>` : ""}
+      </div>
+    `;
+  }
+
+  function renderStepList(steps) {
+    return `
+      <div class="cflow">
+        ${steps.map((step, i) => renderStepRow(step, i < steps.length - 1)).join("")}
+      </div>
+    `;
+  }
+
+  function renderStepRow(step, hasNext) {
+    const connector = hasNext ? '<div class="cflow-connector"></div>' : "";
+
     if (step.type === "decision") {
       return `
-        <li class="cobra-step cobra-step-decision">
-          <div class="cobra-step-text"><span class="cobra-diamond">◆</span> ${step.text}</div>
-          <div class="cobra-branches">
+        <div class="cflow-step">
+          <div class="cflow-node cflow-decision">
+            <div class="cflow-node-text">${step.text}</div>
+          </div>
+          <div class="cflow-fork${step.branches.length < 2 ? " cflow-fork-single" : ""}">
             ${step.branches.map(b => `
-              <div class="cobra-branch">
-                <div class="cobra-branch-label">${b.label}</div>
-                ${b.steps && b.steps.length ? `<ul class="cobra-steps">${b.steps.map(renderStep).join("")}</ul>` : ""}
+              <div class="cflow-branch-col">
+                <div class="cflow-branch-label">${b.label}</div>
+                ${b.steps && b.steps.length ? renderStepList(b.steps) : '<div class="cflow-branch-empty">No further step recorded — continues</div>'}
               </div>
             `).join("")}
           </div>
-        </li>
+        </div>
+        ${connector}
       `;
     }
+
     return `
-      <li class="cobra-step">
-        <div class="cobra-step-text">${step.text}</div>
-        ${step.responsibility || step.time ? `
-          <div class="cobra-step-meta">
-            ${step.responsibility ? `<span class="cobra-badge cobra-badge-who">${step.responsibility}</span>` : ""}
-            ${step.time ? `<span class="cobra-badge cobra-badge-time">${step.time}</span>` : ""}
-          </div>
-        ` : ""}
-      </li>
+      <div class="cflow-step">
+        <div class="cflow-node ${isTransition(step) ? "cflow-transition" : "cflow-process"}">
+          <div class="cflow-node-text">${step.text}</div>
+          ${renderMeta(step)}
+        </div>
+      </div>
+      ${connector}
     `;
   }
 
@@ -39,7 +65,7 @@
           <span class="cobra-phase-toggle">▸</span>
         </button>
         <div class="cobra-phase-body">
-          <ul class="cobra-steps">${phase.steps.map(renderStep).join("")}</ul>
+          ${renderStepList(phase.steps)}
         </div>
       </div>
     `;

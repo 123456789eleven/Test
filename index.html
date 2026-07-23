@@ -605,21 +605,42 @@
   .cobra-phase-body { display: none; padding: 0 22px 22px; }
   .cobra-phase.cobra-expanded .cobra-phase-body { display: block; }
 
-  .cobra-steps { list-style: none; margin: 0; padding: 0; }
-  .cobra-steps .cobra-steps { margin-top: 10px; }
-  .cobra-step { padding: 12px 0 12px 18px; border-top: 1px solid var(--border); border-left: 2px solid var(--border); position: relative; }
-  .cobra-step:first-child { border-top: none; }
-  .cobra-step::before { content: ""; position: absolute; left: -3px; top: 20px; width: 6px; height: 6px; border-radius: 50%; background: var(--accent); }
-  .cobra-step-decision { border-left-color: var(--manager); }
-  .cobra-step-decision::before { background: var(--manager); }
-  .cobra-step-text { font-size: 0.9rem; color: var(--ink); line-height: 1.5; }
-  .cobra-diamond { color: var(--manager); margin-right: 4px; font-size: 0.75em; }
-  .cobra-step-meta { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px; }
-  .cobra-badge { font-size: 0.72rem; padding: 3px 9px; border-radius: 999px; }
+  .cobra-badge { font-size: 0.72rem; padding: 3px 9px; border-radius: 999px; flex: none; }
   .cobra-badge-who { background: var(--accent-wash); color: var(--accent); }
   .cobra-badge-time { background: var(--surface-alt); color: var(--ink-soft); }
-  .cobra-branches { margin-top: 12px; padding-left: 18px; border-left: 1px dashed var(--border); display: flex; flex-direction: column; gap: 14px; }
-  .cobra-branch-label { font-size: 0.76rem; text-transform: uppercase; letter-spacing: 0.04em; font-weight: 700; color: var(--manager); margin-bottom: 4px; }
+
+  /* ---- COBRA process: connected flowchart (trunk of steps, decisions fork into branch columns) ---- */
+  .cflow { display: flex; flex-direction: column; align-items: center; }
+  .cflow-step { display: flex; flex-direction: column; align-items: center; width: 100%; }
+  .cflow-connector { width: 1.5px; height: 26px; background: var(--border); position: relative; flex: none; }
+  .cflow-connector::after {
+    content: "▾"; position: absolute; bottom: -8px; left: 50%; transform: translateX(-50%);
+    font-size: 10px; line-height: 1; color: var(--ink-muted); background: var(--surface);
+  }
+  .cflow-node { max-width: 480px; width: 100%; box-sizing: border-box; background: var(--surface-alt); border-radius: var(--radius-md); padding: 14px 18px; text-align: left; border-left: 3px solid var(--accent); }
+  .cflow-node-text { font-size: 0.88rem; color: var(--ink); line-height: 1.5; }
+  .cflow-node-meta { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
+  .cflow-decision { border-left-color: var(--manager); background: var(--manager-soft); }
+  .cflow-decision .cflow-node-text::before { content: "◆ "; color: var(--manager); font-size: 0.78em; }
+  .cflow-transition { border-left-style: dashed; border-left-color: var(--good); background: var(--good-soft); }
+  .cflow-transition .cflow-node-text { font-style: italic; color: var(--ink-soft); }
+
+  .cflow-fork { display: flex; gap: 22px; justify-content: center; align-items: flex-start; margin-top: 22px; position: relative; padding-top: 22px; width: 100%; }
+  .cflow-fork::before { content: ""; position: absolute; top: 0; left: 12%; right: 12%; height: 1.5px; background: var(--border); }
+  .cflow-fork.cflow-fork-single::before { left: 50%; right: 50%; }
+  .cflow-branch-col { flex: 1 1 0; min-width: 200px; max-width: 340px; position: relative; padding-top: 22px; display: flex; flex-direction: column; align-items: center; }
+  .cflow-branch-col::before { content: ""; position: absolute; top: 0; left: 50%; width: 1.5px; height: 22px; background: var(--border); }
+  .cflow-branch-label {
+    font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 700; color: var(--manager);
+    text-align: center; margin-bottom: 12px; padding: 0 6px;
+  }
+  .cflow-branch-empty { font-size: 0.8rem; color: var(--ink-muted); font-style: italic; text-align: center; }
+  @media (max-width: 720px) {
+    .cflow-fork { flex-direction: column; align-items: center; gap: 20px; }
+    .cflow-fork::before { display: none; }
+    .cflow-branch-col { max-width: 100%; width: 100%; padding-top: 0; }
+    .cflow-branch-col::before { display: none; }
+  }
 
   .crosscutting-box { border-left: 3px solid var(--manager); background: var(--manager-soft); border-radius: 0 var(--radius-md) var(--radius-md) 0; padding: 14px 18px; margin-top: 22px; font-size: 0.9rem; line-height: 1.65; color: var(--ink-soft); }
   .crosscutting-box h4 { font-family: "Inter", sans-serif; font-size: 0.9rem; margin-bottom: 8px; color: var(--manager); }
