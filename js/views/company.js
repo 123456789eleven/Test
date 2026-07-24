@@ -48,29 +48,26 @@
 
           <div class="orgmap-wrap" id="orgmapWrap">
             <div class="orgmap-head">
-              <p class="cap">Click anyone to trace their connections.</p>
-              <button id="orgmapFullscreen" class="orgmap-fs-btn">⛶ Fullscreen</button>
+              <p class="cap">One chart: the real reporting structure, every division's departments and job functions, and the real human connections that cut across it all. Four divisions, their leaders, and the corporate functions that support all four. Click a division's ▸ to expand into its departments, then again into individual job functions — Advantage's are the most refined since that's this project's own seat; Strategies', Payroll's, and Advisory's are a standard-industry-pattern estimate, marked as such. A 🔗 means a function connects to others in the workflow. Click any person with a <span class="ocn-cross-dot" style="display:inline-block; vertical-align:middle;"></span> mark to trace who they connect to outside their own division — John Kelly, David Kelly, and Wesley Mace all hold roles spanning two divisions. Click Corporate Functions (◈) to see its reach across all four.</p>
+              <div style="display:flex; gap:8px; flex:none;">
+                <button id="orgmapShowAll" class="orgmap-connect-btn">🔗 Show all connections</button>
+                <button id="orgmapFullscreen" class="orgmap-fs-btn">⛶ Fullscreen</button>
+              </div>
             </div>
             <div id="coOrgMap" class="orgmap-container"></div>
-            <div class="omap-legend">
-              <span><i style="background:#f59e0b"></i>Executive</span>
-              <span><i style="background:#3b82f6"></i>Strategies</span>
-              <span><i style="background:#10b981"></i>Advantage</span>
-              <span><i style="background:#06b6d4"></i>Payroll</span>
-              <span><i style="background:#8b5cf6"></i>Advisory</span>
-              <span><i style="background:#ec4899"></i>Corporate Functions</span>
-              <span><i class="line" style="border-color:#ec4899"></i>Cross-division role</span>
-              <span><i class="line dash" style="border-color:#ec4899"></i>Corporate Functions reach</span>
-              <span><i class="line" style="border-color:#94a3b8"></i>Department workflow tie</span>
-            </div>
+            <p class="orgmap-caption">Workflow within Advantage: Win → Construct → then splits into Protect, Connect, and Serve. Construct, Connect, and Serve also share enrollment responsibility.</p>
           </div>
 
           <div id="orgDetail"></div>
 
+          <div class="integration-box" id="coIntegrationNote"></div>
+
           <div class="workflow-card">
-            <h3>How the client relationship flows between divisions</h3>
+            <h3>How the client relationship actually flows</h3>
+            <p class="cap">The org chart above shows who reports to whom, and who connects across divisions. This shows something different — the direction work and data actually move as a single client relationship travels through all four divisions, on repeat, for as long as they stay a client. Click any division or arrow for detail.</p>
             <div id="flowContainer"></div>
             <div class="flow-detail" id="flowDetail"></div>
+            <p class="chart-caption" id="flowNote" style="margin-top:14px;"></p>
           </div>
         </section>
 
@@ -209,6 +206,9 @@
         <div class="tl-sig">${h.sig}</div>
       </div>`).join("");
 
+    document.getElementById("coIntegrationNote").innerHTML = `<b>${data.integrationNote.split(" — ")[0]} —</b> ${data.integrationNote.split(" — ").slice(1).join(" — ")}`;
+    if (data.divisionFlowNote) document.getElementById("flowNote").textContent = data.divisionFlowNote;
+
     document.getElementById("coEnrollmentNote").innerHTML = `<b>Enrollment</b> ${data.crossCutting.enrollment.replace(/^Enrollment\s*/, "")}`;
     document.getElementById("coReconciliationNote").innerHTML = `<b>Reconciliation</b> ${data.crossCutting.reconciliation.replace(/^Reconciliation\s*/, "")}`;
 
@@ -248,8 +248,6 @@
 
     function renderVerticalDetail(key) {
       const v = data.verticals[key];
-      const connectedIds = new Set();
-      (data.processConnections || []).forEach(c => { connectedIds.add(c.from); connectedIds.add(c.to); });
       return `
         <div class="ad-head">
           <h3>${v.name}</h3>
@@ -258,12 +256,7 @@
         </div>
         <p style="color:var(--ink-soft); font-size:0.9rem; margin-top:4px;">${v.desc}</p>
         <ul class="ad-func-list">${v.funcs.map(f => `
-          <li>
-            <span class="ad-pill ${f.confirmed ? "confirmed" : "estimated"}">${f.confirmed ? "confirmed" : "est."}</span>
-            ${connectedIds.has(f.id)
-              ? `<button class="fn-conn-link" data-jump="${f.id}" style="border:none; padding:0; flex:1; text-align:left;">${f.label} <span class="ocn-link-dot" title="Connects to other functions">🔗</span></button>`
-              : `<span style="flex:1;">${f.label}</span>`}
-          </li>
+          <li><span class="ad-pill ${f.confirmed ? "confirmed" : "estimated"}">${f.confirmed ? "confirmed" : "est."}</span> ${f.label}</li>
         `).join("")}</ul>
         ${key === "connect" ? `<a href="#sec-cobra" class="fn-conn-link" style="margin-top:12px;">→ See the full COBRA process, step by step</a>` : ""}
       `;
@@ -372,11 +365,22 @@
     }
 
     function jumpToNode(targetId) {
+      const el = document.querySelector(`.ocn[data-id="${targetId}"]`);
+      if (el) {
+        const ul = el.closest("ul.oc-fn-list");
+        if (ul && !ul.classList.contains("oc-expanded")) {
+          ul.classList.add("oc-expanded");
+          const toggle = ul.previousElementSibling;
+          if (toggle && toggle.classList.contains("oc-toggle")) toggle.classList.add("oc-expanded");
+        }
+        el.scrollIntoView({ behavior: "smooth", block: "center" });
+        el.classList.add("ocn-jump-highlight");
+        setTimeout(() => el.classList.remove("ocn-jump-highlight"), 1600);
+      }
       renderDetailContent(targetId);
-      document.getElementById("orgDetail").scrollIntoView({ behavior: "smooth", block: "nearest" });
     }
 
-    renderOrgMap("coOrgMap", { companyData: data, onNodeClick: handleOrgNodeClick });
+    const orgMapControl = renderOrgMap("coOrgMap", { companyData: data, onNodeClick: handleOrgNodeClick });
 
     function renderFlowEdgeDetail(edge) {
       const panel = document.getElementById("flowDetail");
@@ -387,6 +391,11 @@
       panel.classList.add("show");
     }
     renderDivisionFlow("flowContainer", { companyData: data, onNodeClick: handleOrgNodeClick, onEdgeClick: renderFlowEdgeDetail });
+
+    document.getElementById("orgmapShowAll").addEventListener("click", (e) => {
+      orgMapControl.showAllConnections();
+      e.target.classList.toggle("on");
+    });
 
     document.getElementById("orgmapFullscreen").addEventListener("click", () => {
       const wrap = document.getElementById("orgmapWrap");

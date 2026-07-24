@@ -355,42 +355,96 @@
   .orgmap-fs-btn { flex: none; font: inherit; font-size: 0.8rem; font-weight: 600; padding: 8px 14px; border-radius: 999px; border: none; background: var(--surface-alt); color: var(--ink-soft); cursor: pointer; white-space: nowrap; }
   .orgmap-fs-btn:hover { background: var(--accent-wash); color: var(--accent); }
   .orgmap-container { width: 100%; overflow-x: auto; overflow-y: visible; padding: 4px 4px 20px; }
+  .orgmap-caption { color: var(--ink-muted); font-size: 0.8rem; line-height: 1.5; margin: 14px 2px 0; max-width: 74ch; }
   .orgmap-wrap:fullscreen { background: var(--page); padding: 28px; display: flex; flex-direction: column; }
   .orgmap-wrap:fullscreen .orgmap-container { flex: 1; max-height: none; }
 
-  /* ---- Kelly Benefits: radial "orbit" structure + connections diagram ---- */
-  .omap-svg { display: block; margin: 0 auto; }
-  .omap-spoke { stroke-width: 1.2; opacity: 0.32; transition: opacity .2s ease; }
-  .omap-spoke.dim { opacity: 0.06; }
-  .omap-spoke-exec { stroke: var(--ink); opacity: 0.45; }
-  .omap-spoke-person { opacity: 0.4; }
-  .omap-link { fill: none; stroke-width: 2; opacity: 0.55; transition: opacity .15s ease, stroke-width .15s ease; }
-  .omap-link-cross { stroke-width: 2.4; opacity: 0.7; }
-  .omap-link-corp { stroke-dasharray: 2 5; opacity: 0.5; }
-  .omap-link-dept { stroke-width: 1.5; opacity: 0.4; }
-  .omap-link.hi { stroke-width: 3.2; opacity: 1; }
-  .omap-link.dim { opacity: 0.06; }
-  .omap-node { cursor: pointer; transition: opacity .15s ease; }
-  .omap-node.dim { opacity: 0.25; }
-  .omap-node:focus-visible .omap-circle { stroke: var(--ink); stroke-width: 2.5; }
-  .omap-circle { stroke: var(--page); stroke-width: 2; transition: filter .15s ease; }
-  .omap-node:hover .omap-circle { filter: brightness(1.15); }
-  .omap-node-root .omap-circle { fill: var(--ink); }
-  .omap-node-hub .omap-circle { stroke: var(--surface); stroke-width: 4; }
-  .omap-node-exec .omap-circle { fill: var(--ink-soft); }
-  .omap-initials { font-family: "Inter", sans-serif; font-size: 11px; font-weight: 700; fill: #ffffff; text-anchor: middle; pointer-events: none; }
-  .omap-initials-exec { font-size: 9.5px; }
-  .omap-root-label { font-family: "Inter", sans-serif; font-size: 13px; font-weight: 800; fill: #ffffff; letter-spacing: 0.02em; pointer-events: none; }
-  .omap-label { font-family: "Inter", sans-serif; font-size: 10px; fill: var(--ink-muted); transition: opacity .15s ease, fill .15s ease; pointer-events: none; }
-  .omap-label-hub { font-size: 13px; font-weight: 700; fill: var(--ink); }
-  .omap-label-dept { font-weight: 600; fill: var(--ink-soft); }
-  .omap-node:hover .omap-label, .omap-node:focus-visible .omap-label { fill: var(--ink); }
+  .orgchart, .orgchart ul { display: flex; justify-content: center; }
+  .orgchart { padding: 0; margin: 0; }
+  .orgchart ul { padding-top: 44px; margin: 0; padding-left: 0; }
+  .orgchart li { display: flex; flex-direction: column; align-items: center; list-style: none; position: relative; padding: 44px 22px 0; }
+  .orgchart > li { padding-top: 0; }
+  .orgchart li::before, .orgchart li::after {
+    content: ""; position: absolute; top: 0; right: 50%; border-top: 1.5px solid var(--border); width: 50%; height: 44px;
+  }
+  .orgchart li::after { right: auto; left: 50%; border-left: 1.5px solid var(--border); }
+  .orgchart li:only-child { padding-top: 0; }
+  .orgchart li:only-child::before, .orgchart li:only-child::after { display: none; }
+  .orgchart li:first-child::before { border: none; }
+  .orgchart li:last-child::after { border: none; }
+  .orgchart li:first-child::after { border-radius: var(--radius-sm) 0 0 0; }
+  .orgchart li:last-child::before { border-right: 1.5px solid var(--border); border-radius: 0 var(--radius-sm) 0 0; }
+  .orgchart > li::before, .orgchart > li::after { display: none; }
+  .orgchart ul::before {
+    content: ""; position: absolute; top: 0; left: 50%; border-left: 1.5px solid var(--border); width: 0; height: 44px;
+  }
 
-  .omap-legend { display: flex; gap: 16px; flex-wrap: wrap; margin-top: 16px; font-size: 0.76rem; color: var(--ink-soft); }
-  .omap-legend span { display: flex; align-items: center; gap: 6px; }
-  .omap-legend i { display: inline-block; width: 12px; height: 12px; border-radius: 50%; flex: none; }
-  .omap-legend i.line { width: 16px; height: 0; border-top: 2px solid; border-radius: 0; background: none; }
-  .omap-legend i.dash { border-top-style: dashed; }
+  .ocn {
+    box-sizing: border-box; min-width: 160px; max-width: 220px; border: 1.5px solid var(--border); background: var(--surface-alt);
+    border-radius: var(--radius-md); padding: 12px 16px; text-align: center; cursor: pointer;
+    transition: border-color .15s ease, box-shadow .15s ease; font-family: "Inter", sans-serif;
+  }
+  .ocn:hover, .ocn:focus-visible { border-color: var(--accent); outline: none; box-shadow: 0 4px 14px rgba(20,22,31,0.1); }
+  .ocn-root { border-color: var(--ink); border-width: 2px; min-width: 200px; }
+  .ocn-division { border-color: var(--accent); }
+  .ocn-vertical { min-width: 130px; padding: 10px 14px; }
+  .ocn-group { border-style: dashed; border-color: var(--manager); }
+  .ocn-seat { border-color: var(--manager); border-width: 2px; background: var(--manager-soft); }
+  .ocn-function { min-width: 120px; max-width: 170px; padding: 8px 12px; background: var(--surface); }
+  .ocn-function .ocn-name { font-size: 0.78rem; font-weight: 600; }
+  .ocn-function.ocn-confirmed { border-color: var(--good); }
+  .ocn-function.ocn-confirmed .ocn-role { color: var(--good); }
+  .ocn-function.ocn-estimated .ocn-role { color: var(--ink-muted); }
+  .oc-toggle { position: relative; }
+  .ocn-chevron { display: inline-block; margin-left: 4px; font-size: 0.7em; color: var(--ink-muted); transition: transform .15s ease; }
+  .oc-toggle.oc-expanded .ocn-chevron { transform: rotate(90deg); }
+  ul.oc-fn-list { display: none; }
+  ul.oc-fn-list.oc-expanded { display: flex; }
+  .ocn-name { font-family: "Inter", sans-serif; font-weight: 700; font-size: 0.92rem; color: var(--ink); }
+  .ocn-role { font-size: 0.74rem; color: var(--ink-soft); margin-top: 2px; }
+  .ocn-line { font-size: 0.74rem; color: var(--ink-soft); margin-top: 6px; line-height: 1.4; text-align: left; }
+  .ocn-line:first-of-type { margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--border); }
+  .ocn-seat-badge { font-size: 0.6rem; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 700; color: var(--manager); margin-top: 6px; }
+  .ocn-reach-dot { display: inline-block; margin-left: 4px; font-size: 0.7em; color: var(--manager); }
+
+  /* People chips nested inside division/group boxes — reset the generic tree li/ul rules above, which
+     otherwise leak into any <ul>/<li> anywhere inside .orgchart regardless of nesting depth. */
+  .orgchart .ocn-people {
+    display: flex !important; flex-direction: column; gap: 2px; padding: 8px 0 0 !important; margin: 0; text-align: left;
+    border-top: 1px solid var(--border); margin-top: 8px;
+  }
+  .orgchart .ocn-people::before { display: none !important; content: none !important; }
+  .orgchart .ocn-people li {
+    display: block !important; padding: 0 !important; position: static !important; list-style: none;
+  }
+  .orgchart .ocn-people li::before, .orgchart .ocn-people li::after { display: none !important; content: none !important; }
+
+  .ocn-person {
+    display: flex; align-items: center; gap: 8px; width: 100%; text-align: left; font: inherit;
+    background: none; border: none; padding: 5px 4px; border-radius: 8px; cursor: pointer;
+    transition: background .15s ease;
+  }
+  .ocn-person:hover, .ocn-person:focus-visible { background: var(--accent-wash); outline: none; }
+  .ocn-person.ocn-active { background: var(--accent-wash); }
+  .ocn-avatar {
+    flex: none; width: 24px; height: 24px; border-radius: 50%; background: var(--accent); color: var(--accent-ink);
+    font-size: 0.6rem; font-weight: 700; display: flex; align-items: center; justify-content: center;
+  }
+  .ocn-person-info { min-width: 0; flex: 1; }
+  .ocn-person-name { display: block; font-size: 0.74rem; font-weight: 700; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .ocn-person-title { display: block; font-size: 0.66rem; color: var(--ink-soft); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .ocn-cross-dot { flex: none; width: 7px; height: 7px; border-radius: 50%; background: var(--warn); }
+  .ocn.ocn-active { border-color: var(--accent) !important; background: var(--accent-wash); }
+
+  .ocn-overlay { position: absolute; top: 0; left: 0; pointer-events: none; overflow: visible; z-index: 5; }
+  .ocn-overlay-line { fill: none; stroke: var(--accent); stroke-width: 2; opacity: 0.85; }
+  .ocn-overlay-dot { fill: var(--accent); }
+  .orgmap-connect-btn {
+    flex: none; font: inherit; font-size: 0.8rem; font-weight: 600; padding: 8px 14px; border-radius: 999px;
+    border: none; background: var(--surface-alt); color: var(--ink-soft); cursor: pointer; white-space: nowrap;
+  }
+  .orgmap-connect-btn:hover { background: var(--accent-wash); color: var(--accent); }
+  .orgmap-connect-btn.on { background: var(--accent); color: var(--accent-ink); }
 
   /* ---- Kelly Benefits: company-wide workflow (distinct from the org chart above) ---- */
   .workflow-card { background: var(--surface); border-radius: var(--radius-lg); box-shadow: var(--shadow-card); padding: 22px 24px; margin-bottom: 26px; }
@@ -441,6 +495,9 @@
   @media (prefers-reduced-motion: reduce) { .co-hbar-fill { transition: none; } }
   .co-hbar-row .val { font-size: 0.82rem; font-weight: 600; text-align: right; }
   .chart-caption { font-size: 0.8rem; color: var(--ink-muted); margin-top: 10px; }
+
+  .integration-box { border-left: 3px solid var(--manager); background: var(--manager-soft); border-radius: 0 var(--radius-md) var(--radius-md) 0; padding: 14px 18px; margin-bottom: 26px; font-size: 0.92rem; line-height: 1.6; color: var(--ink-soft); }
+  .integration-box b { color: var(--manager); }
 
   /* ---- Where I fit ---- */
   .fit-box { background: var(--surface); border-radius: var(--radius-lg); box-shadow: var(--shadow-card); padding: 18px 22px; margin-bottom: 26px; }
@@ -514,6 +571,9 @@
 
   /* ---- Kelly Benefits: function-level connections (detail panel) ---- */
   .ocn-link-dot { margin-left: 5px; font-size: 0.7em; filter: grayscale(1) opacity(0.6); }
+  .ocn-jump-highlight { animation: ocnPulse 1.6s ease; }
+  @keyframes ocnPulse { 0%, 100% { box-shadow: none; } 15%, 45% { box-shadow: 0 0 0 4px var(--accent-wash); border-color: var(--accent); } }
+  @media (prefers-reduced-motion: reduce) { .ocn-jump-highlight { animation: none; border-color: var(--accent); } }
   .fn-conn-group { margin-top: 16px; }
   .fn-conn-title { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--ink-soft); font-weight: 700; margin-bottom: 8px; }
   .fn-conn-link {
