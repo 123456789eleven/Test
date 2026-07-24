@@ -1,109 +1,29 @@
 (function () {
+  const HUB_IDS = ["strategies", "advantage", "payroll", "advisory", "corpfn"];
+  const HUB_COLOR = { strategies: "#3b82f6", advantage: "#10b981", payroll: "#06b6d4", advisory: "#8b5cf6", corpfn: "#ec4899" };
+  const HUB_LABEL = { strategies: "Strategies", advantage: "Advantage", payroll: "Payroll", advisory: "Advisory", corpfn: "Corporate Functions" };
   const EXEC_IDS = ["fx3", "frankIII"];
   const svgNS = "http://www.w3.org/2000/svg";
 
-  // One color per vertical, grouped by division family. Advantage's five were the original,
-  // user-confirmed set — left unchanged. The other three divisions' verticals are new (see
-  // company.json's verticalsNote) and use their division's existing hub color as a family.
-  const VERTICAL_COLORS = {
-    win: "#6366f1", construct: "#06b6d4", protect: "#d97706", connect: "#059669", serve: "#e11d48",
-    "strat-new": "#3b82f6", "strat-design": "#2563eb", "strat-service": "#60a5fa", "strat-comply": "#1d4ed8",
-    "pay-setup": "#06b6d4", "pay-process": "#0891b2", "pay-tax": "#22d3ee", "pay-support": "#0e7490",
-    "adv-consult": "#8b5cf6", "adv-research": "#7c3aed", "adv-participant": "#a78bfa", "adv-comply": "#6d28d9"
-  };
-  window.VERTICAL_COLORS = VERTICAL_COLORS;
-
-  function escAttr(s) { return String(s).replace(/"/g, "&quot;"); }
   function initials(name) {
     const words = name.replace(/^The Honorable\s+/, "").split(/\s+/).filter(w => /^[A-Z]/.test(w));
-    return (words[0]?.[0] || "") + (words[words.length - 1]?.[0] || "");
+    return ((words[0]?.[0] || "") + (words[words.length - 1]?.[0] || "")).toUpperCase();
   }
+  function truncate(s, n) { return s.length > n ? s.slice(0, n - 1) + "…" : s; }
 
-  function renderPeopleList(people) {
-    if (!people || !people.length) return "";
-    return `
-      <ul class="ocn-people">
-        ${people.map(p => `
-          <li>
-            <button class="ocn-person" data-id="${escAttr(p.id)}" data-cross="${escAttr((p.cross || []).join(","))}" title="${escAttr(p.name)} — ${escAttr(p.title)}">
-              <span class="ocn-avatar">${initials(p.name)}</span>
-              <span class="ocn-person-info">
-                <span class="ocn-person-name">${p.name}</span>
-                <span class="ocn-person-title">${p.title}</span>
-              </span>
-              ${p.cross && p.cross.length ? '<span class="ocn-cross-dot" title="Also connects to another division — click to see"></span>' : ""}
-            </button>
-          </li>
-        `).join("")}
-      </ul>
-    `;
-  }
-
-  function renderBox(node) {
-    const statusClass = node.type === "function" ? (node.confirmed ? " ocn-confirmed" : " ocn-estimated") : "";
-    const collapsible = (node.type === "vertical" || node.type === "division") && node.children && node.children.length;
-    const accentStyle = (node.accentColor && !node.seat) ? ` style="border-top-color:${node.accentColor}; border-top-width:3px;"` : "";
-    return `
-      <div class="ocn ocn-${node.type}${node.seat ? " ocn-seat" : ""}${statusClass}${collapsible ? " oc-toggle" : ""}" data-id="${escAttr(node.id)}" tabindex="0" role="button"${accentStyle}>
-        <div class="ocn-name">${node.name}${collapsible ? '<span class="ocn-chevron">▸</span>' : ""}${node.linked ? '<span class="ocn-link-dot" title="Connects to other functions">🔗</span>' : ""}${node.reach ? '<span class="ocn-reach-dot" title="Connects to all four divisions — click to see">◈</span>' : ""}</div>
-        ${node.role ? `<div class="ocn-role">${node.role}</div>` : ""}
-        ${renderPeopleList(node.people)}
-        ${node.seat ? '<div class="ocn-seat-badge">YOU ARE HERE</div>' : ""}
-      </div>
-    `;
-  }
-
-  function buildTree(companyData) {
-    const leadership = companyData.leadership;
-    const byDivision = (divId) => leadership.filter(l => l.parent === divId);
-    const corpPeople = leadership.filter(l => l.parent === "root" && !EXEC_IDS.includes(l.id));
-    const execPeople = leadership.filter(l => EXEC_IDS.includes(l.id));
-    const connections = companyData.processConnections || [];
-    const connectedIds = new Set();
-    connections.forEach(c => { connectedIds.add(c.from); connectedIds.add(c.to); });
-
-    const allVerticals = Object.entries(companyData.verticals || {});
-    const divisionNodes = companyData.divisions.map(d => {
-      const node = {
-        id: d.id, type: "division", name: d.name, role: d.role,
-        people: byDivision(d.id)
-      };
-      const ownVerticals = allVerticals.filter(([, v]) => v.division === d.id);
-      if (ownVerticals.length) {
-        node.children = ownVerticals.map(([key, v]) => ({
-          id: key, type: "vertical", name: v.name,
-          role: v.confirmed ? "Confirmed" : "Estimated — verify",
-          seat: key === "connect",
-          people: [], accentColor: VERTICAL_COLORS[key],
-          children: v.funcs.map(f => ({
-            id: f.id, type: "function", name: f.label,
-            role: f.confirmed ? "Confirmed" : "Estimated", confirmed: f.confirmed,
-            linked: connectedIds.has(f.id), accentColor: VERTICAL_COLORS[key]
-          }))
-        }));
-      }
-      return node;
+  function verticalConnectionPairs(companyData) {
+    const funcToVertical = {};
+    Object.entries(companyData.verticals || {}).forEach(([vKey, v]) => {
+      (v.funcs || []).forEach(f => { funcToVertical[f.id] = vKey; });
     });
-
-    const corpNode = {
-      id: "corpfn", type: "group", name: "Corporate Functions", role: "Shared services, all divisions",
-      reach: true, people: corpPeople
-    };
-
-    return {
-      id: "root", type: "root", name: "Kelly Benefits",
-      people: execPeople,
-      children: [...divisionNodes, corpNode]
-    };
-  }
-
-  function renderNode(node) {
-    const children = node.children || [];
-    const listClass = (node.type === "vertical" || node.type === "division") && children.length ? " oc-fn-list" : "";
-    const childrenHtml = children.length
-      ? `<ul class="${listClass}">${children.map(c => `<li>${renderNode(c)}</li>`).join("")}</ul>`
-      : "";
-    return renderBox(node) + childrenHtml;
+    const seen = new Map();
+    (companyData.processConnections || []).forEach(c => {
+      const va = funcToVertical[c.from], vb = funcToVertical[c.to];
+      if (!va || !vb || va === vb) return;
+      const key = [va, vb].sort().join("|");
+      if (!seen.has(key)) seen.set(key, [va, vb]);
+    });
+    return [...seen.values()];
   }
 
   window.renderOrgMap = function (containerId, opts) {
@@ -111,178 +31,217 @@
     const container = document.getElementById(containerId);
     if (!container) return;
 
-    const tree = buildTree(companyData);
-    container.innerHTML = `<ul class="orgchart"><li>${renderNode(tree)}</li></ul>`;
-    container.style.position = "relative";
+    const width = Math.max(container.clientWidth || 0, 1040);
+    const height = Math.max(760, Math.round((typeof window !== "undefined" ? window.innerHeight : 800) * 0.84));
+    const cx = width / 2, cy = height / 2;
+    const rMin = Math.min(width, height);
+    const rExec = rMin * 0.065;
+    const rHub = rMin * 0.19;
+    const rDept = rMin * 0.32;
+    const rPeople = rMin * 0.465;
+    const sectorSize = (2 * Math.PI) / HUB_IDS.length;
 
-    // Pre-expand this project's own seat (Advantage → Connect) so it's visible without clicking;
-    // the other three divisions' department breakdowns are new/estimated, so they start collapsed.
-    ["advantage", "connect"].forEach(id => {
-      const toggle = container.querySelector(`.oc-toggle[data-id="${id}"]`);
-      const list = toggle && toggle.nextElementSibling;
-      if (toggle && list) { toggle.classList.add("oc-expanded"); list.classList.add("oc-expanded"); }
-    });
-
-    const overlay = document.createElementNS(svgNS, "svg");
-    overlay.setAttribute("class", "ocn-overlay");
-    container.appendChild(overlay);
-
-    const divisionIds = companyData.divisions.map(d => d.id);
-    const funcToVertical = {};
-    Object.entries(companyData.verticals || {}).forEach(([vKey, v]) => {
-      (v.funcs || []).forEach(f => { funcToVertical[f.id] = vKey; });
-    });
-    let activeMode = null; // { kind: "person"|"function", id } | { kind: "corpfn" } | { kind: "all" }
-
-    function expandVertical(vKey) {
-      const toggle = container.querySelector(`.oc-toggle[data-id="${CSS.escape(vKey)}"]`);
-      const list = toggle && toggle.nextElementSibling;
-      if (toggle && list && !list.classList.contains("oc-expanded")) {
-        toggle.classList.add("oc-expanded");
-        list.classList.add("oc-expanded");
-      }
-    }
-
-    function nodeCenter(id) {
-      const el = container.querySelector(`.ocn[data-id="${CSS.escape(id)}"], .ocn-person[data-id="${CSS.escape(id)}"]`);
-      if (!el) return null;
-      const box = el.getBoundingClientRect();
-      const wrap = container.getBoundingClientRect();
+    const hubNodes = HUB_IDS.map((id, i) => {
+      const angle = i * sectorSize - Math.PI / 2;
       return {
-        x: box.left - wrap.left + container.scrollLeft + box.width / 2,
-        y: box.top - wrap.top + container.scrollTop + box.height / 2
+        id, kind: "hub", label: HUB_LABEL[id], color: HUB_COLOR[id], angle,
+        x: cx + Math.cos(angle) * rHub, y: cy + Math.sin(angle) * rHub
       };
-    }
+    });
+    const hubById = Object.fromEntries(hubNodes.map(h => [h.id, h]));
 
-    function drawLines(pairs) {
-      overlay.setAttribute("width", container.scrollWidth);
-      overlay.setAttribute("height", container.scrollHeight);
-      overlay.innerHTML = "";
-      pairs.forEach(([fromId, toId]) => {
-        const a = nodeCenter(fromId), b = nodeCenter(toId);
-        if (!a || !b) return;
-        const mx = (a.x + b.x) / 2, my = Math.min(a.y, b.y) - 46;
-        const path = document.createElementNS(svgNS, "path");
-        path.setAttribute("d", `M${a.x.toFixed(1)},${a.y.toFixed(1)} Q${mx.toFixed(1)},${my.toFixed(1)} ${b.x.toFixed(1)},${b.y.toFixed(1)}`);
-        path.setAttribute("class", "ocn-overlay-line");
-        overlay.appendChild(path);
-        [a, b].forEach(pt => {
-          const dot = document.createElementNS(svgNS, "circle");
-          dot.setAttribute("cx", pt.x.toFixed(1)); dot.setAttribute("cy", pt.y.toFixed(1)); dot.setAttribute("r", 4);
-          dot.setAttribute("class", "ocn-overlay-dot");
-          overlay.appendChild(dot);
+    const deptNodes = [];
+    HUB_IDS.forEach((hubId, hi) => {
+      const depts = Object.entries(companyData.verticals || {}).filter(([, v]) => v.division === hubId);
+      const baseAngle = hi * sectorSize - Math.PI / 2;
+      const usable = sectorSize * 0.84;
+      depts.forEach(([key, v], di) => {
+        const a = depts.length > 1 ? baseAngle + (di - (depts.length - 1) / 2) * (usable / (depts.length - 1)) : baseAngle;
+        deptNodes.push({
+          id: key, kind: "dept", label: v.name, hub: hubId, angle: a, color: HUB_COLOR[hubId],
+          x: cx + Math.cos(a) * rDept, y: cy + Math.sin(a) * rDept
         });
-      });
-    }
-
-    function pairsAndHighlightForMode(mode) {
-      if (mode.kind === "person") {
-        const person = companyData.leadership.find(l => l.id === mode.id);
-        if (!person) return { pairs: [], ids: [] };
-        return {
-          pairs: (person.cross || []).map(divId => [person.id, divId]),
-          ids: [person.id, person.parent, ...(person.cross || [])]
-        };
-      }
-      if (mode.kind === "corpfn") {
-        return { pairs: divisionIds.map(divId => ["corpfn", divId]), ids: ["corpfn", ...divisionIds] };
-      }
-      if (mode.kind === "function") {
-        const conns = (companyData.processConnections || []).filter(c => c.from === mode.id || c.to === mode.id);
-        const ids = [mode.id];
-        const pairs = conns.map(c => {
-          ids.push(c.from === mode.id ? c.to : c.from);
-          return [c.from, c.to];
-        });
-        return { pairs, ids };
-      }
-      // "all"
-      const pairs = [];
-      companyData.leadership.forEach(p => { (p.cross || []).forEach(divId => pairs.push([p.id, divId])); });
-      divisionIds.forEach(divId => pairs.push(["corpfn", divId]));
-      (companyData.processConnections || []).forEach(c => pairs.push([c.from, c.to]));
-      return { pairs, ids: [] };
-    }
-
-    function clearLines() {
-      activeMode = null;
-      overlay.innerHTML = "";
-      container.querySelectorAll(".ocn-active").forEach(el => el.classList.remove("ocn-active"));
-    }
-
-    function highlight(ids) {
-      container.querySelectorAll(".ocn-active").forEach(el => el.classList.remove("ocn-active"));
-      ids.forEach(id => {
-        const el = container.querySelector(`.ocn[data-id="${CSS.escape(id)}"], .ocn-person[data-id="${CSS.escape(id)}"]`);
-        if (el) el.classList.add("ocn-active");
-      });
-    }
-
-    function activate(mode) {
-      if (activeMode && activeMode.kind === mode.kind && activeMode.id === mode.id) { clearLines(); return; }
-      activeMode = mode;
-      const { pairs, ids } = pairsAndHighlightForMode(mode);
-      drawLines(pairs);
-      highlight(ids);
-    }
-
-    function showPersonConnections(person) { activate({ kind: "person", id: person.id }); }
-    function showCorpfnReach() { activate({ kind: "corpfn" }); }
-
-    function showFunctionConnections(id) {
-      const conns = (companyData.processConnections || []).filter(c => c.from === id || c.to === id);
-      if (!conns.length) return;
-      const relatedIds = new Set([id]);
-      conns.forEach(c => { relatedIds.add(c.from); relatedIds.add(c.to); });
-      relatedIds.forEach(fid => { const vKey = funcToVertical[fid]; if (vKey) expandVertical(vKey); });
-      requestAnimationFrame(() => activate({ kind: "function", id }));
-    }
-
-    function showAllConnections() {
-      const allFuncIds = new Set();
-      (companyData.processConnections || []).forEach(c => { allFuncIds.add(c.from); allFuncIds.add(c.to); });
-      allFuncIds.forEach(fid => { const vKey = funcToVertical[fid]; if (vKey) expandVertical(vKey); });
-      requestAnimationFrame(() => activate({ kind: "all" }));
-    }
-
-    function redrawActive() {
-      if (!activeMode) return;
-      const { pairs, ids } = pairsAndHighlightForMode(activeMode);
-      drawLines(pairs);
-      highlight(ids);
-    }
-
-    window.addEventListener("resize", redrawActive);
-
-    function handleActivate(el) {
-      if (onNodeClick) onNodeClick(el.dataset.id);
-      if (el.classList.contains("oc-toggle")) {
-        const ul = el.nextElementSibling;
-        if (ul) ul.classList.toggle("oc-expanded");
-        el.classList.toggle("oc-expanded");
-        requestAnimationFrame(redrawActive);
-      }
-      if (el.dataset.id === "corpfn") showCorpfnReach();
-      if (el.classList.contains("ocn-function")) showFunctionConnections(el.dataset.id);
-    }
-    container.querySelectorAll(".ocn").forEach(el => {
-      el.addEventListener("click", () => handleActivate(el));
-      el.addEventListener("keydown", (e) => {
-        if (e.key === "Enter" || e.key === " ") { e.preventDefault(); handleActivate(el); }
       });
     });
 
-    container.querySelectorAll(".ocn-person").forEach(btn => {
-      btn.addEventListener("click", (e) => {
-        e.stopPropagation();
-        const id = btn.dataset.id;
-        if (onNodeClick) onNodeClick(id);
-        const person = companyData.leadership.find(l => l.id === id);
-        if (person && person.cross && person.cross.length) showPersonConnections(person);
-      });
-      btn.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") e.stopPropagation(); });
+    const execPeople = companyData.leadership.filter(l => EXEC_IDS.includes(l.id));
+    const execNodes = execPeople.map((p, i) => {
+      const a = execPeople.length > 1 ? (i - (execPeople.length - 1) / 2) * 0.9 - Math.PI / 2 : -Math.PI / 2;
+      return { id: p.id, kind: "exec", label: p.name, color: "var(--ink)", angle: a, x: cx + Math.cos(a) * rExec, y: cy + Math.sin(a) * rExec };
     });
 
-    return { showAllConnections, clearLines, redraw: redrawActive };
+    const peopleByHub = {};
+    HUB_IDS.forEach(id => { peopleByHub[id] = []; });
+    companyData.leadership.forEach(p => {
+      if (EXEC_IDS.includes(p.id)) return;
+      const hubId = p.parent === "root" ? "corpfn" : p.parent;
+      if (peopleByHub[hubId]) peopleByHub[hubId].push(p);
+    });
+    const peopleNodes = [];
+    HUB_IDS.forEach((hubId, hi) => {
+      const people = peopleByHub[hubId];
+      const baseAngle = hi * sectorSize - Math.PI / 2;
+      const usable = sectorSize * 0.88;
+      people.forEach((p, pi) => {
+        const a = people.length > 1 ? baseAngle + (pi - (people.length - 1) / 2) * (usable / (people.length - 1)) : baseAngle;
+        peopleNodes.push({
+          id: p.id, kind: "person", label: p.name, hub: hubId, angle: a, color: HUB_COLOR[hubId],
+          x: cx + Math.cos(a) * rPeople, y: cy + Math.sin(a) * rPeople, cross: p.cross || []
+        });
+      });
+    });
+
+    const allNodes = [{ id: "root", kind: "root", label: "Kelly Benefits", x: cx, y: cy }, ...execNodes, ...hubNodes, ...deptNodes, ...peopleNodes];
+    const nodeById = Object.fromEntries(allNodes.map(n => [n.id, n]));
+
+    const crossLinks = [];
+    peopleNodes.forEach(p => { p.cross.forEach(hubId => crossLinks.push({ from: p.id, to: hubId, kind: "cross", color: p.color })); });
+    const corpLinks = ["strategies", "advantage", "payroll", "advisory"].map(hubId => ({ from: "corpfn", to: hubId, kind: "corp", color: HUB_COLOR.corpfn }));
+    const deptLinks = verticalConnectionPairs(companyData).map(([a, b]) => ({ from: a, to: b, kind: "dept", color: "#94a3b8" }));
+    const allLinks = [...crossLinks, ...corpLinks, ...deptLinks];
+
+    container.innerHTML = "";
+    container.style.position = "relative";
+    const svg = document.createElementNS(svgNS, "svg");
+    svg.setAttribute("viewBox", `0 0 ${width} ${height}`);
+    svg.setAttribute("width", width);
+    svg.setAttribute("height", height);
+    svg.setAttribute("class", "omap-svg");
+
+    const spokeLayer = document.createElementNS(svgNS, "g");
+    svg.appendChild(spokeLayer);
+    function spoke(fromNode, toNode, extraClass) {
+      const line = document.createElementNS(svgNS, "line");
+      line.setAttribute("x1", fromNode.x.toFixed(1)); line.setAttribute("y1", fromNode.y.toFixed(1));
+      line.setAttribute("x2", toNode.x.toFixed(1)); line.setAttribute("y2", toNode.y.toFixed(1));
+      line.setAttribute("class", "omap-spoke" + (extraClass ? " " + extraClass : ""));
+      line.setAttribute("stroke", toNode.color || fromNode.color || "#888");
+      spokeLayer.appendChild(line);
+    }
+    const rootNode = nodeById.root;
+    hubNodes.forEach(h => spoke(rootNode, h));
+    execNodes.forEach(e => spoke(rootNode, e, "omap-spoke-exec"));
+    deptNodes.forEach(d => spoke(hubById[d.hub], d));
+    peopleNodes.forEach(p => spoke(hubById[p.hub], p, "omap-spoke-person"));
+
+    const linkLayer = document.createElementNS(svgNS, "g");
+    svg.appendChild(linkLayer);
+    allLinks.forEach(l => {
+      const s = nodeById[l.from], t = nodeById[l.to];
+      if (!s || !t) return;
+      const mx = (s.x + t.x) / 2, my = (s.y + t.y) / 2;
+      const pull = l.kind === "dept" ? 0.5 : 0.32;
+      const qx = cx + (mx - cx) * pull, qy = cy + (my - cy) * pull;
+      const path = document.createElementNS(svgNS, "path");
+      path.setAttribute("d", `M${s.x.toFixed(1)},${s.y.toFixed(1)} Q${qx.toFixed(1)},${qy.toFixed(1)} ${t.x.toFixed(1)},${t.y.toFixed(1)}`);
+      path.setAttribute("class", `omap-link omap-link-${l.kind}`);
+      path.setAttribute("stroke", l.color);
+      path.dataset.a = l.from; path.dataset.b = l.to;
+      linkLayer.appendChild(path);
+    });
+
+    const nodeLayer = document.createElementNS(svgNS, "g");
+    svg.appendChild(nodeLayer);
+
+    const RADIUS = { root: 40, hub: 32, dept: 16, person: 16, exec: 13 };
+
+    function addNode(n) {
+      const r = RADIUS[n.kind];
+      const g = document.createElementNS(svgNS, "g");
+      g.setAttribute("class", `omap-node omap-node-${n.kind}`);
+      g.setAttribute("transform", `translate(${n.x.toFixed(1)},${n.y.toFixed(1)})`);
+      g.dataset.id = n.id;
+      g.tabIndex = 0;
+      g.setAttribute("role", "button");
+
+      const circle = document.createElementNS(svgNS, "circle");
+      circle.setAttribute("r", r);
+      circle.setAttribute("class", "omap-circle");
+      if (n.color) circle.setAttribute("fill", n.color);
+      g.appendChild(circle);
+
+      if (n.kind === "person" || n.kind === "exec") {
+        const t = document.createElementNS(svgNS, "text");
+        t.setAttribute("class", "omap-initials" + (n.kind === "exec" ? " omap-initials-exec" : ""));
+        t.setAttribute("text-anchor", "middle"); t.setAttribute("dy", "0.32em");
+        t.textContent = initials(n.label);
+        g.appendChild(t);
+      }
+      if (n.kind === "root") {
+        const t = document.createElementNS(svgNS, "text");
+        t.setAttribute("class", "omap-root-label");
+        t.setAttribute("text-anchor", "middle"); t.setAttribute("dy", "0.32em");
+        t.textContent = "KB";
+        g.appendChild(t);
+      }
+
+      if (n.kind === "hub" || n.kind === "dept") {
+        const deg = ((n.angle || 0) * 180) / Math.PI;
+        const facingLeft = deg > 90 || deg < -90;
+        const label = document.createElementNS(svgNS, "text");
+        label.setAttribute("class", `omap-label omap-label-${n.kind}`);
+        if (n.kind === "hub") {
+          label.setAttribute("y", -(r + 12));
+          label.setAttribute("text-anchor", "middle");
+        } else {
+          const off = r + 8;
+          label.setAttribute("x", facingLeft ? -off : off);
+          label.setAttribute("dy", "0.32em");
+          label.setAttribute("text-anchor", facingLeft ? "end" : "start");
+        }
+        label.textContent = truncate(n.label, n.kind === "hub" ? 24 : 20);
+        g.appendChild(label);
+      }
+      if (n.kind === "person") {
+        const deg = ((n.angle || 0) * 180) / Math.PI;
+        const facingLeft = deg > 90 || deg < -90;
+        const label = document.createElementNS(svgNS, "text");
+        label.setAttribute("class", "omap-label omap-label-person");
+        const off = r + 7;
+        label.setAttribute("x", facingLeft ? -off : off);
+        label.setAttribute("dy", "0.32em");
+        label.setAttribute("text-anchor", facingLeft ? "end" : "start");
+        label.textContent = truncate(n.label, 20);
+        g.appendChild(label);
+      }
+
+      function activate() { setFocus(n.id); if (onNodeClick) onNodeClick(n.id); }
+      g.addEventListener("click", activate);
+      g.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); activate(); } });
+      nodeLayer.appendChild(g);
+    }
+
+    addNode(rootNode);
+    execNodes.forEach(addNode);
+    hubNodes.forEach(addNode);
+    deptNodes.forEach(addNode);
+    peopleNodes.forEach(addNode);
+
+    function setFocus(id) {
+      const connected = new Set([id]);
+      allLinks.forEach(l => { if (l.from === id || l.to === id) { connected.add(l.from); connected.add(l.to); } });
+      const node = nodeById[id];
+      if (node && node.kind === "person") connected.add(node.hub);
+      if (node && node.kind === "dept") connected.add(node.hub);
+      if (node && node.kind === "exec") connected.add("root");
+      nodeLayer.querySelectorAll(".omap-node").forEach(el => {
+        el.classList.toggle("dim", !connected.has(el.dataset.id));
+      });
+      linkLayer.querySelectorAll(".omap-link").forEach(el => {
+        const touches = el.dataset.a === id || el.dataset.b === id;
+        el.classList.toggle("hi", touches);
+        el.classList.toggle("dim", !touches);
+      });
+      spokeLayer.querySelectorAll(".omap-spoke").forEach(el => el.classList.add("dim"));
+    }
+    function clearFocus() {
+      nodeLayer.querySelectorAll(".omap-node").forEach(el => el.classList.remove("dim"));
+      linkLayer.querySelectorAll(".omap-link").forEach(el => el.classList.remove("hi", "dim"));
+      spokeLayer.querySelectorAll(".omap-spoke").forEach(el => el.classList.remove("dim"));
+    }
+    container.addEventListener("click", (e) => { if (e.target === svg) clearFocus(); });
+
+    container.appendChild(svg);
+    return { clearFocus };
   };
 })();

@@ -48,13 +48,21 @@
 
           <div class="orgmap-wrap" id="orgmapWrap">
             <div class="orgmap-head">
-              <p class="cap">Click ▸ to expand a division into departments and functions. Click a person with <span class="ocn-cross-dot" style="display:inline-block; vertical-align:middle;"></span>, a function with 🔗, or Corporate Functions (◈) to draw its connections.</p>
-              <div style="display:flex; gap:8px; flex:none;">
-                <button id="orgmapShowAll" class="orgmap-connect-btn">🔗 Show all connections</button>
-                <button id="orgmapFullscreen" class="orgmap-fs-btn">⛶ Fullscreen</button>
-              </div>
+              <p class="cap">Click anyone to trace their connections.</p>
+              <button id="orgmapFullscreen" class="orgmap-fs-btn">⛶ Fullscreen</button>
             </div>
             <div id="coOrgMap" class="orgmap-container"></div>
+            <div class="omap-legend">
+              <span><i style="background:#f59e0b"></i>Executive</span>
+              <span><i style="background:#3b82f6"></i>Strategies</span>
+              <span><i style="background:#10b981"></i>Advantage</span>
+              <span><i style="background:#06b6d4"></i>Payroll</span>
+              <span><i style="background:#8b5cf6"></i>Advisory</span>
+              <span><i style="background:#ec4899"></i>Corporate Functions</span>
+              <span><i class="line" style="border-color:#ec4899"></i>Cross-division role</span>
+              <span><i class="line dash" style="border-color:#ec4899"></i>Corporate Functions reach</span>
+              <span><i class="line" style="border-color:#94a3b8"></i>Department workflow tie</span>
+            </div>
           </div>
 
           <div id="orgDetail"></div>
@@ -240,6 +248,8 @@
 
     function renderVerticalDetail(key) {
       const v = data.verticals[key];
+      const connectedIds = new Set();
+      (data.processConnections || []).forEach(c => { connectedIds.add(c.from); connectedIds.add(c.to); });
       return `
         <div class="ad-head">
           <h3>${v.name}</h3>
@@ -248,7 +258,12 @@
         </div>
         <p style="color:var(--ink-soft); font-size:0.9rem; margin-top:4px;">${v.desc}</p>
         <ul class="ad-func-list">${v.funcs.map(f => `
-          <li><span class="ad-pill ${f.confirmed ? "confirmed" : "estimated"}">${f.confirmed ? "confirmed" : "est."}</span> ${f.label}</li>
+          <li>
+            <span class="ad-pill ${f.confirmed ? "confirmed" : "estimated"}">${f.confirmed ? "confirmed" : "est."}</span>
+            ${connectedIds.has(f.id)
+              ? `<button class="fn-conn-link" data-jump="${f.id}" style="border:none; padding:0; flex:1; text-align:left;">${f.label} <span class="ocn-link-dot" title="Connects to other functions">🔗</span></button>`
+              : `<span style="flex:1;">${f.label}</span>`}
+          </li>
         `).join("")}</ul>
         ${key === "connect" ? `<a href="#sec-cobra" class="fn-conn-link" style="margin-top:12px;">→ See the full COBRA process, step by step</a>` : ""}
       `;
@@ -357,22 +372,11 @@
     }
 
     function jumpToNode(targetId) {
-      const el = document.querySelector(`.ocn[data-id="${targetId}"]`);
-      if (el) {
-        const ul = el.closest("ul.oc-fn-list");
-        if (ul && !ul.classList.contains("oc-expanded")) {
-          ul.classList.add("oc-expanded");
-          const toggle = ul.previousElementSibling;
-          if (toggle && toggle.classList.contains("oc-toggle")) toggle.classList.add("oc-expanded");
-        }
-        el.scrollIntoView({ behavior: "smooth", block: "center" });
-        el.classList.add("ocn-jump-highlight");
-        setTimeout(() => el.classList.remove("ocn-jump-highlight"), 1600);
-      }
       renderDetailContent(targetId);
+      document.getElementById("orgDetail").scrollIntoView({ behavior: "smooth", block: "nearest" });
     }
 
-    const orgMapControl = renderOrgMap("coOrgMap", { companyData: data, onNodeClick: handleOrgNodeClick });
+    renderOrgMap("coOrgMap", { companyData: data, onNodeClick: handleOrgNodeClick });
 
     function renderFlowEdgeDetail(edge) {
       const panel = document.getElementById("flowDetail");
@@ -383,11 +387,6 @@
       panel.classList.add("show");
     }
     renderDivisionFlow("flowContainer", { companyData: data, onNodeClick: handleOrgNodeClick, onEdgeClick: renderFlowEdgeDetail });
-
-    document.getElementById("orgmapShowAll").addEventListener("click", (e) => {
-      orgMapControl.showAllConnections();
-      e.target.classList.toggle("on");
-    });
 
     document.getElementById("orgmapFullscreen").addEventListener("click", () => {
       const wrap = document.getElementById("orgmapWrap");
