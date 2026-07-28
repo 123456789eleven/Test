@@ -446,6 +446,27 @@
   .orgmap-connect-btn:hover { background: var(--accent-wash); color: var(--accent); }
   .orgmap-connect-btn.on { background: var(--accent); color: var(--accent-ink); }
 
+  /* ---- Kelly Benefits: connections matrix (grid alternative to line-drawing) ---- */
+  .cmx-wrap { background: var(--surface); border-radius: var(--radius-lg); box-shadow: var(--shadow-card); padding: 22px 24px; margin-bottom: 26px; }
+  .cmx-wrap h3 { font-size: 1.02rem; margin-bottom: 4px; }
+  .cmx-wrap .cap { color: var(--ink-soft); font-size: 0.88rem; line-height: 1.5; margin: 6px 0 18px; max-width: 74ch; }
+  .cmx-table-scroll { overflow-x: auto; }
+  .cmx-table { border-collapse: collapse; width: 100%; min-width: 560px; }
+  .cmx-table th, .cmx-table td { text-align: center; font-size: 0.8rem; padding: 10px 8px; border: 1px solid var(--border); }
+  .cmx-table thead th { color: var(--ink-soft); font-weight: 600; font-size: 0.76rem; }
+  .cmx-table tbody th { text-align: left; color: var(--ink); font-weight: 600; white-space: nowrap; }
+  .cmx-corner { background: transparent; border: none !important; }
+  .cmx-diag { background: var(--surface-alt); color: var(--ink-muted); }
+  .cmx-empty { background: var(--page); }
+  .cmx-cell { cursor: pointer; font-weight: 700; color: var(--accent-ink); background: var(--accent); transition: transform .12s ease, box-shadow .12s ease; }
+  .cmx-cell:hover, .cmx-cell:focus-visible { transform: scale(1.08); outline: none; box-shadow: 0 0 0 2px var(--accent); }
+  .cmx-cell-corp { background: var(--manager); }
+  .cmx-cell.cmx-active { box-shadow: 0 0 0 3px var(--ink) inset; }
+  .cmx-detail { margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border); font-size: 0.88rem; color: var(--ink-soft); display: none; }
+  .cmx-detail.show { display: block; }
+  .cmx-detail .cmx-detail-item { padding: 6px 0; }
+  .cmx-detail b { color: var(--ink); }
+
   /* ---- Kelly Benefits: company-wide workflow (distinct from the org chart above) ---- */
   .workflow-card { background: var(--surface); border-radius: var(--radius-lg); box-shadow: var(--shadow-card); padding: 22px 24px; margin-bottom: 26px; }
   .workflow-card h3 { font-size: 1.05rem; margin-bottom: 4px; }
@@ -638,6 +659,26 @@
     .cflow-branch-col::before { display: none; }
   }
 
+  .cflow-role-badge {
+    display: inline-block; font-size: 0.62rem; text-transform: uppercase; letter-spacing: 0.04em; font-weight: 700;
+    padding: 2px 7px; border-radius: 999px; margin-bottom: 6px;
+  }
+  .cflow-role-cobraAdminI { background: var(--accent-wash); color: var(--accent); }
+  .cflow-role-cobraAdminII { background: var(--manager-soft); color: var(--manager); }
+  .cflow-node.cflow-dim { opacity: 0.25; }
+
+  .cobra-roles { background: var(--surface-alt); border-radius: var(--radius-md); padding: 18px 20px; margin-bottom: 24px; }
+  .cobra-roles h4 { font-size: 0.95rem; margin-bottom: 6px; }
+  .cobra-roles-note { font-size: 0.82rem; color: var(--ink-soft); line-height: 1.5; margin: 0 0 16px; max-width: 74ch; }
+  .cobra-roles-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; margin-bottom: 16px; }
+  .cobra-role-card { background: var(--surface); border-radius: var(--radius-sm); padding: 14px 16px; border-left: 3px solid var(--border); }
+  .cobra-role-card.cobra-role-cobraAdminI { border-left-color: var(--accent); }
+  .cobra-role-card.cobra-role-cobraAdminII { border-left-color: var(--manager); }
+  .cobra-role-card h5 { font-size: 0.86rem; margin-bottom: 8px; }
+  .cobra-role-card ul { list-style: none; margin: 0; padding: 0; }
+  .cobra-role-card li { font-size: 0.82rem; color: var(--ink-soft); padding: 4px 0; }
+  .cobra-role-filters { display: flex; gap: 18px; flex-wrap: wrap; }
+
   .crosscutting-box { border-left: 3px solid var(--manager); background: var(--manager-soft); border-radius: 0 var(--radius-md) var(--radius-md) 0; padding: 14px 18px; margin-top: 22px; font-size: 0.9rem; line-height: 1.65; color: var(--ink-soft); }
   .crosscutting-box h4 { font-family: "Inter", sans-serif; font-size: 0.9rem; margin-bottom: 8px; color: var(--manager); }
   .crosscutting-box p { margin: 0 0 8px; }
@@ -767,6 +808,7 @@
 <script src="js/migrate.js"></script>
 <script src="js/auth.js"></script>
 <script src="js/orgmap.js"></script>
+<script src="js/connectionsmatrix.js"></script>
 <script src="js/divisionflow.js"></script>
 <script src="js/cobraprocess.js"></script>
 <script src="js/router.js"></script>

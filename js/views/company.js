@@ -60,6 +60,13 @@
 
           <div id="orgDetail"></div>
 
+          <div class="cmx-wrap">
+            <h3>Connections matrix</h3>
+            <p class="cap">The same cross-division ties as the chart above, laid out as a grid instead of lines — click a cell to see exactly who or what connects those two.</p>
+            <div class="cmx-table-scroll" id="cmxTable"></div>
+            <div class="cmx-detail" id="cmxDetail"></div>
+          </div>
+
           <div class="integration-box" id="coIntegrationNote"></div>
 
           <div class="workflow-card">
@@ -382,6 +389,23 @@
 
     const orgMapControl = renderOrgMap("coOrgMap", { companyData: data, onNodeClick: handleOrgNodeClick });
 
+    function hubName(id) {
+      if (id === "corpfn") return "Corporate Functions";
+      const d = data.divisions.find(x => x.id === id);
+      return d ? d.name : id;
+    }
+    renderConnectionsMatrix("cmxTable", {
+      companyData: data,
+      onCellClick: ({ row, col, connections }) => {
+        const panel = document.getElementById("cmxDetail");
+        panel.innerHTML = `
+          <div style="font-weight:700; color:var(--ink); margin-bottom:6px;">${hubName(row)} ↔ ${hubName(col)}</div>
+          ${connections.map(c => `<div class="cmx-detail-item">${c.type === "corp" ? "◈" : "●"} ${c.label}</div>`).join("")}
+        `;
+        panel.classList.add("show");
+      }
+    });
+
     function renderFlowEdgeDetail(edge) {
       const panel = document.getElementById("flowDetail");
       if (!panel) return;
@@ -405,11 +429,28 @@
         document.exitFullscreen();
       }
     });
+    function fitOrgMapToScreen() {
+      const wrap = document.getElementById("orgmapWrap");
+      const container = document.getElementById("coOrgMap");
+      const tree = container && container.querySelector(".orgchart");
+      if (!wrap || !container || !tree) return;
+      if (document.fullscreenElement === wrap) {
+        tree.style.transform = "none";
+        const availW = container.clientWidth, availH = container.clientHeight;
+        const naturalW = tree.scrollWidth, naturalH = tree.scrollHeight;
+        const scale = Math.min(availW / naturalW, availH / naturalH, 1);
+        tree.style.transformOrigin = "top center";
+        tree.style.transform = `scale(${scale.toFixed(3)})`;
+      } else {
+        tree.style.transform = "none";
+      }
+    }
     document.addEventListener("fullscreenchange", () => {
       const wrap = document.getElementById("orgmapWrap");
       const btn = document.getElementById("orgmapFullscreen");
       if (!wrap || !btn) return;
       btn.textContent = document.fullscreenElement === wrap ? "✕ Exit fullscreen" : "⛶ Fullscreen";
+      requestAnimationFrame(() => requestAnimationFrame(fitOrgMapToScreen));
     });
 
     document.getElementById("cobraFullscreen").addEventListener("click", () => {
