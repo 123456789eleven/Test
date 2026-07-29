@@ -3,8 +3,22 @@
   "intro": "Real, sourced from Kelly Benefits' internal process documentation — not an inferred model.",
   "rolesNote": "How the work actually splits day to day, as described directly — not everything below is mapped to a specific step yet (some, like corrections and check/application mail handling, aren't broken out separately in the source flowchart). Treat the tagged steps as a first pass to correct.",
   "roles": {
-    "cobraAdminI": { "title": "COBRA Administrator I", "tasks": ["General notices", "Election notices", "Corrections", "Checks & applications", "Processing mail (incoming payment checks & applications)", "Renewal packets"] },
+    "cobraAdminI": {
+      "title": "COBRA Administrator I",
+      "tasks": ["General notices", "Election notices", "Corrections", "Checks & applications", "Processing mail (incoming payment checks & applications)", "Renewal packets"],
+      "improve": {
+        "concept": "manual",
+        "note": "Incoming payment checks and applications arrive by physical mail, get opened, and get applied by hand — the one part of this entire process with no system timestamp until a person touches it. Every other step has a documented turnaround; this one doesn't, because it can't be measured until it's already been done.",
+        "ask": "If mail processing is ever running behind, would anyone actually know before a qualified beneficiary complains about a late-applied payment?"
+      }
+    },
     "cobraAdminII": { "title": "COBRA Administrator II", "tasks": ["Enrollments", "Additions", "Terminations"] }
+  },
+  "improvementConcepts": {
+    "handoff": { "label": "Handoff delay", "def": "Work sits idle waiting on another person or team to act. It's the single biggest hidden cost in most processes, because once work crosses a handoff, nobody 'owns' the wait." },
+    "rework": { "label": "Rework loop", "def": "The same case bounces back through a step more than once — a rejected date, a short payment, an unconfirmed renewal. Each loop adds cost and another chance for an error, without moving the case any closer to done." },
+    "manual": { "label": "Manual touchpoint", "def": "A step depends on a person doing something by hand rather than the system doing it automatically — the highest-error, hardest-to-scale, and hardest-to-measure point in almost any process." },
+    "branching": { "label": "Branching complexity", "def": "A process that splits into meaningfully different paths depending on an early condition is harder to train, harder to audit, and easier to get wrong than one that behaves the same way every time." }
   },
   "phases": [
     {
@@ -42,7 +56,7 @@
       "summary": "The two different paths a new COBRA enrollment takes depending on whether the initial premium arrives with the election or separately — and what happens if it's short or never comes.",
       "steps": [
         { "type": "process", "text": "Initial premium payment due", "responsibility": "Qualified beneficiary", "time": "Within at least 45 days of COBRA election decision being sent" },
-        { "type": "decision", "text": "Did the qualified beneficiary send the initial premium together with their election, or send the election alone?", "branches": [
+        { "type": "decision", "text": "Did the qualified beneficiary send the initial premium together with their election, or send the election alone?", "improve": { "concept": "branching", "note": "One early fact — whether payment arrived with the election — sends the case down two genuinely different paths for the rest of its life: one enrolls at the carrier immediately, the other has to come back through a second enrollment step once payment eventually shows up. Anyone training on this process has to learn both paths as if they were separate processes.", "ask": "Which of the two paths actually accounts for more of the team's time this month — and is that the path being trained for first?" }, "branches": [
           { "label": "Sent initial premium with election", "steps": [
             { "type": "process", "text": "Kelly Benefits (1) enrolls qualified beneficiary in COBRA coverage (in Admin and at carrier); (2) applies premium to their first coverage month; (3) generates first bill indicating payment made and mails it (including payment and KTBSonline instructions)", "responsibility": "(1) & (3) COBRA team; (2) Credit & Collections", "time": "(1) Typically 7–10 business days from receipt; (2) 1–3 business days; (3) when payment is applied", "role": "cobraAdminII" },
             { "type": "process", "text": "→ Continues into Active Coverage & Billing", "responsibility": "", "time": "" }
@@ -57,7 +71,7 @@
                 { "type": "process", "text": "Kelly Benefits enrolls qualified beneficiary in COBRA coverage at the carrier", "responsibility": "COBRA team", "time": "Typically 7–10 business days from receipt of payment", "role": "cobraAdminII" },
                 { "type": "decision", "text": "Is the payment short by the lesser of $50 or 10% of the required amount (an 'insignificant underpayment')?", "branches": [
                   { "label": "Insignificant underpayment", "steps": [
-                    { "type": "process", "text": "Send a Notice of Insignificant Premium Underpayment email to the qualified beneficiary", "responsibility": "Credit & Collections", "time": "Around the 5th of the following coverage month" },
+                    { "type": "process", "text": "Send a Notice of Insignificant Premium Underpayment email to the qualified beneficiary", "responsibility": "Credit & Collections", "time": "Around the 5th of the following coverage month", "improve": { "concept": "rework", "note": "A shortfall of even a few dollars routes the case through an entirely separate notice, a second waiting period, and a second termination check before it can close — the same three steps whether the gap is $2 or $50.", "ask": "Of the insignificant-underpayment notices sent in a typical month, how many turn out to be an honest shortfall versus something explainable at the point the bill was generated?" } },
                     { "type": "decision", "text": "Does the qualified beneficiary pay the remaining amount due within 2 weeks of the notice email?", "branches": [
                       { "label": "Pays remaining amount", "steps": [
                         { "type": "process", "text": "Pays remaining amount due", "responsibility": "Qualified beneficiary", "time": "Within 2 weeks from notice email being sent" }
@@ -112,14 +126,14 @@
             { "type": "process", "text": "Kelly Benefits mails a letter to the client providing instructions on what to provide to qualified beneficiaries for renewal, plus a census of active and pending beneficiaries", "responsibility": "COBRA team", "time": "2 months prior to renewal", "role": "cobraAdminI" }
           ] },
           { "label": "KBS Pod / Large Group (LG) Pod", "steps": [
-            { "type": "process", "text": "The COBRA team emails the assigned account manager (KBS pod) / broker manager (LG pod) asking them to confirm by a specific date that they'll compile the COBRA Renewal Packet", "responsibility": "COBRA team", "time": "2 months prior to renewal; confirmation requested by the 15th of that month" },
+            { "type": "process", "text": "The COBRA team emails the assigned account manager (KBS pod) / broker manager (LG pod) asking them to confirm by a specific date that they'll compile the COBRA Renewal Packet", "responsibility": "COBRA team", "time": "2 months prior to renewal; confirmation requested by the 15th of that month", "improve": { "concept": "handoff", "note": "From this point, the whole renewal notice timeline depends on someone outside the COBRA team responding — the qualified beneficiary's actual renewal window doesn't pause while that reply is pending.", "ask": "Is there any point where a non-response gets escalated before the 15th deadline, or does the team only find out it didn't happen once the deadline has already passed?" } },
             { "type": "decision", "text": "Does the Account Manager / Broker Manager confirm they'll provide renewal info?", "branches": [
               { "label": "Confirms", "steps": [
                 { "type": "process", "text": "Compiles the COBRA Renewal Packet (new rates, benefit summaries, and renewal election form)", "responsibility": "Account manager (KBS pod) / Broker manager (LG pod)", "time": "By the 15th of the month prior to the renewal effective date" },
                 { "type": "process", "text": "Mails the Renewal Packet to qualified beneficiaries (or outsourced to a third-party printer for a Major Account client)", "responsibility": "COBRA team", "time": "Within 5 business days of receipt", "role": "cobraAdminI" }
               ] },
               { "label": "Does not confirm", "steps": [
-                { "type": "process", "text": "Kelly Benefits mails the generic Open Enrollment/Renewal Notification letter to the qualified beneficiary, asking them to reach out to the client for more info about the renewal", "responsibility": "COBRA team", "time": "15th of the month prior to the renewal effective date", "role": "cobraAdminI" }
+                { "type": "process", "text": "Kelly Benefits mails the generic Open Enrollment/Renewal Notification letter to the qualified beneficiary, asking them to reach out to the client for more info about the renewal", "responsibility": "COBRA team", "time": "15th of the month prior to the renewal effective date", "role": "cobraAdminI", "improve": { "concept": "handoff", "note": "This is the direct downstream cost of the handoff above not landing — the qualified beneficiary now gets a generic letter instead of their actual renewal details, and has to go chase the client themselves for information Kelly Benefits already asked for once.", "ask": "How often does this fallback actually fire in a given renewal season — and would that number, tracked over time, make the case for changing the handoff itself?" } }
               ] }
             ] }
           ] }
@@ -164,7 +178,7 @@
           ] },
           { "label": "Exceeds carrier retroactivity rules", "steps": [
             { "type": "process", "text": "Kelly Benefits terminates for a current effective date, and requests the original effective date from the carrier (unless the carrier is CareFirst Facets)", "responsibility": "Enrollment team", "time": "Within 5–7 business days of receipt from client" },
-            { "type": "decision", "text": "How does the carrier respond?", "branches": [
+            { "type": "decision", "text": "How does the carrier respond?", "improve": { "concept": "rework", "note": "Every rejected date sends the case back through Kelly Benefits at least once more before it settles — and each round trip is a wait on a third party the team doesn't control, not additional work the team itself can speed up.", "ask": "Do certain carriers reject original effective dates noticeably more often than others — and if so, is that pattern visible anywhere, or only felt case by case?" }, "branches": [
               { "label": "Approves the original effective date", "steps": [
                 { "type": "process", "text": "Kelly Benefits updates to match the termination date approved by the carrier", "responsibility": "Enrollment team", "time": "Within 5–7 business days of receipt from carrier" }
               ] },
