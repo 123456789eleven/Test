@@ -1,10 +1,4 @@
 (function () {
-  const STATUS_LABEL = { idea: "Idea", considering: "Considering", proposed: "Proposed", active: "Active", done: "Done", shelved: "Shelved" };
-  const STATUS_ORDER = ["idea", "considering", "proposed", "active", "done", "shelved"];
-  const IMPACT_LABEL = { high: "High impact", med: "Medium impact", low: "Low impact" };
-  const EFFORT_LABEL = { low: "Low effort", med: "Medium effort", high: "High effort" };
-
-  let wbFilter = "all";
   let fitSaveTimeout;
 
   function fmtVal(v) { return v === null ? "n/a" : "$" + v + "B"; }
@@ -33,7 +27,6 @@
         <button data-view="overview" class="active">Overview</button>
         <button data-view="people">People &amp; History</button>
         <button data-view="strategy">Strategy</button>
-        <button data-view="notes">Workbench</button>
       </div>
 
       <div class="view active" id="coview-overview">
@@ -108,41 +101,6 @@
         </div>
       </div>
 
-      <div class="view" id="coview-notes">
-        <div class="notes-card">
-          <h3>Strategy workbench</h3>
-          <p class="cap">Not just a list — a place to actually decide what's worth doing. Score each idea on impact and effort, watch where it lands, then move it forward. This is where a visible improvement project actually gets picked, not just written down.</p>
-          <div id="coWbAuthGate"></div>
-          <div id="coWbSuggestions"></div>
-          <div class="note-form" id="coNoteForm">
-            <textarea id="coNoteText" placeholder="What would you change, build, or test?"></textarea>
-            <div class="row2">
-              <input id="coNoteRelated" placeholder="Related to (optional — e.g. Advantage, COBRA process)" style="flex:1.4;" />
-              <select id="coNoteImpact"><option value="high">High impact</option><option value="med" selected>Medium impact</option><option value="low">Low impact</option></select>
-              <select id="coNoteEffort"><option value="low">Low effort</option><option value="med" selected>Medium effort</option><option value="high">High effort</option></select>
-              <button id="coNoteAdd">Add to workbench</button>
-            </div>
-          </div>
-
-          <div class="wb-matrix-wrap">
-            <div class="wb-axis-top">Effort →</div>
-            <div class="wb-matrix-row">
-              <div class="wb-axis-side">Impact<br>↑</div>
-              <div class="wb-matrix" id="coWbMatrix"></div>
-            </div>
-          </div>
-
-          <div class="wb-filters" id="coWbFilters">
-            <button class="wb-filter active" data-status="all">All</button>
-            <button class="wb-filter" data-status="idea">Idea</button>
-            <button class="wb-filter" data-status="considering">Considering</button>
-            <button class="wb-filter" data-status="proposed">Proposed</button>
-            <button class="wb-filter" data-status="active">Active</button>
-            <button class="wb-filter" data-status="done">Done / Shelved</button>
-          </div>
-          <div class="notes-list" id="coNotesList"></div>
-        </div>
-      </div>
     `;
 
     document.getElementById("coTabs").addEventListener("click", (e) => {
@@ -159,22 +117,14 @@
     loadFitText();
     wireFitText();
 
-    updateWorkbenchGate();
-    wireWorkbench();
-    renderWorkbenchNotes();
-    renderSuggestedItems();
-
     const onAuthOrMigrate = () => {
-      if (!document.getElementById("coWbAuthGate")) {
+      if (!document.getElementById(mount.id)) {
         window.removeEventListener("custodian:authchange", onAuthOrMigrate);
         window.removeEventListener("custodian:migrated", onAuthOrMigrate);
         return;
       }
       updateFitGate();
       loadFitText();
-      updateWorkbenchGate();
-      renderWorkbenchNotes();
-      renderSuggestedItems();
     };
     window.addEventListener("custodian:authchange", onAuthOrMigrate);
     window.addEventListener("custodian:migrated", onAuthOrMigrate);
@@ -506,180 +456,6 @@
         supabaseClient.from("site_text").upsert({ key: "fit", content: el.value });
       }, 700);
     });
-  }
-
-  function updateWorkbenchGate() {
-    const gate = document.getElementById("coWbAuthGate");
-    const form = document.getElementById("coNoteForm");
-    if (!gate || !form) return;
-    if (Auth.isSignedIn()) {
-      gate.innerHTML = "";
-      form.style.display = "";
-    } else {
-      form.style.display = "none";
-      gate.innerHTML = `<div class="auth-gate">Sign in to add or edit workbench items. <button id="coAuthGateBtn">Sign in</button></div>`;
-      document.getElementById("coAuthGateBtn").addEventListener("click", () => document.getElementById("authButton").click());
-    }
-  }
-
-  function wireWorkbench() {
-    document.getElementById("coWbFilters").addEventListener("click", (e) => {
-      const btn = e.target.closest(".wb-filter");
-      if (!btn) return;
-      document.querySelectorAll("#coWbFilters .wb-filter").forEach(b => b.classList.remove("active"));
-      btn.classList.add("active");
-      wbFilter = btn.dataset.status;
-      renderWorkbenchNotes();
-    });
-    document.getElementById("coNoteAdd").addEventListener("click", async () => {
-      const text = document.getElementById("coNoteText").value.trim();
-      if (!text) return;
-      await supabaseClient.from("workbench_items").insert({
-        related: document.getElementById("coNoteRelated").value.trim() || null,
-        impact: document.getElementById("coNoteImpact").value,
-        effort: document.getElementById("coNoteEffort").value,
-        status: "idea",
-        body: text
-      });
-      document.getElementById("coNoteText").value = "";
-      document.getElementById("coNoteRelated").value = "";
-      renderWorkbenchNotes();
-    });
-  }
-
-  function renderWorkbenchMatrix(all) {
-    const active = all.filter(n => n.status !== "done" && n.status !== "shelved");
-    const impacts = ["high", "med", "low"];
-    const efforts = ["low", "med", "high"];
-    const cells = impacts.map(imp => efforts.map(eff => {
-      const items = active.filter(n => n.impact === imp && n.effort === eff);
-      let cls = "", label = "";
-      if (imp === "high" && eff === "low") { cls = "best"; label = "Do first"; }
-      if (imp === "low" && eff === "high") { cls = "worst"; label = "Reconsider"; }
-      return `<div class="wb-cell ${cls}">
-        ${label ? `<span class="wb-cell-label">${label}</span>` : ""}
-        ${items.map(it => `<div class="wb-chip" data-id="${it.id}" title="${it.body.replace(/"/g, "&quot;")}">${it.body.length > 34 ? it.body.slice(0, 34) + "…" : it.body}</div>`).join("")}
-      </div>`;
-    }).join("")).join("");
-    document.getElementById("coWbMatrix").innerHTML = cells;
-    document.querySelectorAll("#coWbMatrix .wb-chip").forEach(chip => {
-      chip.addEventListener("click", () => {
-        const el = document.querySelector(`#coNotesList .note-item[data-id="${chip.dataset.id}"]`);
-        if (el) { el.scrollIntoView({ behavior: "smooth", block: "center" }); el.style.borderColor = "var(--accent)"; setTimeout(() => el.style.borderColor = "", 1200); }
-      });
-    });
-  }
-
-  async function renderSuggestedItems() {
-    const wrap = document.getElementById("coWbSuggestions");
-    if (!wrap) return;
-    let suggestions;
-    try {
-      suggestions = await fetch("data/suggested-items.json").then(r => r.json());
-    } catch (err) {
-      wrap.innerHTML = "";
-      return;
-    }
-    if (!document.getElementById("coWbSuggestions") || !suggestions.length) { wrap.innerHTML = ""; return; }
-
-    const dismissed = JSON.parse(localStorage.getItem("custodian:dismissedSuggestions") || "[]");
-    const { data: existingItems } = await supabaseClient.from("workbench_items").select("related");
-    const acceptedRefs = new Set((existingItems || []).map(i => i.related).filter(Boolean));
-
-    const visible = suggestions.filter(s => !dismissed.includes(s.id) && !acceptedRefs.has(s.sourceRef));
-    if (!document.getElementById("coWbSuggestions")) return;
-    if (!visible.length) { wrap.innerHTML = ""; return; }
-
-    wrap.innerHTML = `
-      <div class="wb-suggest-head">
-        <h4>Suggested for you</h4>
-        <p class="cap">Cross-referenced automatically from today's Insights/Landscape refresh against your actual seat — not general industry news.</p>
-      </div>
-      ${visible.map(s => `
-        <div class="wb-suggest-card" data-id="${s.id}">
-          <div class="wb-suggest-reason">${s.reason}</div>
-          <div class="wb-suggest-text">${s.text}</div>
-          <div class="wb-suggest-meta">
-            <span class="note-tag impact-${s.impact}">${IMPACT_LABEL[s.impact] || s.impact}</span>
-            <span class="note-tag effort">${EFFORT_LABEL[s.effort] || s.effort}</span>
-            <span class="wb-suggest-source">From ${s.source === "insight" ? "Insights" : "Landscape"}: ${s.sourceRef}</span>
-          </div>
-          <div class="wb-suggest-actions">
-            <button class="wb-suggest-add" data-id="${s.id}">+ Add to Workbench</button>
-            <button class="wb-suggest-dismiss" data-id="${s.id}">Dismiss</button>
-          </div>
-        </div>
-      `).join("")}
-    `;
-
-    wrap.querySelectorAll(".wb-suggest-dismiss").forEach(btn => {
-      btn.addEventListener("click", () => {
-        const list = JSON.parse(localStorage.getItem("custodian:dismissedSuggestions") || "[]");
-        list.push(btn.dataset.id);
-        localStorage.setItem("custodian:dismissedSuggestions", JSON.stringify(list));
-        renderSuggestedItems();
-      });
-    });
-    wrap.querySelectorAll(".wb-suggest-add").forEach(btn => {
-      btn.addEventListener("click", async () => {
-        if (!Auth.isSignedIn()) { document.getElementById("authButton").click(); return; }
-        const s = visible.find(x => x.id === btn.dataset.id);
-        if (!s) return;
-        btn.disabled = true;
-        await supabaseClient.from("workbench_items").insert({
-          body: s.text, related: s.sourceRef, impact: s.impact, effort: s.effort, status: "idea"
-        });
-        renderWorkbenchNotes();
-        renderSuggestedItems();
-      });
-    });
-  }
-
-  async function renderWorkbenchNotes() {
-    const list = document.getElementById("coNotesList");
-    if (!list) return;
-    const { data, error } = await supabaseClient.from("workbench_items").select("*").order("created_at", { ascending: false });
-    if (!document.getElementById("coNotesList")) return;
-    if (error) { list.innerHTML = `<div style="color:var(--warn);">Couldn't load workbench items (${error.message}).</div>`; return; }
-    renderWorkbenchMatrix(data);
-    const filtered = wbFilter === "all" ? data
-      : wbFilter === "done" ? data.filter(n => n.status === "done" || n.status === "shelved")
-      : data.filter(n => n.status === wbFilter);
-    if (!filtered.length) { list.innerHTML = `<div class="notes-empty">Nothing here yet.</div>`; return; }
-    const signedIn = Auth.isSignedIn();
-    list.innerHTML = filtered.map(n => `
-      <div class="note-item" data-id="${n.id}">
-        ${signedIn ? `<button class="note-del" title="Delete" data-id="${n.id}">✕</button>` : ""}
-        <div class="nmeta">
-          <span class="note-tag impact-${n.impact}">${IMPACT_LABEL[n.impact]}</span>
-          <span class="note-tag effort">${EFFORT_LABEL[n.effort]}</span>
-          ${n.related ? `<span class="note-related">${n.related}</span>` : ""}
-          <span class="note-date mono">${n.created_at.slice(0, 10)}</span>
-        </div>
-        <div class="note-text">${n.body}</div>
-        <div class="note-status-row">
-          ${signedIn ? `
-            <label style="font-size:0.72rem; color:var(--ink-muted); text-transform:uppercase; letter-spacing:0.04em;">Status</label>
-            <select data-id="${n.id}" class="wb-status-select">
-              ${STATUS_ORDER.map(s => `<option value="${s}" ${s === n.status ? "selected" : ""}>${STATUS_LABEL[s]}</option>`).join("")}
-            </select>
-          ` : `<span class="note-tag">${STATUS_LABEL[n.status]}</span>`}
-        </div>
-      </div>`).join("");
-    if (signedIn) {
-      list.querySelectorAll(".note-del").forEach(btn => {
-        btn.addEventListener("click", async () => {
-          await supabaseClient.from("workbench_items").delete().eq("id", btn.dataset.id);
-          renderWorkbenchNotes();
-        });
-      });
-      list.querySelectorAll(".wb-status-select").forEach(sel => {
-        sel.addEventListener("change", async () => {
-          await supabaseClient.from("workbench_items").update({ status: sel.value }).eq("id", sel.dataset.id);
-          renderWorkbenchNotes();
-        });
-      });
-    }
   }
 
   Router.register("company", renderCompanyView);

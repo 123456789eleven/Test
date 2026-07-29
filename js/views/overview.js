@@ -33,9 +33,8 @@ async function renderOverview(mount) {
         </section>
 
         <section class="aurora-dash">
-          <div class="aurora-eyebrow"><span class="rule"></span>Live — 4 entries</div>
-          <div class="aurora-grid-4" id="briefGrid">
-            <div class="aurora-card"><div class="loading">Loading…</div></div>
+          <div class="aurora-eyebrow"><span class="rule"></span>Live — 3 entries</div>
+          <div class="aurora-grid-3" id="briefGrid">
             <div class="aurora-card"><div class="loading">Loading…</div></div>
             <div class="aurora-card"><div class="loading">Loading…</div></div>
             <div class="aurora-card"><div class="loading">Loading…</div></div>
@@ -57,11 +56,10 @@ async function renderOverview(mount) {
 
   const grid = document.getElementById("briefGrid");
 
-  const [insightsResult, landscapeResult, fitResult, workbenchResult] = await Promise.allSettled([
+  const [insightsResult, landscapeResult, fitResult] = await Promise.allSettled([
     fetch("data/insights.json").then(r => r.json()),
     fetch("data/landscape.json").then(r => r.json()),
-    supabaseClient.from("site_text").select("content").eq("key", "fit").maybeSingle(),
-    supabaseClient.from("workbench_items").select("id, body, status, impact, created_at").order("created_at", { ascending: false })
+    supabaseClient.from("site_text").select("content").eq("key", "fit").maybeSingle()
   ]);
 
   if (!document.getElementById("briefGrid")) return;
@@ -122,31 +120,6 @@ async function renderOverview(mount) {
         <div class="foot">Set it on the Kelly Benefits page →</div>
       </a>
     `);
-  }
-
-  if (workbenchResult.status === "fulfilled" && !workbenchResult.value.error) {
-    const items = workbenchResult.value.data || [];
-    const active = items.filter(n => n.status !== "done" && n.status !== "shelved");
-    if (active.length) {
-      const top = active.find(n => n.status === "active") || active[0];
-      cards.push(`
-        <a class="aurora-card" href="#/company">
-          <span class="tag">Strategy Workbench · ${active.length} open</span>
-          <h3>${escBrief(top.body)}</h3>
-          <p>Your own ideas for moving up, scored and waiting on a decision — not just industry reading.</p>
-          <div class="foot">Review on the Kelly Benefits page →</div>
-        </a>
-      `);
-    } else {
-      cards.push(`
-        <a class="aurora-card" href="#/company">
-          <span class="tag">Strategy Workbench</span>
-          <h3>Nothing in your pipeline yet</h3>
-          <p>The one part of Custodian that's about you, not the industry — an idea for moving into management.</p>
-          <div class="foot">Add one on the Kelly Benefits page →</div>
-        </a>
-      `);
-    }
   }
 
   grid.innerHTML = cards.join("");
