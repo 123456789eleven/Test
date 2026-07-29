@@ -330,6 +330,27 @@
   .note-del:hover { color: var(--warn); }
   .notes-empty { color: var(--ink-muted); font-size: 0.86rem; font-style: italic; }
 
+  /* ---- Kelly Benefits: Workbench suggestions (from the daily cross-reference agent) ---- */
+  .wb-suggest-head { margin-bottom: 14px; }
+  .wb-suggest-head h4 { font-size: 0.9rem; margin-bottom: 4px; }
+  .wb-suggest-head .cap { color: var(--ink-soft); font-size: 0.82rem; line-height: 1.5; margin: 0; max-width: 68ch; }
+  .wb-suggest-card { background: var(--accent-wash); border-radius: var(--radius-md); padding: 14px 16px; margin-bottom: 10px; }
+  .wb-suggest-reason { font-size: 0.76rem; color: var(--accent); font-weight: 600; margin-bottom: 6px; }
+  .wb-suggest-text { font-size: 0.88rem; color: var(--ink); line-height: 1.5; }
+  .wb-suggest-meta { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin-top: 8px; }
+  .wb-suggest-source { font-size: 0.74rem; color: var(--ink-muted); }
+  .wb-suggest-actions { display: flex; gap: 10px; margin-top: 12px; }
+  .wb-suggest-add {
+    font: inherit; font-size: 0.8rem; font-weight: 600; padding: 7px 16px; border-radius: 999px; border: none;
+    background: var(--ink); color: var(--page); cursor: pointer; transition: opacity .15s ease;
+  }
+  .wb-suggest-add:hover { opacity: 0.85; }
+  .wb-suggest-dismiss {
+    font: inherit; font-size: 0.8rem; padding: 7px 14px; border-radius: 999px; border: none;
+    background: none; color: var(--ink-muted); cursor: pointer;
+  }
+  .wb-suggest-dismiss:hover { color: var(--warn); }
+
   /* ---- Kelly Benefits: snapshot + leadership ---- */
   .snapshot { display: grid; grid-template-columns: 1fr 1fr; gap: 4px 40px; margin-bottom: 26px; background: var(--surface); border-radius: var(--radius-lg); box-shadow: var(--shadow-card); padding: 8px 22px 14px; }
   @media (max-width: 560px) { .snapshot { grid-template-columns: 1fr; } }

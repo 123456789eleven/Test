@@ -113,6 +113,7 @@
           <h3>Strategy workbench</h3>
           <p class="cap">Not just a list — a place to actually decide what's worth doing. Score each idea on impact and effort, watch where it lands, then move it forward. This is where a visible improvement project actually gets picked, not just written down.</p>
           <div id="coWbAuthGate"></div>
+          <div id="coWbSuggestions"></div>
           <div class="note-form" id="coNoteForm">
             <textarea id="coNoteText" placeholder="What would you change, build, or test?"></textarea>
             <div class="row2">
@@ -161,6 +162,7 @@
     updateWorkbenchGate();
     wireWorkbench();
     renderWorkbenchNotes();
+    renderSuggestedItems();
 
     const onAuthOrMigrate = () => {
       if (!document.getElementById("coWbAuthGate")) {
@@ -172,6 +174,7 @@
       loadFitText();
       updateWorkbenchGate();
       renderWorkbenchNotes();
+      renderSuggestedItems();
     };
     window.addEventListener("custodian:authchange", onAuthOrMigrate);
     window.addEventListener("custodian:migrated", onAuthOrMigrate);
@@ -563,6 +566,71 @@
       chip.addEventListener("click", () => {
         const el = document.querySelector(`#coNotesList .note-item[data-id="${chip.dataset.id}"]`);
         if (el) { el.scrollIntoView({ behavior: "smooth", block: "center" }); el.style.borderColor = "var(--accent)"; setTimeout(() => el.style.borderColor = "", 1200); }
+      });
+    });
+  }
+
+  async function renderSuggestedItems() {
+    const wrap = document.getElementById("coWbSuggestions");
+    if (!wrap) return;
+    let suggestions;
+    try {
+      suggestions = await fetch("data/suggested-items.json").then(r => r.json());
+    } catch (err) {
+      wrap.innerHTML = "";
+      return;
+    }
+    if (!document.getElementById("coWbSuggestions") || !suggestions.length) { wrap.innerHTML = ""; return; }
+
+    const dismissed = JSON.parse(localStorage.getItem("custodian:dismissedSuggestions") || "[]");
+    const { data: existingItems } = await supabaseClient.from("workbench_items").select("related");
+    const acceptedRefs = new Set((existingItems || []).map(i => i.related).filter(Boolean));
+
+    const visible = suggestions.filter(s => !dismissed.includes(s.id) && !acceptedRefs.has(s.sourceRef));
+    if (!document.getElementById("coWbSuggestions")) return;
+    if (!visible.length) { wrap.innerHTML = ""; return; }
+
+    wrap.innerHTML = `
+      <div class="wb-suggest-head">
+        <h4>Suggested for you</h4>
+        <p class="cap">Cross-referenced automatically from today's Insights/Landscape refresh against your actual seat — not general industry news.</p>
+      </div>
+      ${visible.map(s => `
+        <div class="wb-suggest-card" data-id="${s.id}">
+          <div class="wb-suggest-reason">${s.reason}</div>
+          <div class="wb-suggest-text">${s.text}</div>
+          <div class="wb-suggest-meta">
+            <span class="note-tag impact-${s.impact}">${IMPACT_LABEL[s.impact] || s.impact}</span>
+            <span class="note-tag effort">${EFFORT_LABEL[s.effort] || s.effort}</span>
+            <span class="wb-suggest-source">From ${s.source === "insight" ? "Insights" : "Landscape"}: ${s.sourceRef}</span>
+          </div>
+          <div class="wb-suggest-actions">
+            <button class="wb-suggest-add" data-id="${s.id}">+ Add to Workbench</button>
+            <button class="wb-suggest-dismiss" data-id="${s.id}">Dismiss</button>
+          </div>
+        </div>
+      `).join("")}
+    `;
+
+    wrap.querySelectorAll(".wb-suggest-dismiss").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const list = JSON.parse(localStorage.getItem("custodian:dismissedSuggestions") || "[]");
+        list.push(btn.dataset.id);
+        localStorage.setItem("custodian:dismissedSuggestions", JSON.stringify(list));
+        renderSuggestedItems();
+      });
+    });
+    wrap.querySelectorAll(".wb-suggest-add").forEach(btn => {
+      btn.addEventListener("click", async () => {
+        if (!Auth.isSignedIn()) { document.getElementById("authButton").click(); return; }
+        const s = visible.find(x => x.id === btn.dataset.id);
+        if (!s) return;
+        btn.disabled = true;
+        await supabaseClient.from("workbench_items").insert({
+          body: s.text, related: s.sourceRef, impact: s.impact, effort: s.effort, status: "idea"
+        });
+        renderWorkbenchNotes();
+        renderSuggestedItems();
       });
     });
   }
