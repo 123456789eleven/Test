@@ -60,13 +60,6 @@
 
           <div id="orgDetail"></div>
 
-          <div class="cmx-wrap">
-            <h3>Connections matrix</h3>
-            <p class="cap">The same cross-division ties as the chart above, laid out as a grid instead of lines — click a cell to see exactly who or what connects those two.</p>
-            <div class="cmx-table-scroll" id="cmxTable"></div>
-            <div class="cmx-detail" id="cmxDetail"></div>
-          </div>
-
           <div class="integration-box" id="coIntegrationNote"></div>
 
           <div class="workflow-card">
@@ -388,23 +381,6 @@
     }
 
     const orgMapControl = renderOrgMap("coOrgMap", { companyData: data, onNodeClick: handleOrgNodeClick });
-
-    function hubName(id) {
-      if (id === "corpfn") return "Corporate Functions";
-      const d = data.divisions.find(x => x.id === id);
-      return d ? d.name : id;
-    }
-    renderConnectionsMatrix("cmxTable", {
-      companyData: data,
-      onCellClick: ({ row, col, connections }) => {
-        const panel = document.getElementById("cmxDetail");
-        panel.innerHTML = `
-          <div style="font-weight:700; color:var(--ink); margin-bottom:6px;">${hubName(row)} ↔ ${hubName(col)}</div>
-          ${connections.map(c => `<div class="cmx-detail-item">${c.type === "corp" ? "◈" : "●"} ${c.label}</div>`).join("")}
-        `;
-        panel.classList.add("show");
-      }
-    });
 
     function renderFlowEdgeDetail(edge) {
       const panel = document.getElementById("flowDetail");
