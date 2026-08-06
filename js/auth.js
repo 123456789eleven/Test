@@ -4,6 +4,10 @@ const Auth = (function () {
   const ready = supabaseClient.auth.getSession().then(({ data }) => {
     user = data.session ? data.session.user : null;
     renderButton();
+  }).catch((err) => {
+    console.error("Auth unavailable — continuing signed out:", err);
+    user = null;
+    renderButton();
   });
 
   supabaseClient.auth.onAuthStateChange((_event, session) => {
