@@ -66,7 +66,6 @@
               <p class="cap">One chart: the real reporting structure, every division's departments and job functions, and the real human connections that cut across it all. Four divisions, their leaders, and the corporate functions that support all four. Click a division's ▸ to expand into its departments, then again into individual job functions — Advantage's are the most refined since that's this project's own seat; Strategies', Payroll's, and Advisory's are a standard-industry-pattern estimate, marked as such. A 🔗 means a function connects to others in the workflow. Click any person with a <span class="ocn-cross-dot" style="display:inline-block; vertical-align:middle;"></span> mark to trace who they connect to outside their own division — John Kelly, David Kelly, and Wesley Mace all hold roles spanning two divisions. Click Corporate Functions (◈) to see its reach across all four.</p>
               <div style="display:flex; gap:8px; flex:none; flex-wrap:wrap;">
                 <button id="orgAddPerson" class="orgmap-fs-btn" style="display:none;">+ Add person</button>
-                <button id="orgManageConnections" class="orgmap-fs-btn" style="display:none;">🔗 Manage connections</button>
                 <button id="orgmapShowAll" class="orgmap-connect-btn">🔗 Show all connections</button>
                 <button id="orgmapFullscreen" class="orgmap-fs-btn">⛶ Fullscreen</button>
               </div>
@@ -79,6 +78,17 @@
           <div id="orgDetail"></div>
 
           <div class="integration-box" id="coIntegrationNote"></div>
+
+          <div class="cmap-wrap" id="cmapWrap">
+            <div class="cmap-head">
+              <div>
+                <h3>Connection Map</h3>
+                <p class="cap">How work actually hands off or overlaps between departments — aggregated from the specific job functions underneath. Click any department to trace its connections.</p>
+              </div>
+              <button id="cmapManageConnections" class="orgmap-fs-btn" style="display:none;">🔗 Manage connections</button>
+            </div>
+            <div id="coConnectionMap"></div>
+          </div>
 
           <div class="workflow-card">
             <h3>How the client relationship actually flows</h3>
@@ -397,10 +407,11 @@
     }
 
     let orgMapControl = renderOrgMap("coOrgMap", { companyData: data, onNodeClick: handleOrgNodeClick });
+    let connectionMapControl = renderConnectionMap("coConnectionMap", data);
 
     function updateOrgEditGate() {
       const addPersonBtn = document.getElementById("orgAddPerson");
-      const manageConnBtn = document.getElementById("orgManageConnections");
+      const manageConnBtn = document.getElementById("cmapManageConnections");
       const show = canEditOrg() ? "" : "none";
       if (addPersonBtn) addPersonBtn.style.display = show;
       if (manageConnBtn) manageConnBtn.style.display = show;
@@ -420,6 +431,7 @@
       updateOrgEditGate();
       if (orgMapControl) orgMapControl.destroy();
       orgMapControl = renderOrgMap("coOrgMap", { companyData: data, onNodeClick: handleOrgNodeClick });
+      connectionMapControl = renderConnectionMap("coConnectionMap", data);
       document.getElementById("coLeadership").innerHTML = data.leadership.map(p => `
         <div class="leader-card"><div class="name">${p.name}</div><div class="title">${p.title}</div><div class="note">${p.note}</div></div>`).join("");
       document.getElementById("orgDetail").classList.remove("show");
@@ -427,7 +439,7 @@
     OrgEdit.init(() => data, refreshOrgMap);
 
     document.getElementById("orgAddPerson").addEventListener("click", () => OrgEdit.open("person", "add", null, "root"));
-    document.getElementById("orgManageConnections").addEventListener("click", () => OrgEdit.openConnections());
+    document.getElementById("cmapManageConnections").addEventListener("click", () => OrgEdit.openConnections());
 
     function renderFlowEdgeDetail(edge) {
       const panel = document.getElementById("flowDetail");

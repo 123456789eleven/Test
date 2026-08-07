@@ -538,6 +538,42 @@
   .integration-box { border-left: 3px solid var(--manager); background: var(--manager-soft); border-radius: 0 var(--radius-md) var(--radius-md) 0; padding: 14px 18px; margin-bottom: 26px; font-size: 0.92rem; line-height: 1.6; color: var(--ink-soft); }
   .integration-box b { color: var(--manager); }
 
+  /* ---- Connection Map (Stage A: plain Aurora styling, dark redesign comes next) ---- */
+  .cmap-wrap { background: var(--surface); border-radius: var(--radius-lg); box-shadow: var(--shadow-card); padding: 22px 24px 20px; margin-bottom: 26px; }
+  .cmap-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; flex-wrap: wrap; margin-bottom: 8px; }
+  .cmap-head h3 { font-size: 1.05rem; margin-bottom: 4px; }
+  .cmap-head .cap { color: var(--ink-soft); font-size: 0.88rem; line-height: 1.5; max-width: 62ch; margin: 0; }
+  .cmap-legend { display: flex; gap: 16px; flex-wrap: wrap; font-size: 0.78rem; color: var(--ink-soft); margin-bottom: 10px; }
+  .cmap-legend-item { display: inline-flex; align-items: center; gap: 6px; }
+  .cmap-swatch { width: 16px; height: 3px; border-radius: 2px; display: inline-block; }
+  .cmap-swatch-handoff { background: var(--accent); }
+  .cmap-swatch-shared { background: var(--manager); }
+  .cmap-swatch-people { background: var(--ink-muted); }
+  .cmap-canvas { width: 100%; overflow-x: auto; }
+  .cmap-svg { display: block; margin: 0 auto; max-width: 100%; height: auto; min-width: 700px; }
+  .cmap-col-header { font-size: 12px; font-weight: 700; fill: var(--ink); text-transform: uppercase; letter-spacing: 0.04em; }
+  .cmap-node rect { fill: var(--surface-alt); stroke: var(--border); stroke-width: 1; transition: fill .15s ease, stroke .15s ease; }
+  .cmap-node-label { font-size: 11px; fill: var(--ink); pointer-events: none; }
+  .cmap-node { cursor: pointer; }
+  .cmap-node:hover rect, .cmap-node:focus rect { stroke: var(--accent); }
+  .cmap-node-active rect { fill: var(--accent-wash); stroke: var(--accent); stroke-width: 1.5; }
+  .cmap-node-quiet rect { opacity: 0.55; stroke-dasharray: 3 3; }
+  .cmap-node-quiet .cmap-node-label { fill: var(--ink-muted); }
+  .cmap-edge { fill: none; stroke-width: 2; opacity: 0.6; transition: opacity .15s ease, stroke-width .15s ease; }
+  .cmap-edge-handoff { stroke: var(--accent); }
+  .cmap-edge-shared { stroke: var(--manager); }
+  .cmap-edge-mixed { stroke: var(--warn); }
+  .cmap-edge-dim { opacity: 0.08; }
+  .cmap-arrowhead { fill: var(--accent); }
+  .cmap-people-edge { fill: none; stroke: var(--ink-muted); stroke-width: 1.2; stroke-dasharray: 2 3; opacity: 0.4; transition: opacity .15s ease; }
+  .cmap-detail { margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--border); }
+  .cmap-detail h4 { font-size: 0.92rem; margin-bottom: 8px; }
+  .cmap-detail-empty { color: var(--ink-muted); font-size: 0.86rem; font-style: italic; }
+  .cmap-detail-row { margin-bottom: 12px; }
+  .cmap-detail-rel { font-size: 0.86rem; color: var(--ink); margin-bottom: 3px; }
+  .cmap-detail-note { font-size: 0.8rem; color: var(--ink-soft); line-height: 1.5; }
+  .cmap-detail-people { font-size: 0.82rem; color: var(--ink-soft); margin-top: 10px; }
+
   /* ---- Where I fit ---- */
   .fit-box { background: var(--surface); border-radius: var(--radius-lg); box-shadow: var(--shadow-card); padding: 18px 22px; margin-bottom: 26px; }
   .fit-box .lbl { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--ink-soft); font-weight: 700; margin-bottom: 8px; }
@@ -826,6 +862,7 @@
 <script src="js/orgmap.js"></script>
 <script src="js/orgedit.js"></script>
 <script src="js/divisionflow.js"></script>
+<script src="js/connectionmap.js"></script>
 <script src="js/cobraprocess.js"></script>
 <script src="js/router.js"></script>
 <script src="js/search.js"></script>
