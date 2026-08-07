@@ -112,6 +112,43 @@
   .auth-gate { background: var(--accent-wash); border-radius: var(--radius-md); padding: 14px 18px; color: var(--ink-soft); font-size: 0.88rem; margin-bottom: 16px; }
   .auth-gate button { font: inherit; font-size: 0.85rem; font-weight: 600; color: var(--accent); background: none; border: none; cursor: pointer; text-decoration: underline; }
 
+  /* ---- Kelly Benefits: Foundation edit modal (org structure CRUD) ---- */
+  .oe-modal { max-width: 480px; max-height: 86vh; overflow-y: auto; }
+  .oe-modal h3 { font-size: 1.1rem; margin-bottom: 4px; }
+  .oe-modal h4 { font-size: 0.9rem; margin: 18px 0 10px; }
+  .oe-form { display: flex; flex-direction: column; gap: 12px; margin-top: 10px; }
+  .oe-form label { display: flex; flex-direction: column; gap: 5px; font-size: 0.78rem; color: var(--ink-soft); text-transform: uppercase; letter-spacing: 0.03em; }
+  .oe-form input[type="text"], .oe-form input:not([type]), .oe-form textarea, .oe-form select {
+    font: inherit; font-size: 0.9rem; text-transform: none; letter-spacing: normal; padding: 10px 12px;
+    border-radius: var(--radius-sm); border: none; background: var(--surface-alt); color: var(--ink); resize: vertical;
+  }
+  .oe-form textarea { min-height: 60px; }
+  .oe-form input:focus, .oe-form textarea:focus, .oe-form select:focus { outline: 2px solid var(--accent); outline-offset: -1px; }
+  .oe-checklist { display: flex; flex-direction: column; gap: 6px; background: var(--surface-alt); border-radius: var(--radius-sm); padding: 10px 12px; }
+  .oe-checkbox { flex-direction: row !important; align-items: center; gap: 8px !important; text-transform: none !important; letter-spacing: normal !important; font-size: 0.86rem !important; color: var(--ink) !important; }
+  .oe-checkbox input { width: auto; }
+  .oe-error { color: var(--warn); font-size: 0.8rem; min-height: 1em; }
+  .oe-actions { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin-top: 4px; }
+  .oe-save { font: inherit; font-size: 0.86rem; font-weight: 600; padding: 10px 20px; border-radius: 999px; border: none; background: var(--accent); color: var(--accent-ink); cursor: pointer; transition: opacity .15s ease; }
+  .oe-save:hover { opacity: 0.88; }
+  .oe-cancel { font: inherit; font-size: 0.86rem; padding: 10px 16px; border-radius: 999px; border: none; background: none; color: var(--ink-muted); cursor: pointer; }
+  .oe-delete { font: inherit; font-size: 0.8rem; padding: 10px 14px; border-radius: 999px; border: none; background: none; color: var(--warn); cursor: pointer; margin-left: auto; }
+  .oe-delete:hover { text-decoration: underline; }
+
+  .oe-conn-list { display: flex; flex-direction: column; gap: 8px; margin-top: 10px; }
+  .oe-conn-row { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; background: var(--surface-alt); border-radius: var(--radius-sm); padding: 10px 12px; }
+  .oe-conn-text { font-size: 0.84rem; color: var(--ink); line-height: 1.5; }
+  .oe-conn-note { color: var(--ink-muted); font-size: 0.78rem; }
+  .oe-delete-sm { flex: none; background: none; border: none; color: var(--ink-muted); cursor: pointer; font-size: 0.8rem; padding: 2px 6px; }
+  .oe-delete-sm:hover { color: var(--warn); }
+  .oe-empty { color: var(--ink-muted); font-size: 0.86rem; font-style: italic; }
+
+  /* Edit affordances embedded in the org-chart detail panel */
+  .orgedit-row { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 18px; padding-top: 14px; border-top: 1px solid var(--border); }
+  .orgedit-btn { font: inherit; font-size: 0.8rem; font-weight: 600; padding: 7px 14px; border-radius: 999px; border: 1px solid var(--border); background: none; color: var(--ink-soft); cursor: pointer; transition: all .15s ease; }
+  .orgedit-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .orgedit-btn-danger:hover { border-color: var(--warn); color: var(--warn); }
+
   main { flex: 1; padding: 28px clamp(16px, 3vw, 40px) 70px; width: 100%; margin: 0 auto; }
   .loading { color: var(--ink-muted); font-size: 0.9rem; padding: 40px 0; text-align: center; }
 
@@ -775,11 +812,19 @@
   </div>
 </div>
 
+<div class="auth-modal-overlay" id="orgEditOverlay">
+  <div class="auth-modal oe-modal">
+    <button class="auth-modal-close" id="orgEditClose">✕</button>
+    <div id="orgEditBody"></div>
+  </div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="js/supabase-client.js"></script>
 <script src="js/migrate.js"></script>
 <script src="js/auth.js"></script>
 <script src="js/orgmap.js"></script>
+<script src="js/orgedit.js"></script>
 <script src="js/divisionflow.js"></script>
 <script src="js/cobraprocess.js"></script>
 <script src="js/router.js"></script>

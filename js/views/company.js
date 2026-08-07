@@ -64,7 +64,9 @@
           <div class="orgmap-wrap" id="orgmapWrap">
             <div class="orgmap-head">
               <p class="cap">One chart: the real reporting structure, every division's departments and job functions, and the real human connections that cut across it all. Four divisions, their leaders, and the corporate functions that support all four. Click a division's ▸ to expand into its departments, then again into individual job functions — Advantage's are the most refined since that's this project's own seat; Strategies', Payroll's, and Advisory's are a standard-industry-pattern estimate, marked as such. A 🔗 means a function connects to others in the workflow. Click any person with a <span class="ocn-cross-dot" style="display:inline-block; vertical-align:middle;"></span> mark to trace who they connect to outside their own division — John Kelly, David Kelly, and Wesley Mace all hold roles spanning two divisions. Click Corporate Functions (◈) to see its reach across all four.</p>
-              <div style="display:flex; gap:8px; flex:none;">
+              <div style="display:flex; gap:8px; flex:none; flex-wrap:wrap;">
+                <button id="orgAddPerson" class="orgmap-fs-btn" style="display:none;">+ Add person</button>
+                <button id="orgManageConnections" class="orgmap-fs-btn" style="display:none;">🔗 Manage connections</button>
                 <button id="orgmapShowAll" class="orgmap-connect-btn">🔗 Show all connections</button>
                 <button id="orgmapFullscreen" class="orgmap-fs-btn">⛶ Fullscreen</button>
               </div>
@@ -148,11 +150,13 @@
       }
       updateFitGate();
       loadFitText();
+      updateOrgEditGate();
     };
     window.addEventListener("custodian:authchange", onAuthOrMigrate);
     window.addEventListener("custodian:migrated", onAuthOrMigrate);
 
     let data;
+    let orgDataLive = true;
     try {
       data = await fetch("data/company.json").then(r => r.json());
     } catch (err) {
@@ -164,6 +168,7 @@
       Object.assign(data, await loadOrgData());
     } catch (err) {
       console.error("Live org data unavailable, showing last saved structure:", err);
+      orgDataLive = false;
       const note = document.getElementById("orgLiveNote");
       if (note) note.textContent = "Showing the last saved structure — live editing is unavailable right now.";
     }
@@ -206,6 +211,20 @@
         <ul>${data.swot[key].map(item => `<li>${item}</li>`).join("")}</ul>
       </div>`).join("");
 
+    function canEditOrg() { return Auth.isSignedIn() && orgDataLive; }
+    function oeEditBtn(kind, id) {
+      if (!canEditOrg()) return "";
+      return `<button class="orgedit-btn" data-oe-action="edit" data-oe-kind="${kind}" data-oe-id="${id}">✎ Edit</button>`;
+    }
+    function oeDeleteBtn(kind, id) {
+      if (!canEditOrg()) return "";
+      return `<button class="orgedit-btn orgedit-btn-danger" data-oe-action="delete" data-oe-kind="${kind}" data-oe-id="${id}">🗑 Delete</button>`;
+    }
+    function oeAddBtn(kind, label, parentId) {
+      if (!canEditOrg()) return "";
+      return `<button class="orgedit-btn" data-oe-action="add" data-oe-kind="${kind}" data-oe-parent="${parentId}">+ ${label}</button>`;
+    }
+
     function renderDivisionDetail(d) {
       const withVals = d.competitors.filter(c => c.value !== null);
       const max = Math.max(...withVals.map(c => c.value));
@@ -227,6 +246,7 @@
         <div style="font-size:0.72rem; text-transform:uppercase; letter-spacing:0.05em; color:var(--ink-soft); margin-bottom:10px;">${d.unit}</div>
         ${chartHtml}
         <div class="chart-caption">${d.caption}</div>
+        <div class="orgedit-row">${oeEditBtn("division", d.id)}${oeAddBtn("vertical", "Add department", d.id)}</div>
       `;
     }
 
@@ -243,6 +263,7 @@
           <li><span class="ad-pill ${f.confirmed ? "confirmed" : "estimated"}">${f.confirmed ? "confirmed" : "est."}</span> ${f.label}</li>
         `).join("")}</ul>
         ${key === "connect" ? `<a href="#sec-cobra" class="fn-conn-link" style="margin-top:12px;">→ See the full COBRA process, step by step</a>` : ""}
+        <div class="orgedit-row">${oeEditBtn("vertical", key)}${oeAddBtn("function", "Add job function", key)}${oeDeleteBtn("vertical", key)}</div>
       `;
     }
 
@@ -287,16 +308,18 @@
         ${linkGroup("Fed by ←", "←", fedBy)}
         ${linkGroup("Shares systems with ⇄", "⇄", shared)}
         ${!feedsInto.length && !fedBy.length && !shared.length ? '<p class="notes-empty">No modeled connections yet for this function.</p>' : ""}
+        <div class="orgedit-row">${oeEditBtn("function", id)}${oeDeleteBtn("function", id)}</div>
       `;
     }
 
-    function renderPersonDetail(name, title, note) {
+    function renderPersonDetail(id, name, title, note) {
       return `
         <div class="dd-head">
           <div><h2>${name}</h2><div class="dd-leaders">${title}</div></div>
           <button id="closeOrgDetail">Close ✕</button>
         </div>
         ${note ? `<p class="desc">${note}</p>` : ""}
+        <div class="orgedit-row">${oeEditBtn("person", id)}${oeDeleteBtn("person", id)}</div>
       `;
     }
 
@@ -309,6 +332,7 @@
           <button id="closeOrgDetail">Close ✕</button>
         </div>
         <ul class="ad-func-list">${people.map(p => `<li><strong style="flex:none; min-width:170px;">${p.name}</strong> ${p.title}</li>`).join("")}</ul>
+        <div class="orgedit-row">${oeAddBtn("person", "Add person", "root")}</div>
       `;
     }
 
@@ -325,17 +349,25 @@
         html = renderFunctionDetail(id);
       } else if (id === "root") {
         const p = data.leadership.find(l => l.id === "frankIII");
-        html = renderPersonDetail(p.name, p.title, p.note);
+        html = renderPersonDetail(p.id, p.name, p.title, p.note);
       } else {
         const p = data.leadership.find(l => l.id === id);
         if (!p) return false;
-        html = renderPersonDetail(p.name, p.title, p.note);
+        html = renderPersonDetail(p.id, p.name, p.title, p.note);
       }
       panel.innerHTML = html;
       panel.classList.add("show");
       document.getElementById("closeOrgDetail").addEventListener("click", () => panel.classList.remove("show"));
       panel.querySelectorAll(".fn-conn-link").forEach(btn => {
         btn.addEventListener("click", () => jumpToNode(btn.dataset.jump));
+      });
+      panel.querySelectorAll("[data-oe-action]").forEach(btn => {
+        btn.addEventListener("click", (e) => {
+          e.stopPropagation();
+          const { oeAction, oeKind, oeId, oeParent } = btn.dataset;
+          if (oeAction === "delete") { OrgEdit.remove(oeKind, oeId); return; }
+          OrgEdit.open(oeKind, oeAction, oeId, oeParent);
+        });
       });
       requestAnimationFrame(() => requestAnimationFrame(() => {
         panel.querySelectorAll(".co-hbar-fill[data-w]").forEach(el => { el.style.width = el.dataset.w + "%"; });
@@ -364,7 +396,38 @@
       renderDetailContent(targetId);
     }
 
-    const orgMapControl = renderOrgMap("coOrgMap", { companyData: data, onNodeClick: handleOrgNodeClick });
+    let orgMapControl = renderOrgMap("coOrgMap", { companyData: data, onNodeClick: handleOrgNodeClick });
+
+    function updateOrgEditGate() {
+      const addPersonBtn = document.getElementById("orgAddPerson");
+      const manageConnBtn = document.getElementById("orgManageConnections");
+      const show = canEditOrg() ? "" : "none";
+      if (addPersonBtn) addPersonBtn.style.display = show;
+      if (manageConnBtn) manageConnBtn.style.display = show;
+    }
+    updateOrgEditGate();
+
+    async function refreshOrgMap() {
+      try {
+        Object.assign(data, await loadOrgData());
+        orgDataLive = true;
+        document.getElementById("orgLiveNote").textContent = "";
+      } catch (err) {
+        console.error("Failed to refresh org data:", err);
+        orgDataLive = false;
+        document.getElementById("orgLiveNote").textContent = "Showing the last saved structure — live editing is unavailable right now.";
+      }
+      updateOrgEditGate();
+      if (orgMapControl) orgMapControl.destroy();
+      orgMapControl = renderOrgMap("coOrgMap", { companyData: data, onNodeClick: handleOrgNodeClick });
+      document.getElementById("coLeadership").innerHTML = data.leadership.map(p => `
+        <div class="leader-card"><div class="name">${p.name}</div><div class="title">${p.title}</div><div class="note">${p.note}</div></div>`).join("");
+      document.getElementById("orgDetail").classList.remove("show");
+    }
+    OrgEdit.init(() => data, refreshOrgMap);
+
+    document.getElementById("orgAddPerson").addEventListener("click", () => OrgEdit.open("person", "add", null, "root"));
+    document.getElementById("orgManageConnections").addEventListener("click", () => OrgEdit.openConnections());
 
     function renderFlowEdgeDetail(edge) {
       const panel = document.getElementById("flowDetail");
