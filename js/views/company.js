@@ -3,6 +3,28 @@
 
   function fmtVal(v) { return v === null ? "n/a" : "$" + v + "B"; }
 
+  async function loadOrgData() {
+    const [divR, vertR, funcR, peopleR, connR] = await Promise.all([
+      supabaseClient.from("org_divisions").select("*").order("sort_order"),
+      supabaseClient.from("org_verticals").select("*").order("sort_order"),
+      supabaseClient.from("org_functions").select("*").order("sort_order"),
+      supabaseClient.from("org_people").select("*").order("sort_order"),
+      supabaseClient.from("org_connections").select("*")
+    ]);
+    for (const r of [divR, vertR, funcR, peopleR, connR]) if (r.error) throw r.error;
+
+    const verticals = {};
+    vertR.data.forEach(v => { verticals[v.id] = { division: v.division, name: v.name, confirmed: v.confirmed, desc: v.desc, funcs: [] }; });
+    funcR.data.forEach(f => { if (verticals[f.vertical]) verticals[f.vertical].funcs.push({ id: f.id, label: f.label, confirmed: f.confirmed }); });
+
+    return {
+      divisions: divR.data,
+      verticals,
+      leadership: peopleR.data.map(p => ({ id: p.id, name: p.name, title: p.title, note: p.note, parent: p.parent, cross: p.cross_divisions })),
+      processConnections: connR.data.map(c => ({ from: c.from_id, to: c.to_id, type: c.type, note: c.note }))
+    };
+  }
+
   async function renderCompanyView(mount) {
     mount.innerHTML = `
       <div class="kb-hero">
@@ -47,6 +69,7 @@
                 <button id="orgmapFullscreen" class="orgmap-fs-btn">⛶ Fullscreen</button>
               </div>
             </div>
+            <p class="orgmap-live-note" id="orgLiveNote"></p>
             <div id="coOrgMap" class="orgmap-container"></div>
             <p class="orgmap-caption">Workflow within Advantage: Win → Construct → then splits into Protect, Connect, and Serve. Construct, Connect, and Serve also share enrollment responsibility.</p>
           </div>
@@ -135,6 +158,14 @@
     } catch (err) {
       document.getElementById("coview-overview").innerHTML = `<div style="color:var(--warn);">Couldn't load Kelly Benefits data (${err.message}).</div>`;
       return;
+    }
+
+    try {
+      Object.assign(data, await loadOrgData());
+    } catch (err) {
+      console.error("Live org data unavailable, showing last saved structure:", err);
+      const note = document.getElementById("orgLiveNote");
+      if (note) note.textContent = "Showing the last saved structure — live editing is unavailable right now.";
     }
 
     const heroCovered = ["Founded", "Scale", "Recognition"];

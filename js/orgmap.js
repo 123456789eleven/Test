@@ -215,6 +215,7 @@
     }
 
     window.addEventListener("resize", redrawActive);
+    function destroy() { window.removeEventListener("resize", redrawActive); }
 
     function handleActivate(el) {
       if (onNodeClick) onNodeClick(el.dataset.id);
@@ -244,6 +245,6 @@
       btn.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") e.stopPropagation(); });
     });
 
-    return { showAllConnections, clearLines, redraw: redrawActive };
+    return { showAllConnections, clearLines, redraw: redrawActive, destroy };
   };
 })();
