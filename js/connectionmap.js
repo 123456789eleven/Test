@@ -54,6 +54,29 @@
     return String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
   }
 
+  // Real CSS 3D tilt, mouse-driven — pointer:fine devices only, and only when the user
+  // hasn't asked for reduced motion. Touch/mobile and reduced-motion users get the static
+  // glass/glow look with no tilt, rather than a half-working touch interaction.
+  function wireTilt(wrapper, canvas, floor) {
+    if (!wrapper || !canvas) return;
+    const reduceMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const fine = window.matchMedia && window.matchMedia("(pointer: fine)").matches;
+    if (reduceMotion || !fine) return;
+    const maxTilt = 6;
+    wrapper.addEventListener("pointermove", (e) => {
+      const rect = wrapper.getBoundingClientRect();
+      const px = (e.clientX - rect.left) / rect.width - 0.5;
+      const py = (e.clientY - rect.top) / rect.height - 0.5;
+      const rx = (-py * maxTilt).toFixed(2), ry = (px * maxTilt).toFixed(2);
+      canvas.style.transform = `rotateX(${rx}deg) rotateY(${ry}deg)`;
+      if (floor) floor.style.transform = `translateZ(-60px) scale(1.15) rotateX(${(rx * 0.6).toFixed(2)}deg) rotateY(${(ry * 0.6).toFixed(2)}deg)`;
+    });
+    wrapper.addEventListener("pointerleave", () => {
+      canvas.style.transform = "rotateX(0deg) rotateY(0deg)";
+      if (floor) floor.style.transform = "translateZ(-60px) scale(1.15)";
+    });
+  }
+
   window.renderConnectionMap = function (containerId, data) {
     const container = document.getElementById(containerId);
     if (!container) return null;
@@ -126,10 +149,15 @@
         <span class="cmap-legend-item"><span class="cmap-swatch cmap-swatch-people"></span> Person or corporate function spanning divisions</span>
         <span class="cmap-legend-item"><span class="cmap-swatch cmap-swatch-outcome"></span> Traces to client outcome (not yet tracked)</span>
       </div>
-      <div class="cmap-canvas"></div>
+      <div class="cmap-perspective">
+        <div class="cmap-floor"></div>
+        <div class="cmap-canvas"></div>
+      </div>
       <div class="cmap-detail" id="cmapDetail"><p class="cmap-detail-empty">Click any department, corporate function, or the client outcome node to see how it connects.</p></div>
     `;
     const canvas = container.querySelector(".cmap-canvas");
+    const floor = container.querySelector(".cmap-floor");
+    wireTilt(container.querySelector(".cmap-perspective"), canvas, floor);
     const detail = container.querySelector("#cmapDetail");
 
     const svg = document.createElementNS(svgNS, "svg");
@@ -205,7 +233,16 @@
 
     function setActive(id) {
       activeId = activeId === id ? null : id;
-      nodeLayer.querySelectorAll(".cmap-node, .cmap-outcome-node").forEach(el => el.classList.toggle("cmap-node-active", el.dataset.id === activeId));
+      // Scale lives in the SVG transform attribute (combined with translate), not a CSS
+      // transform — a CSS transform on an element that also has a transform attribute
+      // replaces the translate entirely rather than adding to it, which would snap the
+      // node to the origin instead of just growing it in place.
+      nodeLayer.querySelectorAll(".cmap-node, .cmap-outcome-node").forEach(el => {
+        const isActive = el.dataset.id === activeId;
+        el.classList.toggle("cmap-node-active", isActive);
+        const pos = el.dataset.id === "outcome" ? outcomePos : nodePos[el.dataset.id];
+        if (pos) el.setAttribute("transform", `translate(${pos.x.toFixed(1)},${pos.y.toFixed(1)}) scale(${isActive ? 1.08 : 1})`);
+      });
       edgeLayer.querySelectorAll(".cmap-edge").forEach(el => {
         const on = !activeId || el.dataset.a === activeId || el.dataset.b === activeId;
         el.classList.toggle("cmap-edge-dim", !on);
