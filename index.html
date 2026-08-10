@@ -549,8 +549,9 @@
   .cmap-swatch-handoff { background: var(--accent); }
   .cmap-swatch-shared { background: var(--manager); }
   .cmap-swatch-people { background: var(--ink-muted); }
+  .cmap-swatch-outcome { background: var(--good, var(--accent)); opacity: 0.6; }
   .cmap-canvas { width: 100%; overflow-x: auto; }
-  .cmap-svg { display: block; margin: 0 auto; max-width: 100%; height: auto; min-width: 700px; }
+  .cmap-svg { display: block; margin: 0 auto; max-width: 100%; height: auto; min-width: 860px; }
   .cmap-col-header { font-size: 12px; font-weight: 700; fill: var(--ink); text-transform: uppercase; letter-spacing: 0.04em; }
   .cmap-node rect { fill: var(--surface-alt); stroke: var(--border); stroke-width: 1; transition: fill .15s ease, stroke .15s ease; }
   .cmap-node-label { font-size: 11px; fill: var(--ink); pointer-events: none; }
@@ -573,6 +574,12 @@
   .cmap-detail-rel { font-size: 0.86rem; color: var(--ink); margin-bottom: 3px; }
   .cmap-detail-note { font-size: 0.8rem; color: var(--ink-soft); line-height: 1.5; }
   .cmap-detail-people { font-size: 0.82rem; color: var(--ink-soft); margin-top: 10px; }
+  .cmap-outcome-edge { fill: none; stroke: var(--good); stroke-width: 1.2; stroke-dasharray: 1 4; opacity: 0.35; transition: opacity .15s ease; }
+  .cmap-outcome-node rect { fill: var(--good-soft); stroke: var(--good); stroke-width: 1.2; stroke-dasharray: 4 3; cursor: pointer; }
+  .cmap-outcome-node:hover rect, .cmap-outcome-node:focus rect { opacity: 0.85; }
+  .cmap-outcome-node.cmap-node-active rect { stroke-width: 2; stroke-dasharray: none; }
+  .cmap-outcome-label { font-size: 12px; font-weight: 700; fill: var(--good); text-anchor: middle; }
+  .cmap-outcome-sub { font-size: 9.5px; fill: var(--ink-muted); text-anchor: middle; font-style: italic; }
 
   /* ---- Where I fit ---- */
   .fit-box { background: var(--surface); border-radius: var(--radius-lg); box-shadow: var(--shadow-card); padding: 18px 22px; margin-bottom: 26px; }
@@ -809,7 +816,8 @@
       <a href="#/overview" data-route="overview"><span class="dot"></span>Overview</a>
       <a href="#/insights" data-route="insights"><span class="dot"></span>Insights</a>
       <a href="#/landscape" data-route="landscape"><span class="dot"></span>Landscape</a>
-      <a href="#/company" data-route="company"><span class="dot"></span>Kelly Benefits</a>
+      <a href="#/full-circle" data-route="full-circle"><span class="dot"></span>Full Circle</a>
+      <a href="#/org-tree" data-route="org-tree"><span class="dot"></span>Org Tree</a>
       <a href="study/"><span class="dot"></span>Exam Prep ↗</a>
     </nav>
     <div class="foot">One app, one address — no more separate .html pages to keep in sync.</div>
@@ -869,7 +877,8 @@
 <script src="js/views/overview.js"></script>
 <script src="js/views/insights.js"></script>
 <script src="js/views/landscape.js"></script>
-<script src="js/views/company.js"></script>
+<script src="js/views/fullcircle.js"></script>
+<script src="js/views/orgtree.js"></script>
 <script src="js/app.js"></script>
 </body>
 </html>

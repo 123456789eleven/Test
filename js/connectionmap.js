@@ -1,6 +1,7 @@
 (function () {
   const svgNS = "http://www.w3.org/2000/svg";
   const DIVISION_ORDER = ["strategies", "advantage", "payroll", "advisory"];
+  const EXEC_IDS = ["fx3", "frankIII"];
 
   function findVerticalOf(functionId, verticals) {
     for (const [vid, v] of Object.entries(verticals)) {
@@ -36,16 +37,16 @@
     });
   }
 
-  function crossDivisionEdges(leadership, divisions) {
+  function crossDivisionEdges(leadership, divisionIds) {
     const edges = [];
     (leadership || []).forEach(p => {
       (p.cross || []).forEach(divId => {
-        if (p.parent && divisions.some(d => d.id === divId) && divisions.some(d => d.id === p.parent)) {
+        if (p.parent && divisionIds.includes(divId) && divisionIds.includes(p.parent)) {
           edges.push({ kind: "person", from: p.parent, to: divId, label: p.name });
         }
       });
     });
-    divisions.forEach(d => edges.push({ kind: "corpfn", from: "corpfn", to: d.id, label: "Corporate Functions" }));
+    divisionIds.forEach(id => { if (id !== "corpfn") edges.push({ kind: "corpfn", from: "corpfn", to: id, label: "Corporate Functions" }); });
     return edges;
   }
 
@@ -58,38 +59,48 @@
     if (!container) return null;
 
     const verticals = data.verticals || {};
-    const divisions = DIVISION_ORDER.map(id => (data.divisions || []).find(d => d.id === id)).filter(Boolean);
-    const verticalsByDivision = {};
-    divisions.forEach(d => { verticalsByDivision[d.id] = Object.entries(verticals).filter(([, v]) => v.division === d.id).map(([id, v]) => ({ id, ...v })); });
+    const realDivisions = DIVISION_ORDER.map(id => (data.divisions || []).find(d => d.id === id)).filter(Boolean);
+    const corpfnPeople = (data.leadership || []).filter(l => l.parent === "root" && !EXEC_IDS.includes(l.id));
+    const divisions = [...realDivisions, { id: "corpfn", name: "Corporate Functions" }];
+
+    // nodeInfo covers both real department nodes and Corporate Functions' synthetic
+    // person-nodes, so detail lookups work uniformly across both kinds.
+    const nodeInfo = {};
+    Object.entries(verticals).forEach(([id, v]) => { nodeInfo[id] = { name: v.name, division: v.division, desc: v.desc, isPerson: false }; });
+    corpfnPeople.forEach(p => { nodeInfo[p.id] = { name: p.name, division: "corpfn", desc: p.title, isPerson: true }; });
+
+    const nodesByDivision = {};
+    realDivisions.forEach(d => { nodesByDivision[d.id] = Object.entries(verticals).filter(([, v]) => v.division === d.id).map(([id, v]) => ({ id, name: v.name })); });
+    nodesByDivision.corpfn = corpfnPeople.map(p => ({ id: p.id, name: p.name }));
 
     const pairs = aggregateConnections(data.processConnections, verticals);
-    const connectedVerticalIds = new Set();
-    pairs.forEach(p => { connectedVerticalIds.add(p.a); connectedVerticalIds.add(p.b); });
+    const connectedIds = new Set();
+    pairs.forEach(p => { connectedIds.add(p.a); connectedIds.add(p.b); });
 
-    const peopleEdges = crossDivisionEdges(data.leadership, divisions);
+    const peopleEdges = crossDivisionEdges(data.leadership, divisions.map(d => d.id));
 
     // ---- layout ----
-    const width = Math.max(container.clientWidth || 0, 760);
+    const width = Math.max(container.clientWidth || 0, 900);
     const colW = width / divisions.length;
-    const nodeH = 38, gap = 14, topMargin = 100, bottomMargin = 30, headerY = 34;
-    const maxCount = Math.max(1, ...divisions.map(d => verticalsByDivision[d.id].length));
+    const nodeH = 36, gap = 12, topMargin = 100, bottomMargin = 30, headerY = 34, outcomeSection = 100;
+    const maxCount = Math.max(1, ...divisions.map(d => nodesByDivision[d.id].length));
     const availableH = maxCount * nodeH + (maxCount - 1) * gap;
-    const height = topMargin + availableH + bottomMargin;
+    const height = topMargin + availableH + bottomMargin + outcomeSection;
 
     const nodePos = {};
     const headerPos = {};
     divisions.forEach((d, ci) => {
-      const list = verticalsByDivision[d.id];
+      const list = nodesByDivision[d.id];
       const n = list.length;
       const colExtent = n * nodeH + Math.max(0, n - 1) * gap;
       const yStart = topMargin + (availableH - colExtent) / 2;
       const cx = ci * colW + colW / 2;
       headerPos[d.id] = { x: cx, y: headerY };
       list.forEach((v, vi) => {
-        nodePos[v.id] = { x: cx, y: yStart + vi * (nodeH + gap) + nodeH / 2, divisionId: d.id, division: d, vertical: v };
+        nodePos[v.id] = { x: cx, y: yStart + vi * (nodeH + gap) + nodeH / 2, divisionId: d.id, id: v.id, name: v.name };
       });
     });
-    headerPos.corpfn = { x: width / 2, y: 12 };
+    const outcomePos = { x: width / 2, y: topMargin + availableH + bottomMargin + outcomeSection - 34 };
 
     function curvePath(a, b, sameColumn) {
       const mx = (a.x + b.x) / 2, my = (a.y + b.y) / 2;
@@ -113,9 +124,10 @@
         <span class="cmap-legend-item"><span class="cmap-swatch cmap-swatch-handoff"></span> Handoff (work passes forward)</span>
         <span class="cmap-legend-item"><span class="cmap-swatch cmap-swatch-shared"></span> Shared (same system/data)</span>
         <span class="cmap-legend-item"><span class="cmap-swatch cmap-swatch-people"></span> Person or corporate function spanning divisions</span>
+        <span class="cmap-legend-item"><span class="cmap-swatch cmap-swatch-outcome"></span> Traces to client outcome (not yet tracked)</span>
       </div>
       <div class="cmap-canvas"></div>
-      <div class="cmap-detail" id="cmapDetail"><p class="cmap-detail-empty">Click any department to see how it connects.</p></div>
+      <div class="cmap-detail" id="cmapDetail"><p class="cmap-detail-empty">Click any department, corporate function, or the client outcome node to see how it connects.</p></div>
     `;
     const canvas = container.querySelector(".cmap-canvas");
     const detail = container.querySelector("#cmapDetail");
@@ -123,6 +135,22 @@
     const svg = document.createElementNS(svgNS, "svg");
     svg.setAttribute("viewBox", `0 0 ${width} ${height}`);
     svg.setAttribute("class", "cmap-svg");
+
+    // Client Outcome convergence lines — drawn first/behind everything, always dim, never
+    // implies a real measured relationship (see .cmap-outcome-edge — deliberately faint/dashed).
+    const outcomeLayer = document.createElementNS(svgNS, "g");
+    outcomeLayer.setAttribute("class", "cmap-outcome-layer");
+    svg.appendChild(outcomeLayer);
+    divisions.forEach(d => {
+      const a = headerPos[d.id];
+      const path = document.createElementNS(svgNS, "path");
+      path.setAttribute("d", curvePath(a, outcomePos, false));
+      path.setAttribute("class", "cmap-outcome-edge");
+      const title = document.createElementNS(svgNS, "title");
+      title.textContent = `${d.name} → Client Outcome (conceptual — not backed by real metrics yet)`;
+      path.appendChild(title);
+      outcomeLayer.appendChild(path);
+    });
 
     const peopleLayer = document.createElementNS(svgNS, "g");
     peopleLayer.setAttribute("class", "cmap-people-layer");
@@ -177,9 +205,7 @@
 
     function setActive(id) {
       activeId = activeId === id ? null : id;
-      nodeLayer.querySelectorAll(".cmap-node").forEach(el => el.classList.toggle("cmap-node-active", el.dataset.id === activeId));
-      const touching = new Set();
-      pairs.forEach(p => { if (p.a === activeId || p.b === activeId) touching.add(p.a === activeId ? p.b : p.a); });
+      nodeLayer.querySelectorAll(".cmap-node, .cmap-outcome-node").forEach(el => el.classList.toggle("cmap-node-active", el.dataset.id === activeId));
       edgeLayer.querySelectorAll(".cmap-edge").forEach(el => {
         const on = !activeId || el.dataset.a === activeId || el.dataset.b === activeId;
         el.classList.toggle("cmap-edge-dim", !on);
@@ -188,35 +214,44 @@
         const on = !activeId || el.dataset.a === activeId || el.dataset.b === activeId;
         el.classList.toggle("cmap-edge-dim", !on);
       });
-      renderDetail(activeId, touching);
+      outcomeLayer.querySelectorAll(".cmap-outcome-edge").forEach(el => el.classList.toggle("cmap-edge-dim", !!activeId));
+      renderDetail(activeId);
     }
 
-    function renderDetail(id, touching) {
-      if (!id) { detail.innerHTML = `<p class="cmap-detail-empty">Click any department to see how it connects.</p>`; return; }
-      const v = verticals[id];
+    function renderDetail(id) {
+      if (!id) { detail.innerHTML = `<p class="cmap-detail-empty">Click any department, corporate function, or the client outcome node to see how it connects.</p>`; return; }
+      if (id === "outcome") {
+        detail.innerHTML = `
+          <h4>Client Outcome</h4>
+          <p class="cmap-detail-empty">Placeholder — not backed by real data yet. The idea behind Full Circle is that every division's work should trace to actual client outcomes (satisfaction, retention, escalation rates, etc.), not just to each other. None of that is tracked in this system today. Every division and Corporate Functions conceptually traces here; none of those lines represent a measured relationship.</p>
+        `;
+        return;
+      }
+      const v = nodeInfo[id];
       if (!v) return;
       const rel = pairs.filter(p => p.a === id || p.b === id);
       const peopleRel = peopleEdges.filter(e => e.from === v.division || e.to === v.division);
       detail.innerHTML = `
         <h4>${esc(v.name)}</h4>
+        ${v.isPerson ? `<p class="cmap-detail-empty">${esc(v.desc || "")}</p>` : ""}
         ${rel.length ? rel.map(p => {
           const otherId = p.a === id ? p.b : p.a;
-          const other = verticals[otherId];
+          const other = nodeInfo[otherId];
           return `<div class="cmap-detail-row">
             <div class="cmap-detail-rel"><b>${esc(v.name)}</b> ${p.directed ? (p.direction.from === id ? "→" : "←") : "⇄"} <b>${esc(other ? other.name : otherId)}</b></div>
             ${p.rows.map(r => `<div class="cmap-detail-note">${esc(r.note || "")}</div>`).join("")}
           </div>`;
-        }).join("") : `<p class="cmap-detail-empty">No modeled connections yet for this department.</p>`}
+        }).join("") : (v.isPerson ? "" : `<p class="cmap-detail-empty">No modeled connections yet for this department.</p>`)}
         ${peopleRel.length ? `<div class="cmap-detail-people"><b>Spans divisions:</b> ${peopleRel.map(e => esc(e.label)).join(", ")}</div>` : ""}
       `;
     }
 
     Object.values(nodePos).forEach(n => {
       const g = document.createElementNS(svgNS, "g");
-      const quiet = !connectedVerticalIds.has(n.vertical.id);
+      const quiet = !connectedIds.has(n.id) && nodeInfo[n.id] && !nodeInfo[n.id].isPerson;
       g.setAttribute("class", "cmap-node" + (quiet ? " cmap-node-quiet" : ""));
       g.setAttribute("transform", `translate(${n.x.toFixed(1)},${n.y.toFixed(1)})`);
-      g.dataset.id = n.vertical.id;
+      g.dataset.id = n.id;
       g.tabIndex = 0;
       g.setAttribute("role", "button");
       const rect = document.createElementNS(svgNS, "rect");
@@ -228,13 +263,41 @@
       label.setAttribute("text-anchor", "middle");
       label.setAttribute("dy", "4.5");
       label.setAttribute("class", "cmap-node-label");
-      label.textContent = n.vertical.name;
+      label.textContent = n.name;
       g.appendChild(label);
-      function activate() { setActive(n.vertical.id); }
+      function activate() { setActive(n.id); }
       g.addEventListener("click", activate);
       g.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); activate(); } });
       nodeLayer.appendChild(g);
     });
+
+    const outcomeNode = document.createElementNS(svgNS, "g");
+    outcomeNode.setAttribute("class", "cmap-outcome-node");
+    outcomeNode.setAttribute("transform", `translate(${outcomePos.x.toFixed(1)},${outcomePos.y.toFixed(1)})`);
+    outcomeNode.dataset.id = "outcome";
+    outcomeNode.tabIndex = 0;
+    outcomeNode.setAttribute("role", "button");
+    const outcomeRect = document.createElementNS(svgNS, "rect");
+    outcomeRect.setAttribute("x", -110); outcomeRect.setAttribute("y", -22);
+    outcomeRect.setAttribute("width", 220); outcomeRect.setAttribute("height", 44);
+    outcomeRect.setAttribute("rx", 10);
+    outcomeNode.appendChild(outcomeRect);
+    const outcomeLabel = document.createElementNS(svgNS, "text");
+    outcomeLabel.setAttribute("text-anchor", "middle");
+    outcomeLabel.setAttribute("dy", "-1");
+    outcomeLabel.setAttribute("class", "cmap-outcome-label");
+    outcomeLabel.textContent = "Client Outcome";
+    outcomeNode.appendChild(outcomeLabel);
+    const outcomeSub = document.createElementNS(svgNS, "text");
+    outcomeSub.setAttribute("text-anchor", "middle");
+    outcomeSub.setAttribute("dy", "13");
+    outcomeSub.setAttribute("class", "cmap-outcome-sub");
+    outcomeSub.textContent = "not yet tracked";
+    outcomeNode.appendChild(outcomeSub);
+    function activateOutcome() { setActive("outcome"); }
+    outcomeNode.addEventListener("click", activateOutcome);
+    outcomeNode.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); activateOutcome(); } });
+    nodeLayer.appendChild(outcomeNode);
 
     canvas.appendChild(svg);
     return { setActive };

@@ -46,7 +46,7 @@ async function renderOverview(mount) {
           <div class="aurora-grid-4">
             <a class="aurora-tile" href="#/insights"><span class="arrow">→</span><span class="t">Insights</span><span class="d">Regulatory tracking &amp; trends</span></a>
             <a class="aurora-tile" href="#/landscape"><span class="arrow">→</span><span class="t">Landscape</span><span class="d">Who the players are</span></a>
-            <a class="aurora-tile" href="#/company"><span class="arrow">→</span><span class="t">Kelly Benefits</span><span class="d">Structure, connections &amp; process</span></a>
+            <a class="aurora-tile" href="#/full-circle"><span class="arrow">→</span><span class="t">Full Circle</span><span class="d">How Kelly Benefits connects &amp; functions</span></a>
             <a class="aurora-tile" href="study/"><span class="arrow">↗</span><span class="t">Exam Prep</span><span class="d">Study reference</span></a>
           </div>
         </section>
@@ -104,20 +104,20 @@ async function renderOverview(mount) {
   const fitContent = fitResult.status === "fulfilled" && fitResult.value.data ? fitResult.value.data.content : "";
   if (fitContent && fitContent.trim()) {
     cards.push(`
-      <a class="aurora-card" href="#/company">
+      <a class="aurora-card" href="#/full-circle">
         <span class="tag">Where You Fit</span>
         <h3>Your seat, in your own words</h3>
         <p>${escBrief(fitContent)}</p>
-        <div class="foot">Edit on the Kelly Benefits page →</div>
+        <div class="foot">Edit on the Full Circle page →</div>
       </a>
     `);
   } else {
     cards.push(`
-      <a class="aurora-card" href="#/company">
+      <a class="aurora-card" href="#/full-circle">
         <span class="tag">Where You Fit</span>
         <h3>Ground this in your actual seat</h3>
-        <p>Everything else on this page is industry-wide. Add a line on the Kelly Benefits page about where you actually sit.</p>
-        <div class="foot">Set it on the Kelly Benefits page →</div>
+        <p>Everything else on this page is industry-wide. Add a line on the Full Circle page about where you actually sit.</p>
+        <div class="foot">Set it on the Full Circle page →</div>
       </a>
     `);
   }

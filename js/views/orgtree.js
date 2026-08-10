@@ -1,8 +1,7 @@
 (function () {
-  let fitSaveTimeout;
-
   function fmtVal(v) { return v === null ? "n/a" : "$" + v + "B"; }
 
+  // Own data fetch, deliberately not shared with fullcircle.js — see PLAN.md.
   async function loadOrgData() {
     const [divR, vertR, funcR, peopleR, connR] = await Promise.all([
       supabaseClient.from("org_divisions").select("*").order("sort_order"),
@@ -25,132 +24,42 @@
     };
   }
 
-  async function renderCompanyView(mount) {
+  async function renderOrgTreeView(mount) {
     mount.innerHTML = `
-      <div class="kb-hero">
-        <div class="kb-hero-content">
-          <h1>Kelly Benefits — The Full Circle</h1>
-          <p>A privately-held, family-owned benefits company built around four connected divisions — each one sells into (or draws from) the next, forming a closed loop of the client relationship rather than a single-service business.</p>
+      <div class="page-head">
+        <h1>Kelly Benefits — Org Tree</h1>
+        <p>Strict reporting structure — who reports to whom, and which job functions sit where. For how the divisions actually connect and function as a whole, see <a href="#/full-circle">Full Circle</a> instead.</p>
+      </div>
+
+      <div class="snapshot" id="otSnapshot"></div>
+
+      <div class="orgmap-wrap" id="orgmapWrap">
+        <div class="orgmap-head">
+          <p class="cap">The real reporting structure: every division's departments and job functions. Click a division's ▸ to expand into its departments, then again into individual job functions — Advantage's are the most refined since that's this project's own seat; Strategies', Payroll's, and Advisory's are a standard-industry-pattern estimate, marked as such. A 🔗 means a function connects to others in the workflow (see Full Circle for the relationship view). Click any person with a <span class="ocn-cross-dot" style="display:inline-block; vertical-align:middle;"></span> mark to trace who they connect to outside their own division. Click Corporate Functions (◈) to see its reach across all four.</p>
+          <div style="display:flex; gap:8px; flex:none; flex-wrap:wrap;">
+            <button id="orgAddPerson" class="orgmap-fs-btn" style="display:none;">+ Add person</button>
+            <button id="orgmapShowAll" class="orgmap-connect-btn">🔗 Show all connections</button>
+            <button id="orgmapFullscreen" class="orgmap-fs-btn">⛶ Fullscreen</button>
+          </div>
         </div>
-        <div class="kb-hero-stats">
-          <div class="kb-stat"><div class="kb-stat-big">50</div><div class="kb-stat-label">Years since founding — 50th anniversary this year</div></div>
-          <div class="kb-stat"><div class="kb-stat-big">10K+</div><div class="kb-stat-label">Corporate clients, 600,000+ covered lives</div></div>
-          <div class="kb-stat"><div class="kb-stat-big">23</div><div class="kb-stat-label">Years ranked #1 in Maryland (2002–2024)</div></div>
-        </div>
+        <p class="orgmap-live-note" id="orgLiveNote"></p>
+        <div id="coOrgMap" class="orgmap-container"></div>
+        <p class="orgmap-caption">Workflow within Advantage: Win → Construct → then splits into Protect, Connect, and Serve. Construct, Connect, and Serve also share enrollment responsibility.</p>
       </div>
 
-      <div class="fit-box">
-        <div class="lbl">Where I fit</div>
-        <textarea id="fitText" placeholder="e.g. I work in COBRA administration within Kelly Benefits Advantage, handling..."></textarea>
-        <div class="hint" id="fitHint">Ground the rest of this page in your actual seat — it changes what "moving up" should mean.</div>
+      <div id="orgDetail"></div>
+
+      <p class="section-label">Leadership — split across the four divisions</p>
+      <div class="leadership" id="otLeadership"></div>
+
+      <div class="timeline-card">
+        <h3>Company history</h3>
+        <p class="cap">50 years from a bedroom in Maryland to four connected divisions — the growth pattern (family stability, then acquisition, then outside technology leadership) tells its own story.</p>
+        <div class="timeline" id="otHistoryTimeline"></div>
       </div>
-
-      <div class="tabs" id="coTabs">
-        <button data-view="overview" class="active">Overview</button>
-        <button data-view="people">People &amp; History</button>
-        <button data-view="strategy">Strategy</button>
-      </div>
-
-      <div class="view active" id="coview-overview">
-        <nav class="kb-subnav" id="kbSubnav">
-          <a href="#sec-structure" data-sec="structure" class="active">Structure &amp; Connections</a>
-          <a href="#sec-cobra" data-sec="cobra">COBRA Process</a>
-        </nav>
-
-        <section id="sec-structure" class="kb-section">
-          <p class="section-label">Company details</p>
-          <div class="snapshot" id="coSnapshot"></div>
-
-          <div class="orgmap-wrap" id="orgmapWrap">
-            <div class="orgmap-head">
-              <p class="cap">One chart: the real reporting structure, every division's departments and job functions, and the real human connections that cut across it all. Four divisions, their leaders, and the corporate functions that support all four. Click a division's ▸ to expand into its departments, then again into individual job functions — Advantage's are the most refined since that's this project's own seat; Strategies', Payroll's, and Advisory's are a standard-industry-pattern estimate, marked as such. A 🔗 means a function connects to others in the workflow. Click any person with a <span class="ocn-cross-dot" style="display:inline-block; vertical-align:middle;"></span> mark to trace who they connect to outside their own division — John Kelly, David Kelly, and Wesley Mace all hold roles spanning two divisions. Click Corporate Functions (◈) to see its reach across all four.</p>
-              <div style="display:flex; gap:8px; flex:none; flex-wrap:wrap;">
-                <button id="orgAddPerson" class="orgmap-fs-btn" style="display:none;">+ Add person</button>
-                <button id="orgmapShowAll" class="orgmap-connect-btn">🔗 Show all connections</button>
-                <button id="orgmapFullscreen" class="orgmap-fs-btn">⛶ Fullscreen</button>
-              </div>
-            </div>
-            <p class="orgmap-live-note" id="orgLiveNote"></p>
-            <div id="coOrgMap" class="orgmap-container"></div>
-            <p class="orgmap-caption">Workflow within Advantage: Win → Construct → then splits into Protect, Connect, and Serve. Construct, Connect, and Serve also share enrollment responsibility.</p>
-          </div>
-
-          <div id="orgDetail"></div>
-
-          <div class="integration-box" id="coIntegrationNote"></div>
-
-          <div class="cmap-wrap" id="cmapWrap">
-            <div class="cmap-head">
-              <div>
-                <h3>Connection Map</h3>
-                <p class="cap">How work actually hands off or overlaps between departments — aggregated from the specific job functions underneath. Click any department to trace its connections.</p>
-              </div>
-              <button id="cmapManageConnections" class="orgmap-fs-btn" style="display:none;">🔗 Manage connections</button>
-            </div>
-            <div id="coConnectionMap"></div>
-          </div>
-
-          <div class="workflow-card">
-            <h3>How the client relationship actually flows</h3>
-            <p class="cap">The org chart above shows who reports to whom, and who connects across divisions. This shows something different — the direction work and data actually move as a single client relationship travels through all four divisions, on repeat, for as long as they stay a client. Click any division or arrow for detail.</p>
-            <div id="flowContainer"></div>
-            <div class="flow-detail" id="flowDetail"></div>
-            <p class="chart-caption" id="flowNote" style="margin-top:14px;"></p>
-          </div>
-        </section>
-
-        <section id="sec-cobra" class="kb-section">
-          <div class="cobra-wrap" id="cobraWrap">
-            <div class="cobra-head">
-              <div>
-                <h3>The real COBRA administration process, start to finish</h3>
-                <p class="cobra-source" id="cobraSourceNote">Loading…</p>
-              </div>
-              <button id="cobraFullscreen" class="orgmap-fs-btn">⛶ Fullscreen</button>
-            </div>
-            <div id="cobraProcess"></div>
-          </div>
-          <div class="crosscutting-box">
-            <h4>Where "enrollment" and "reconciliation" actually sit</h4>
-            <p id="coEnrollmentNote"></p>
-            <p id="coReconciliationNote"></p>
-          </div>
-        </section>
-      </div>
-
-      <div class="view" id="coview-people">
-        <p class="section-label">Leadership — split across the four divisions</p>
-        <div class="leadership" id="coLeadership"></div>
-        <div class="timeline-card">
-          <h3>Company history</h3>
-          <p class="cap">50 years from a bedroom in Maryland to four connected divisions — the growth pattern (family stability, then acquisition, then outside technology leadership) tells its own story.</p>
-          <div class="timeline" id="coHistoryTimeline"></div>
-        </div>
-      </div>
-
-      <div class="view" id="coview-strategy">
-        <div class="swot-card">
-          <h3>SWOT</h3>
-          <p class="cap">The circle and the competitor data, synthesized into a strategic read — not a description of what Kelly is, but a read on the position it's actually in.</p>
-          <div class="swot-grid" id="coSwotGrid"></div>
-        </div>
-      </div>
-
     `;
 
-    document.getElementById("coTabs").addEventListener("click", (e) => {
-      const btn = e.target.closest("button");
-      if (!btn) return;
-      document.querySelectorAll("#coTabs button").forEach(b => b.classList.remove("active"));
-      btn.classList.add("active");
-      document.querySelectorAll("#" + mount.id + " .view").forEach(v => v.classList.remove("active"));
-      document.getElementById("coview-" + btn.dataset.view).classList.add("active");
-    });
-
     await Auth.ready;
-    updateFitGate();
-    loadFitText();
-    wireFitText();
 
     const onAuthOrMigrate = () => {
       if (!document.getElementById(mount.id)) {
@@ -158,22 +67,21 @@
         window.removeEventListener("custodian:migrated", onAuthOrMigrate);
         return;
       }
-      updateFitGate();
-      loadFitText();
       updateOrgEditGate();
     };
     window.addEventListener("custodian:authchange", onAuthOrMigrate);
     window.addEventListener("custodian:migrated", onAuthOrMigrate);
 
-    let data;
-    let orgDataLive = true;
+    let staticData;
     try {
-      data = await fetch("data/company.json").then(r => r.json());
+      staticData = await fetch("data/company.json").then(r => r.json());
     } catch (err) {
-      document.getElementById("coview-overview").innerHTML = `<div style="color:var(--warn);">Couldn't load Kelly Benefits data (${err.message}).</div>`;
+      mount.innerHTML = `<div style="color:var(--warn);">Couldn't load Kelly Benefits data (${err.message}).</div>`;
       return;
     }
 
+    let data = { snapshot: staticData.snapshot, history: staticData.history };
+    let orgDataLive = true;
     try {
       Object.assign(data, await loadOrgData());
     } catch (err) {
@@ -181,44 +89,24 @@
       orgDataLive = false;
       const note = document.getElementById("orgLiveNote");
       if (note) note.textContent = "Showing the last saved structure — live editing is unavailable right now.";
+      Object.assign(data, {
+        divisions: staticData.divisions, verticals: staticData.verticals,
+        leadership: staticData.leadership, processConnections: staticData.processConnections
+      });
     }
 
     const heroCovered = ["Founded", "Scale", "Recognition"];
-    document.getElementById("coSnapshot").innerHTML = data.snapshot.filter(s => !heroCovered.includes(s.l)).map(s => `
+    document.getElementById("otSnapshot").innerHTML = data.snapshot.filter(s => !heroCovered.includes(s.l)).map(s => `
       <div class="snap-card"><div class="l">${s.l}</div><div class="v">${s.v}</div></div>`).join("");
 
-    try {
-      const cobraData = await fetch("data/cobra-process.json").then(r => r.json());
-      document.getElementById("cobraSourceNote").textContent = cobraData.intro;
-      renderCobraProcess("cobraProcess", cobraData);
-    } catch (err) {
-      document.getElementById("cobraSourceNote").textContent = `Couldn't load the COBRA process data (${err.message}).`;
-    }
-
-    document.getElementById("coLeadership").innerHTML = data.leadership.map(p => `
+    document.getElementById("otLeadership").innerHTML = data.leadership.map(p => `
       <div class="leader-card"><div class="name">${p.name}</div><div class="title">${p.title}</div><div class="note">${p.note}</div></div>`).join("");
 
-    document.getElementById("coHistoryTimeline").innerHTML = data.history.map(h => `
+    document.getElementById("otHistoryTimeline").innerHTML = data.history.map(h => `
       <div class="tl-item">
         <div class="tl-date mono">${h.date}</div>
         <div class="tl-deal">${h.deal}${h.value ? ` <span class="mono" style="font-weight:400; color:var(--ink-muted); font-size:0.8rem;">— ${h.value}</span>` : ""}</div>
         <div class="tl-sig">${h.sig}</div>
-      </div>`).join("");
-
-    document.getElementById("coIntegrationNote").innerHTML = `<b>${data.integrationNote.split(" — ")[0]} —</b> ${data.integrationNote.split(" — ").slice(1).join(" — ")}`;
-    if (data.divisionFlowNote) document.getElementById("flowNote").textContent = data.divisionFlowNote;
-
-    document.getElementById("coEnrollmentNote").innerHTML = `<b>Enrollment</b> ${data.crossCutting.enrollment.replace(/^Enrollment\s*/, "")}`;
-    document.getElementById("coReconciliationNote").innerHTML = `<b>Reconciliation</b> ${data.crossCutting.reconciliation.replace(/^Reconciliation\s*/, "")}`;
-
-    const swotOrder = [
-      ["strengths", "Strengths"], ["weaknesses", "Weaknesses"],
-      ["opportunities", "Opportunities"], ["threats", "Threats"]
-    ];
-    document.getElementById("coSwotGrid").innerHTML = swotOrder.map(([key, label]) => `
-      <div class="swot-item ${key}">
-        <h4>${label}</h4>
-        <ul>${data.swot[key].map(item => `<li>${item}</li>`).join("")}</ul>
       </div>`).join("");
 
     function canEditOrg() { return Auth.isSignedIn() && orgDataLive; }
@@ -272,7 +160,7 @@
         <ul class="ad-func-list">${v.funcs.map(f => `
           <li><span class="ad-pill ${f.confirmed ? "confirmed" : "estimated"}">${f.confirmed ? "confirmed" : "est."}</span> ${f.label}</li>
         `).join("")}</ul>
-        ${key === "connect" ? `<a href="#sec-cobra" class="fn-conn-link" style="margin-top:12px;">→ See the full COBRA process, step by step</a>` : ""}
+        ${key === "connect" ? `<a href="#/full-circle" class="fn-conn-link" style="margin-top:12px;">→ See the full COBRA process and how this connects, on Full Circle</a>` : ""}
         <div class="orgedit-row">${oeEditBtn("vertical", key)}${oeAddBtn("function", "Add job function", key)}${oeDeleteBtn("vertical", key)}</div>
       `;
     }
@@ -317,7 +205,7 @@
         ${linkGroup("Feeds into →", "→", feedsInto)}
         ${linkGroup("Fed by ←", "←", fedBy)}
         ${linkGroup("Shares systems with ⇄", "⇄", shared)}
-        ${!feedsInto.length && !fedBy.length && !shared.length ? '<p class="notes-empty">No modeled connections yet for this function.</p>' : ""}
+        ${!feedsInto.length && !fedBy.length && !shared.length ? '<p class="notes-empty">No modeled connections yet for this function — see Full Circle.</p>' : ""}
         <div class="orgedit-row">${oeEditBtn("function", id)}${oeDeleteBtn("function", id)}</div>
       `;
     }
@@ -368,7 +256,7 @@
       panel.innerHTML = html;
       panel.classList.add("show");
       document.getElementById("closeOrgDetail").addEventListener("click", () => panel.classList.remove("show"));
-      panel.querySelectorAll(".fn-conn-link").forEach(btn => {
+      panel.querySelectorAll(".fn-conn-link[data-jump]").forEach(btn => {
         btn.addEventListener("click", () => jumpToNode(btn.dataset.jump));
       });
       panel.querySelectorAll("[data-oe-action]").forEach(btn => {
@@ -407,14 +295,10 @@
     }
 
     let orgMapControl = renderOrgMap("coOrgMap", { companyData: data, onNodeClick: handleOrgNodeClick });
-    let connectionMapControl = renderConnectionMap("coConnectionMap", data);
 
     function updateOrgEditGate() {
       const addPersonBtn = document.getElementById("orgAddPerson");
-      const manageConnBtn = document.getElementById("cmapManageConnections");
-      const show = canEditOrg() ? "" : "none";
-      if (addPersonBtn) addPersonBtn.style.display = show;
-      if (manageConnBtn) manageConnBtn.style.display = show;
+      if (addPersonBtn) addPersonBtn.style.display = canEditOrg() ? "" : "none";
     }
     updateOrgEditGate();
 
@@ -431,25 +315,13 @@
       updateOrgEditGate();
       if (orgMapControl) orgMapControl.destroy();
       orgMapControl = renderOrgMap("coOrgMap", { companyData: data, onNodeClick: handleOrgNodeClick });
-      connectionMapControl = renderConnectionMap("coConnectionMap", data);
-      document.getElementById("coLeadership").innerHTML = data.leadership.map(p => `
+      document.getElementById("otLeadership").innerHTML = data.leadership.map(p => `
         <div class="leader-card"><div class="name">${p.name}</div><div class="title">${p.title}</div><div class="note">${p.note}</div></div>`).join("");
       document.getElementById("orgDetail").classList.remove("show");
     }
     OrgEdit.init(() => data, refreshOrgMap);
 
     document.getElementById("orgAddPerson").addEventListener("click", () => OrgEdit.open("person", "add", null, "root"));
-    document.getElementById("cmapManageConnections").addEventListener("click", () => OrgEdit.openConnections());
-
-    function renderFlowEdgeDetail(edge) {
-      const panel = document.getElementById("flowDetail");
-      if (!panel) return;
-      const fromName = (data.divisions.find(d => d.id === edge.from) || {}).name || edge.from;
-      const toName = (data.divisions.find(d => d.id === edge.to) || {}).name || edge.to;
-      panel.innerHTML = `<b>${fromName} → ${toName}: ${edge.label}.</b> ${edge.detail}`;
-      panel.classList.add("show");
-    }
-    renderDivisionFlow("flowContainer", { companyData: data, onNodeClick: handleOrgNodeClick, onEdgeClick: renderFlowEdgeDetail });
 
     document.getElementById("orgmapShowAll").addEventListener("click", (e) => {
       orgMapControl.showAllConnections();
@@ -488,81 +360,11 @@
       requestAnimationFrame(() => requestAnimationFrame(fitOrgMapToScreen));
     });
 
-    document.getElementById("cobraFullscreen").addEventListener("click", () => {
-      const wrap = document.getElementById("cobraWrap");
-      if (!document.fullscreenElement) {
-        wrap.requestFullscreen();
-      } else {
-        document.exitFullscreen();
-      }
-    });
-    document.addEventListener("fullscreenchange", () => {
-      const wrap = document.getElementById("cobraWrap");
-      const btn = document.getElementById("cobraFullscreen");
-      if (!wrap || !btn) return;
-      btn.textContent = document.fullscreenElement === wrap ? "✕ Exit fullscreen" : "⛶ Fullscreen";
-    });
-
-    const subnavLinks = document.querySelectorAll("#kbSubnav a");
-    subnavLinks.forEach(link => {
-      link.addEventListener("click", () => {
-        subnavLinks.forEach(l => l.classList.remove("active"));
-        link.classList.add("active");
-      });
-    });
-    const spySections = ["structure", "cobra"]
-      .map(id => document.getElementById("sec-" + id))
-      .filter(Boolean);
-    if (spySections.length && "IntersectionObserver" in window) {
-      const spy = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-          if (!entry.isIntersecting) return;
-          const secId = entry.target.id.replace("sec-", "");
-          subnavLinks.forEach(l => l.classList.toggle("active", l.dataset.sec === secId));
-        });
-      }, { rootMargin: "-96px 0px -70% 0px", threshold: 0 });
-      spySections.forEach(s => spy.observe(s));
-    }
-
-    SearchIndex.register("Kelly Benefits", [
-      ...data.divisions.map(d => ({ title: `Kelly Benefits ${d.name}`, snippet: d.desc, route: "company" })),
-      ...data.leadership.map(p => ({ title: p.name, snippet: p.title, route: "company" }))
+    SearchIndex.register("Org Tree", [
+      ...data.divisions.map(d => ({ title: `Kelly Benefits ${d.name}`, snippet: d.desc, route: "org-tree" })),
+      ...data.leadership.map(p => ({ title: p.name, snippet: p.title, route: "org-tree" }))
     ]);
   }
 
-  function updateFitGate() {
-    const el = document.getElementById("fitText");
-    const hint = document.getElementById("fitHint");
-    if (!el || !hint) return;
-    if (Auth.isSignedIn()) {
-      el.readOnly = false;
-      hint.textContent = "Ground the rest of this page in your actual seat — it changes what \"moving up\" should mean.";
-    } else {
-      el.readOnly = true;
-      hint.innerHTML = `Sign in to edit. <button id="fitAuthBtn" style="background:none;border:none;color:var(--accent);text-decoration:underline;cursor:pointer;font:inherit;padding:0;">Sign in</button>`;
-      const btn = document.getElementById("fitAuthBtn");
-      if (btn) btn.addEventListener("click", () => document.getElementById("authButton").click());
-    }
-  }
-
-  async function loadFitText() {
-    const el = document.getElementById("fitText");
-    if (!el) return;
-    const { data } = await supabaseClient.from("site_text").select("content").eq("key", "fit").maybeSingle();
-    if (!document.getElementById("fitText")) return;
-    el.value = (data && data.content) || "";
-  }
-
-  function wireFitText() {
-    const el = document.getElementById("fitText");
-    el.addEventListener("input", () => {
-      if (!Auth.isSignedIn()) return;
-      clearTimeout(fitSaveTimeout);
-      fitSaveTimeout = setTimeout(() => {
-        supabaseClient.from("site_text").upsert({ key: "fit", content: el.value });
-      }, 700);
-    });
-  }
-
-  Router.register("company", renderCompanyView);
+  Router.register("org-tree", renderOrgTreeView);
 })();
