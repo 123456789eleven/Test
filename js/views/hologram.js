@@ -211,12 +211,12 @@
     const lineLayer = new THREE.Group();
     scene.add(lineLayer);
 
-    const nodes = new Map();      // id -> { group, fill, tier, angle, radius, y, parentId }
-    const lines = new Map();      // "a|b" -> THREE.Line
-    const visibleFuncIds = new Set();
+    const nodes = new Map();      // id -> { group, fill, tier, angle, radius, y, parentId, expanded, children }
+    const lines = new Map();      // "a|b" -> { line, baseOpacity }
     const hoverable = [];
     const raycaster = new THREE.Raycaster();
     const mouse = new THREE.Vector2();
+    let expandedTier1 = null, expandedTier2 = null; // accordion: one open branch per level
 
     function tier2Of(t1) {
       if (t1.id === "corpfn") return sceneState.corpfnPeople.map(p => ({ id: p.id, name: p.name, isPerson: true }));
@@ -243,26 +243,44 @@
       nodeLayer.add(group);
       hoverable.push(fill);
       nodes.set(item.id, { group, fill, tier, angle, radius: radius, y, parentId, expanded: false, children: [] });
-      if (tier === 3) visibleFuncIds.add(item.id);
-      checkNewFunctionLines();
       return item.id;
     }
 
-    function checkNewFunctionLines() {
+    // Every connection resolves to whichever tier is currently on screen for each end —
+    // the function itself if its department is drilled all the way in, else its
+    // department node, else its division (divisions are never removed, only their
+    // children toggle, so this always finds something). Full recompute rather than
+    // incremental: cheap at 14 rows, and correct by construction on every expand/
+    // collapse instead of only lighting up once you've clicked all the way down to
+    // exact function pairs.
+    function resolveVisible(functionId) {
+      if (nodes.has(functionId)) return functionId;
+      const vertId = window.OrgConnections.findVerticalOf(functionId, sceneState.verticals);
+      if (vertId && nodes.has(vertId)) return vertId;
+      const divId = vertId ? sceneState.verticals[vertId].division : null;
+      if (divId && nodes.has(divId)) return divId;
+      return null;
+    }
+
+    function rebuildLines() {
+      lines.forEach(({ line }) => lineLayer.remove(line));
+      lines.clear();
+      const seen = new Set();
       sceneState.processConnections.forEach(c => {
-        const key = [c.from, c.to].sort().join("|");
-        if (lines.has(key)) return;
-        if (!visibleFuncIds.has(c.from) || !visibleFuncIds.has(c.to)) return;
-        const a = nodes.get(c.from), b = nodes.get(c.to);
-        if (!a || !b) return;
-        const pa = a.group.position, pb = b.group.position;
+        const a = resolveVisible(c.from), b = resolveVisible(c.to);
+        if (!a || !b || a === b) return;
+        const key = [a, b].sort().join("|");
+        if (seen.has(key)) return;
+        seen.add(key);
+        const na = nodes.get(a), nb = nodes.get(b);
+        const pa = na.group.position, pb = nb.group.position;
         const mid = pa.clone().lerp(pb, 0.5); mid.y += 0.5;
         const curve = new THREE.QuadraticBezierCurve3(pa, mid, pb);
         const geom = new THREE.BufferGeometry().setFromPoints(curve.getPoints(20));
         const color = c.type === "shared" ? SHARED_GLOW : GLOW;
         const line = new THREE.Line(geom, new THREE.LineBasicMaterial({ color, transparent: true, opacity: 0.8 }));
         lineLayer.add(line);
-        lines.set(key, line);
+        lines.set(key, { line, baseOpacity: 0.8 });
       });
     }
 
@@ -271,12 +289,8 @@
       if (!n) return;
       n.children.forEach(childId => removeSubtree(childId));
       n.children = [];
-      if (n.tier === 3) {
-        visibleFuncIds.delete(id);
-        Array.from(lines.entries()).forEach(([key, line]) => {
-          if (key.split("|").includes(id)) { lineLayer.remove(line); lines.delete(key); }
-        });
-      }
+      if (expandedTier1 === id) expandedTier1 = null;
+      if (expandedTier2 === id) expandedTier2 = null;
       nodeLayer.remove(n.group);
       const hi = hoverable.indexOf(n.fill);
       if (hi >= 0) hoverable.splice(hi, 1);
@@ -287,10 +301,15 @@
       const n = nodes.get(id);
       if (!n || n.expanded) return;
       const fill = n.fill;
+      // Accordion: only one open branch per level. Expanding a new sibling closes
+      // whatever was open before it, so the scene stays focused on one path at a
+      // time instead of accumulating every branch ever clicked.
+      if (n.tier === 1 && expandedTier1 && expandedTier1 !== id) collapse(expandedTier1);
+      if (n.tier === 2 && expandedTier2 && expandedTier2 !== id) collapse(expandedTier2);
       let children;
-      if (n.tier === 1) children = tier2Of({ id, isCorpfn: fill.userData.kind === "corpfn" });
+      if (n.tier === 1) children = tier2Of({ id });
       else children = tier3Of(id);
-      if (!children.length) return;
+      if (!children.length) { rebuildLines(); return; }
       // Tier-2's wedge (department fan around a division) is generous since siblings
       // are far apart on the circle. Tier-3's wedge (function fan around a department)
       // is tighter — real departments sit close together (e.g. Advantage's 5), so a
@@ -305,6 +324,9 @@
       });
       n.expanded = true;
       fill.userData.expanded = true;
+      if (n.tier === 1) expandedTier1 = id;
+      if (n.tier === 2) expandedTier2 = id;
+      rebuildLines();
     }
 
     function collapse(id) {
@@ -314,6 +336,9 @@
       n.children = [];
       n.expanded = false;
       n.fill.userData.expanded = false;
+      if (expandedTier1 === id) expandedTier1 = null;
+      if (expandedTier2 === id) expandedTier2 = null;
+      rebuildLines();
     }
 
     function toggle(id) {
@@ -335,13 +360,15 @@
         const angle = (i / sceneState.tier1.length) * Math.PI * 2;
         addNode(t1, 1, angle, 5.5, 1.6, null);
       });
+      rebuildLines();
     }
 
     function rebuild(newData) {
       Array.from(nodes.keys()).forEach(id => { const n = nodes.get(id); if (n) { nodeLayer.remove(n.group); } });
-      nodes.clear(); hoverable.length = 0; visibleFuncIds.clear();
-      lines.forEach(line => lineLayer.remove(line));
+      nodes.clear(); hoverable.length = 0;
+      lines.forEach(({ line }) => lineLayer.remove(line));
       lines.clear();
+      expandedTier1 = null; expandedTier2 = null;
       sceneState = buildState(newData);
       initTier1();
     }
@@ -366,7 +393,6 @@
     }
     function onPointerMove(e) {
       const hit = raycastAt(e.clientX, e.clientY);
-      lines.forEach(line => { line.material.opacity = 0.8; });
       if (hit) {
         label.style.display = "flex";
         label.style.left = (e.clientX + 14) + "px";
@@ -382,21 +408,11 @@
           labelEdit.style.display = "none";
         }
         const hitId = hit.userData.id;
-        lines.forEach((line, key) => {
-          const on = key.split("|").includes(hitId);
-          line.material.opacity = on ? 1 : 0.1;
-        });
+        lines.forEach((entry, key) => { entry.baseOpacity = key.split("|").includes(hitId) ? 1 : 0.08; });
       } else {
         label.style.display = "none";
+        lines.forEach(entry => { entry.baseOpacity = 0.8; });
       }
-    }
-    // Click does its own raycast at the click point rather than trusting the last
-    // pointermove's result — pointermove isn't guaranteed to fire before a tap on
-    // touch devices, so relying on stale hover state would make tap-to-expand
-    // unreliable on mobile.
-    function onClick(e) {
-      const hit = raycastAt(e.clientX, e.clientY);
-      if (hit) toggle(hit.userData.id);
     }
     labelEdit.addEventListener("click", (e) => {
       e.stopPropagation();
@@ -404,8 +420,25 @@
       OrgEdit.open(kind, "edit", id, parent || null);
     });
 
+    // OrbitControls owns mousedown/mousemove/mouseup on this element for orbiting,
+    // and the native "click" event that follows doesn't reliably fire (or fires after
+    // OrbitControls has already treated a few pixels of jitter as a drag) — this is a
+    // well-known friction point when combining OrbitControls with click-to-select. Fix:
+    // track our own pointerdown→pointerup distance/time instead of trusting "click".
+    let downX = 0, downY = 0, downT = 0, isDown = false;
+    renderer.domElement.addEventListener("pointerdown", (e) => {
+      downX = e.clientX; downY = e.clientY; downT = performance.now(); isDown = true;
+    });
+    renderer.domElement.addEventListener("pointerup", (e) => {
+      if (!isDown) return;
+      isDown = false;
+      const dist = Math.hypot(e.clientX - downX, e.clientY - downY);
+      const dt = performance.now() - downT;
+      if (dist > 6 || dt > 500) return; // treat as a drag/orbit gesture, not a click
+      const hit = raycastAt(e.clientX, e.clientY);
+      if (hit) toggle(hit.userData.id);
+    });
     renderer.domElement.addEventListener("pointermove", onPointerMove);
-    renderer.domElement.addEventListener("click", onClick);
 
     let scanT = 0;
     let rafId;
@@ -422,6 +455,16 @@
         scanT += 0.006;
         scanRing.position.y = (Math.sin(scanT) * 0.5 + 0.5) * 3.6;
         scanRing.material.opacity = 0.03 + 0.045 * (1 - Math.abs(Math.sin(scanT)));
+        // Connections stay visibly "alive" (a gentle breathing glow) rather than static
+        // lines, and never fully vanish — each gets its own phase so they don't pulse
+        // in lockstep, reading more like energy moving through the map than decoration.
+        lines.forEach((entry, key) => {
+          let phase = 0;
+          for (let i = 0; i < key.length; i++) phase += key.charCodeAt(i);
+          entry.line.material.opacity = entry.baseOpacity * (0.7 + 0.3 * Math.sin(scanT * 2.4 + phase));
+        });
+      } else {
+        lines.forEach(entry => { entry.line.material.opacity = entry.baseOpacity; });
       }
       composer.render();
     }
