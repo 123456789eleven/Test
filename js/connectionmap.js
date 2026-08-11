@@ -77,6 +77,9 @@
     });
   }
 
+  // Shared with js/views/hologram.js — same rollup logic, not duplicated.
+  window.OrgConnections = { aggregateConnections, findVerticalOf };
+
   window.renderConnectionMap = function (containerId, data) {
     const container = document.getElementById(containerId);
     if (!container) return null;
