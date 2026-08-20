@@ -4,7 +4,9 @@
   const RADIUS = { division: 0.75, vertical: 0.34, function: 0.19 };
   const GLOW = 0x46d6ff, SHARED_GLOW = 0xffb84f, QUIET = 0x3a4250, PEOPLE_GLOW = 0x8b93c9;
 
-  // Own data fetch — same shape as fullcircle.js/orgtree.js, deliberately not shared.
+  let fitSaveTimeout;
+
+  // Live org structure — divisions/verticals/functions/people/connections.
   async function loadOrgData() {
     const [divR, vertR, funcR, peopleR, connR] = await Promise.all([
       supabaseClient.from("org_divisions").select("*").order("sort_order"),
@@ -25,12 +27,62 @@
     };
   }
 
+  function fmtVal(v) { return v === null ? "n/a" : "$" + v + "B"; }
+
+  function updateFitGate() {
+    const el = document.getElementById("fitText");
+    const hint = document.getElementById("fitHint");
+    if (!el || !hint) return;
+    if (Auth.isSignedIn()) {
+      el.readOnly = false;
+      hint.textContent = "Ground the rest of this page in your actual seat — it changes what \"moving up\" should mean.";
+    } else {
+      el.readOnly = true;
+      hint.innerHTML = `Sign in to edit. <button id="fitAuthBtn" style="background:none;border:none;color:var(--accent);text-decoration:underline;cursor:pointer;font:inherit;padding:0;">Sign in</button>`;
+      const btn = document.getElementById("fitAuthBtn");
+      if (btn) btn.addEventListener("click", () => document.getElementById("authButton").click());
+    }
+  }
+  async function loadFitText() {
+    const el = document.getElementById("fitText");
+    if (!el) return;
+    const { data } = await supabaseClient.from("site_text").select("content").eq("key", "fit").maybeSingle();
+    if (!document.getElementById("fitText")) return;
+    el.value = (data && data.content) || "";
+  }
+  function wireFitText() {
+    const el = document.getElementById("fitText");
+    el.addEventListener("input", () => {
+      if (!Auth.isSignedIn()) return;
+      clearTimeout(fitSaveTimeout);
+      fitSaveTimeout = setTimeout(() => {
+        supabaseClient.from("site_text").upsert({ key: "fit", content: el.value });
+      }, 700);
+    });
+  }
+
   async function renderHologramView(mount) {
     mount.innerHTML = `
-      <div class="page-head">
-        <h1>Kelly Benefits — Hologram</h1>
-        <p>A new, unified take on structure and connections together — drag to orbit, scroll to zoom, click a division or department to expand it. Full Circle and Org Tree stay put; this is a third view, not a replacement, while it's still being tuned. <a href="#/full-circle">Full Circle</a> · <a href="#/org-tree">Org Tree</a></p>
+      <div class="kb-hero">
+        <div class="kb-hero-content">
+          <h1>Kelly Benefits — Full Circle</h1>
+          <p>Not an org chart — a live map of how Kelly Benefits actually functions as one connected whole. Structure (who's part of what) and relationships (how work actually hands off between departments) live in the same 3D scene below: hierarchy reads through node size and depth, connections read through glowing lines. Drag to orbit, scroll to zoom, click a division or department to expand it.</p>
+        </div>
+        <div class="kb-hero-stats">
+          <div class="kb-stat"><div class="kb-stat-big">50</div><div class="kb-stat-label">Years since founding — 50th anniversary this year</div></div>
+          <div class="kb-stat"><div class="kb-stat-big">10K+</div><div class="kb-stat-label">Corporate clients, 600,000+ covered lives</div></div>
+          <div class="kb-stat"><div class="kb-stat-big">23</div><div class="kb-stat-label">Years ranked #1 in Maryland (2002–2024)</div></div>
+        </div>
       </div>
+
+      <div class="fit-box">
+        <div class="lbl">Where I fit</div>
+        <textarea id="fitText" placeholder="e.g. I work in COBRA administration within Kelly Benefits Advantage, handling..."></textarea>
+        <div class="hint" id="fitHint">Ground the rest of this page in your actual seat — it changes what "moving up" should mean.</div>
+      </div>
+
+      <div class="snapshot" id="holoSnapshot"></div>
+
       <div class="holo-legend">
         <span class="holo-legend-item"><span class="holo-swatch" style="background:#46d6ff;"></span> Handoff connection</span>
         <span class="holo-legend-item"><span class="holo-swatch" style="background:#ffb84f;"></span> Shared connection</span>
@@ -41,32 +93,95 @@
         <canvas id="holoCanvas"></canvas>
         <div id="holoLabel" class="holo-label">
           <span id="holoLabelText"></span>
+          <button id="holoLabelAdd" class="holo-label-edit" style="display:none;">+ Add</button>
           <button id="holoLabelEdit" class="holo-label-edit" style="display:none;">✎ Edit</button>
         </div>
         <div id="holoFallback" class="holo-fallback" style="display:none;"></div>
       </div>
-      <p class="holo-hint">Client outcome is deliberately not shown here — no real client-quality data exists in this system yet to trace toward.</p>
+      <p class="holo-hint">Client outcome is deliberately not shown in the scene — no real client-quality data exists in this system yet to trace toward.</p>
+
+      <div class="integration-box" id="holoIntegrationNote"></div>
+
+      <div class="workflow-card">
+        <h3>How the client relationship actually flows</h3>
+        <p class="cap">A different lens on the same circle — the direction work and data actually move as a single client relationship travels through all four divisions, on repeat, for as long as they stay a client. Click any division or arrow for detail.</p>
+        <div id="flowContainer"></div>
+        <div class="flow-detail" id="flowDetail"></div>
+        <p class="chart-caption" id="flowNote" style="margin-top:14px;"></p>
+      </div>
+
+      <div class="cobra-wrap" id="cobraWrap">
+        <div class="cobra-head">
+          <div>
+            <h3>The real COBRA administration process, start to finish</h3>
+            <p class="cobra-source" id="cobraSourceNote">Loading…</p>
+          </div>
+          <button id="cobraFullscreen" class="orgmap-fs-btn">⛶ Fullscreen</button>
+        </div>
+        <div id="cobraProcess"></div>
+      </div>
+      <div class="crosscutting-box">
+        <h4>Where "enrollment" and "reconciliation" actually sit</h4>
+        <p id="holoEnrollmentNote"></p>
+        <p id="holoReconciliationNote"></p>
+      </div>
+
+      <div class="swot-card">
+        <h3>SWOT</h3>
+        <p class="cap">The circle and the competitor data, synthesized into a strategic read — not a description of what Kelly is, but a read on the position it's actually in.</p>
+        <div class="swot-grid" id="holoSwotGrid"></div>
+      </div>
+
+      <p class="section-label">Leadership — split across the four divisions</p>
+      <div class="leadership" id="holoLeadership"></div>
+
+      <div class="timeline-card">
+        <h3>Company history</h3>
+        <p class="cap">50 years from a bedroom in Maryland to four connected divisions — the growth pattern (family stability, then acquisition, then outside technology leadership) tells its own story.</p>
+        <div class="timeline" id="holoHistoryTimeline"></div>
+      </div>
     `;
 
     await Auth.ready;
+    updateFitGate();
+    loadFitText();
+    wireFitText();
+
     const onAuthOrMigrate = () => {
       if (!document.getElementById(mount.id)) {
         window.removeEventListener("custodian:authchange", onAuthOrMigrate);
         window.removeEventListener("custodian:migrated", onAuthOrMigrate);
         return;
       }
+      updateFitGate();
+      loadFitText();
       updateEditGate();
     };
     window.addEventListener("custodian:authchange", onAuthOrMigrate);
     window.addEventListener("custodian:migrated", onAuthOrMigrate);
 
-    let data;
+    let staticData;
     try {
-      data = await loadOrgData();
+      staticData = await fetch("data/company.json").then(r => r.json());
     } catch (err) {
       document.getElementById("holoFallback").style.display = "block";
-      document.getElementById("holoFallback").textContent = `Couldn't load org data (${err.message}).`;
+      document.getElementById("holoFallback").textContent = `Couldn't load Kelly Benefits data (${err.message}).`;
       return;
+    }
+
+    let data = {
+      snapshot: staticData.snapshot, history: staticData.history,
+      swot: staticData.swot, integrationNote: staticData.integrationNote, crossCutting: staticData.crossCutting,
+      divisionFlow: staticData.divisionFlow, divisionFlowNote: staticData.divisionFlowNote
+    };
+    try {
+      Object.assign(data, await loadOrgData());
+    } catch (err) {
+      console.error("Live org data unavailable, showing last saved structure:", err);
+      Object.assign(data, {
+        divisions: staticData.divisions, verticals: staticData.verticals,
+        leadership: staticData.leadership, processConnections: staticData.processConnections
+      });
     }
 
     function updateEditGate() {
@@ -76,29 +191,88 @@
     updateEditGate();
     document.getElementById("holoManageConnections").addEventListener("click", () => OrgEdit.openConnections());
 
-    if (!window.THREE || !window.THREE.OrbitControls || !window.THREE.UnrealBloomPass) {
-      showFallback("3D rendering library didn't load — check your connection and reload. Meanwhile, try Full Circle or Org Tree.");
-      return;
-    }
+    const heroCovered = ["Founded", "Scale", "Recognition"];
+    document.getElementById("holoSnapshot").innerHTML = data.snapshot.filter(s => !heroCovered.includes(s.l)).map(s => `
+      <div class="snap-card"><div class="l">${s.l}</div><div class="v">${s.v}</div></div>`).join("");
 
-    let scene3d;
+    document.getElementById("holoLeadership").innerHTML = data.leadership.map(p => `
+      <div class="leader-card"><div class="name">${p.name}</div><div class="title">${p.title}</div><div class="note">${p.note}</div></div>`).join("");
+
+    document.getElementById("holoHistoryTimeline").innerHTML = data.history.map(h => `
+      <div class="tl-item">
+        <div class="tl-date mono">${h.date}</div>
+        <div class="tl-deal">${h.deal}${h.value ? ` <span class="mono" style="font-weight:400; color:var(--ink-muted); font-size:0.8rem;">— ${h.value}</span>` : ""}</div>
+        <div class="tl-sig">${h.sig}</div>
+      </div>`).join("");
+
+    document.getElementById("holoIntegrationNote").innerHTML = `<b>${data.integrationNote.split(" — ")[0]} —</b> ${data.integrationNote.split(" — ").slice(1).join(" — ")}`;
+    if (data.divisionFlowNote) document.getElementById("flowNote").textContent = data.divisionFlowNote;
+    document.getElementById("holoEnrollmentNote").innerHTML = `<b>Enrollment</b> ${data.crossCutting.enrollment.replace(/^Enrollment\s*/, "")}`;
+    document.getElementById("holoReconciliationNote").innerHTML = `<b>Reconciliation</b> ${data.crossCutting.reconciliation.replace(/^Reconciliation\s*/, "")}`;
+
+    const swotOrder = [
+      ["strengths", "Strengths"], ["weaknesses", "Weaknesses"],
+      ["opportunities", "Opportunities"], ["threats", "Threats"]
+    ];
+    document.getElementById("holoSwotGrid").innerHTML = swotOrder.map(([key, label]) => `
+      <div class="swot-item ${key}">
+        <h4>${label}</h4>
+        <ul>${data.swot[key].map(item => `<li>${item}</li>`).join("")}</ul>
+      </div>`).join("");
+
     try {
-      scene3d = buildScene(data);
+      const cobraData = await fetch("data/cobra-process.json").then(r => r.json());
+      document.getElementById("cobraSourceNote").textContent = cobraData.intro;
+      renderCobraProcess("cobraProcess", cobraData);
     } catch (err) {
-      console.error("Hologram scene failed to initialize:", err);
-      showFallback(`This browser/device couldn't start the 3D scene (${err.message}). Try Full Circle or Org Tree instead.`);
-      return;
+      document.getElementById("cobraSourceNote").textContent = `Couldn't load the COBRA process data (${err.message}).`;
     }
 
-    OrgEdit.init(() => data, async () => {
-      try {
-        data = await loadOrgData();
-      } catch (err) {
-        console.error("Failed to refresh hologram data:", err);
-        return;
-      }
-      scene3d.rebuild(data);
+    function renderFlowEdgeDetail(edge) {
+      const panel = document.getElementById("flowDetail");
+      if (!panel) return;
+      const fromName = (data.divisions.find(d => d.id === edge.from) || {}).name || edge.from;
+      const toName = (data.divisions.find(d => d.id === edge.to) || {}).name || edge.to;
+      panel.innerHTML = `<b>${fromName} → ${toName}: ${edge.label}.</b> ${edge.detail}`;
+      panel.classList.add("show");
+    }
+    renderDivisionFlow("flowContainer", { companyData: data, onEdgeClick: renderFlowEdgeDetail });
+
+    document.getElementById("cobraFullscreen").addEventListener("click", () => {
+      const wrap = document.getElementById("cobraWrap");
+      if (!document.fullscreenElement) { wrap.requestFullscreen(); } else { document.exitFullscreen(); }
     });
+    document.addEventListener("fullscreenchange", () => {
+      const wrap = document.getElementById("cobraWrap");
+      const btn = document.getElementById("cobraFullscreen");
+      if (!wrap || !btn) return;
+      btn.textContent = document.fullscreenElement === wrap ? "✕ Exit fullscreen" : "⛶ Fullscreen";
+    });
+
+    if (!window.THREE || !window.THREE.OrbitControls || !window.THREE.UnrealBloomPass) {
+      showFallback("3D rendering library didn't load — check your connection and reload.");
+    } else {
+      let scene3d;
+      try {
+        scene3d = buildScene(data);
+      } catch (err) {
+        console.error("Hologram scene failed to initialize:", err);
+        showFallback(`This browser/device couldn't start the 3D scene (${err.message}).`);
+      }
+      if (scene3d) {
+        OrgEdit.init(() => data, async () => {
+          try {
+            data = Object.assign(data, await loadOrgData());
+          } catch (err) {
+            console.error("Failed to refresh hologram data:", err);
+            return;
+          }
+          scene3d.rebuild(data);
+          document.getElementById("holoLeadership").innerHTML = data.leadership.map(p => `
+            <div class="leader-card"><div class="name">${p.name}</div><div class="title">${p.title}</div><div class="note">${p.note}</div></div>`).join("");
+        });
+      }
+    }
 
     function showFallback(msg) {
       const canvas = document.getElementById("holoCanvas");
@@ -107,8 +281,9 @@
       if (fb) { fb.style.display = "block"; fb.textContent = msg; }
     }
 
-    SearchIndex.register("Hologram", [
-      ...data.divisions.map(d => ({ title: `Hologram: ${d.name}`, snippet: d.desc, route: "hologram" }))
+    SearchIndex.register("Full Circle", [
+      ...data.divisions.map(d => ({ title: `Full Circle: ${d.name}`, snippet: d.desc, route: "hologram" })),
+      ...data.leadership.map(p => ({ title: p.name, snippet: p.title, route: "hologram" }))
     ]);
   }
 
@@ -119,6 +294,7 @@
     const label = document.getElementById("holoLabel");
     const labelText = document.getElementById("holoLabelText");
     const labelEdit = document.getElementById("holoLabelEdit");
+    const labelAdd = document.getElementById("holoLabelAdd");
 
     const reduceMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const smallViewport = window.matchMedia && window.matchMedia("(max-width: 640px)").matches;
@@ -179,8 +355,7 @@
 
     // Fixed total wedge divided by however many children exist, not a fixed step per
     // child — so 2 siblings and 7 siblings both fit their allotted angular space
-    // instead of the spread growing unbounded with count (real data is ~4x denser
-    // than the prototype this was adapted from).
+    // instead of the spread growing unbounded with count.
     function distributeAngles(centerAngle, count, totalWedge) {
       if (count <= 1) return [centerAngle];
       const step = totalWedge / (count - 1);
@@ -239,7 +414,8 @@
       const { group, fill } = makeNode(r, color, opacity);
       const x = Math.cos(angle) * radius, z = Math.sin(angle) * radius;
       group.position.set(x, y, z);
-      fill.userData = { id: item.id, name: item.name, tier, kind: tier === 1 ? (item.isCorpfn ? "corpfn" : "division") : tier === 2 ? (isPerson ? "person" : "vertical") : "function", parentId, expandable: tier < 3 && !isPerson };
+      const kind = tier === 1 ? (item.isCorpfn ? "corpfn" : "division") : tier === 2 ? (isPerson ? "person" : "vertical") : "function";
+      fill.userData = { id: item.id, name: item.name, tier, kind, parentId, expandable: tier < 3 && !isPerson };
       nodeLayer.add(group);
       hoverable.push(fill);
       nodes.set(item.id, { group, fill, tier, angle, radius: radius, y, parentId, expanded: false, children: [] });
@@ -250,9 +426,7 @@
     // the function itself if its department is drilled all the way in, else its
     // department node, else its division (divisions are never removed, only their
     // children toggle, so this always finds something). Full recompute rather than
-    // incremental: cheap at 14 rows, and correct by construction on every expand/
-    // collapse instead of only lighting up once you've clicked all the way down to
-    // exact function pairs.
+    // incremental: cheap at ~15 rows, correct by construction on every expand/collapse.
     function resolveVisible(functionId) {
       if (nodes.has(functionId)) return functionId;
       const vertId = window.OrgConnections.findVerticalOf(functionId, sceneState.verticals);
@@ -302,18 +476,13 @@
       if (!n || n.expanded) return;
       const fill = n.fill;
       // Accordion: only one open branch per level. Expanding a new sibling closes
-      // whatever was open before it, so the scene stays focused on one path at a
-      // time instead of accumulating every branch ever clicked.
+      // whatever was open before it, so the scene stays focused on one path at a time.
       if (n.tier === 1 && expandedTier1 && expandedTier1 !== id) collapse(expandedTier1);
       if (n.tier === 2 && expandedTier2 && expandedTier2 !== id) collapse(expandedTier2);
       let children;
       if (n.tier === 1) children = tier2Of({ id });
       else children = tier3Of(id);
       if (!children.length) { rebuildLines(); return; }
-      // Tier-2's wedge (department fan around a division) is generous since siblings
-      // are far apart on the circle. Tier-3's wedge (function fan around a department)
-      // is tighter — real departments sit close together (e.g. Advantage's 5), so a
-      // wide function fan on two adjacent expanded departments would overlap.
       const totalWedge = n.tier === 1 ? 0.95 : 0.5;
       const outward = n.tier === 1 ? 1.9 : 1.6;
       const yStep = n.tier === 1 ? -0.65 : -0.55;
@@ -352,6 +521,14 @@
       if (kind === "vertical") return "vertical";
       if (kind === "function") return "function";
       if (kind === "person") return "person";
+      return null;
+    }
+    // Divisions are edit-only by design (no add/delete — the same rule js/orgedit.js
+    // already enforces; the four divisions are fixed). Corporate's "children" are
+    // people, not departments.
+    function addKindFor(userData) {
+      if (userData.tier === 1) return userData.kind === "corpfn" ? "person" : "vertical";
+      if (userData.tier === 2 && userData.kind === "vertical") return "function";
       return null;
     }
 
@@ -407,6 +584,15 @@
         } else {
           labelEdit.style.display = "none";
         }
+        const addKind = addKindFor(hit.userData);
+        if (addKind && Auth.isSignedIn()) {
+          labelAdd.style.display = "";
+          labelAdd.dataset.kind = addKind;
+          labelAdd.dataset.parent = hit.userData.id;
+          labelAdd.textContent = addKind === "person" ? "+ Add person" : addKind === "function" ? "+ Add function" : "+ Add department";
+        } else {
+          labelAdd.style.display = "none";
+        }
         const hitId = hit.userData.id;
         lines.forEach((entry, key) => { entry.baseOpacity = key.split("|").includes(hitId) ? 1 : 0.08; });
       } else {
@@ -419,12 +605,16 @@
       const { kind, id, parent } = labelEdit.dataset;
       OrgEdit.open(kind, "edit", id, parent || null);
     });
+    labelAdd.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const { kind, parent } = labelAdd.dataset;
+      OrgEdit.open(kind, "add", null, parent);
+    });
 
-    // OrbitControls owns mousedown/mousemove/mouseup on this element for orbiting,
-    // and the native "click" event that follows doesn't reliably fire (or fires after
-    // OrbitControls has already treated a few pixels of jitter as a drag) — this is a
-    // well-known friction point when combining OrbitControls with click-to-select. Fix:
-    // track our own pointerdown→pointerup distance/time instead of trusting "click".
+    // OrbitControls owns mousedown/mousemove/mouseup on this element for orbiting, and
+    // the native "click" event that follows doesn't reliably fire once OrbitControls has
+    // treated a few pixels of jitter as a drag. Track our own pointerdown->pointerup
+    // distance/time instead of trusting "click".
     let downX = 0, downY = 0, downT = 0, isDown = false;
     renderer.domElement.addEventListener("pointerdown", (e) => {
       downX = e.clientX; downY = e.clientY; downT = performance.now(); isDown = true;
@@ -434,7 +624,7 @@
       isDown = false;
       const dist = Math.hypot(e.clientX - downX, e.clientY - downY);
       const dt = performance.now() - downT;
-      if (dist > 6 || dt > 500) return; // treat as a drag/orbit gesture, not a click
+      if (dist > 6 || dt > 500) return;
       const hit = raycastAt(e.clientX, e.clientY);
       if (hit) toggle(hit.userData.id);
     });
@@ -455,9 +645,6 @@
         scanT += 0.006;
         scanRing.position.y = (Math.sin(scanT) * 0.5 + 0.5) * 3.6;
         scanRing.material.opacity = 0.03 + 0.045 * (1 - Math.abs(Math.sin(scanT)));
-        // Connections stay visibly "alive" (a gentle breathing glow) rather than static
-        // lines, and never fully vanish — each gets its own phase so they don't pulse
-        // in lockstep, reading more like energy moving through the map than decoration.
         lines.forEach((entry, key) => {
           let phase = 0;
           for (let i = 0; i < key.length; i++) phase += key.charCodeAt(i);
