@@ -643,7 +643,20 @@
   .holo-fallback {
     padding: 60px 24px; text-align: center; color: var(--ink-soft); font-size: 0.9rem; line-height: 1.6;
   }
-  .holo-hint { color: var(--ink-muted); font-size: 0.8rem; margin: 0 0 26px; }
+  .holo-hint { color: var(--ink-muted); font-size: 0.8rem; margin: 0 0 12px; }
+  .holo-detail {
+    position: relative; background: var(--surface); border-radius: var(--radius-lg); box-shadow: var(--shadow-card);
+    padding: 20px 24px; margin-bottom: 26px;
+  }
+  .holo-detail h4 { font-size: 1rem; margin: 0 0 14px; padding-right: 30px; }
+  .holo-detail-close { position: absolute; top: 16px; right: 18px; background: none; border: none; color: var(--ink-muted); cursor: pointer; font-size: 0.85rem; }
+  .holo-detail-close:hover { color: var(--ink); }
+  .holo-detail-task { padding: 12px 0; border-top: 1px solid var(--border); }
+  .holo-detail-task:first-of-type { border-top: none; padding-top: 0; }
+  .holo-detail-task-name { font-size: 0.9rem; color: var(--ink); font-weight: 600; }
+  .holo-detail-task-desc { font-size: 0.84rem; color: var(--ink-soft); line-height: 1.5; margin-top: 4px; }
+  .holo-detail-tools { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px; }
+  .holo-tool-chip { font-size: 0.74rem; background: var(--accent-wash); color: var(--accent); border-radius: 999px; padding: 3px 11px; }
 
   /* ---- Where I fit ---- */
   .fit-box { background: var(--surface); border-radius: var(--radius-lg); box-shadow: var(--shadow-card); padding: 18px 22px; margin-bottom: 26px; }

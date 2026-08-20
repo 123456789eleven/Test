@@ -27,6 +27,31 @@
     };
   }
 
+  // Task/tool capability layer — from the Schema Extension work. Read-only here;
+  // still function-level, matching how org_connections already works.
+  async function loadTaskData() {
+    const [taskR, toolR, linkR] = await Promise.all([
+      supabaseClient.from("tasks").select("*"),
+      supabaseClient.from("tools").select("*"),
+      supabaseClient.from("task_tools").select("*")
+    ]);
+    for (const r of [taskR, toolR, linkR]) if (r.error) throw r.error;
+    const toolsById = {};
+    toolR.data.forEach(t => { toolsById[t.id] = t; });
+    const toolsByTask = {};
+    linkR.data.forEach(l => {
+      if (!toolsByTask[l.task_id]) toolsByTask[l.task_id] = [];
+      const tool = toolsById[l.tool_id];
+      if (tool) toolsByTask[l.task_id].push(tool);
+    });
+    const tasksByFunction = {};
+    taskR.data.forEach(t => {
+      if (!tasksByFunction[t.function_id]) tasksByFunction[t.function_id] = [];
+      tasksByFunction[t.function_id].push({ ...t, tools: toolsByTask[t.id] || [] });
+    });
+    return tasksByFunction;
+  }
+
   function fmtVal(v) { return v === null ? "n/a" : "$" + v + "B"; }
 
   function updateFitGate() {
@@ -98,7 +123,8 @@
         </div>
         <div id="holoFallback" class="holo-fallback" style="display:none;"></div>
       </div>
-      <p class="holo-hint">Client outcome is deliberately not shown in the scene — no real client-quality data exists in this system yet to trace toward.</p>
+      <p class="holo-hint">Client outcome is deliberately not shown in the scene — no real client-quality data exists in this system yet to trace toward. Click a job function (the smallest nodes) to see its real tasks and tools, where any are recorded yet.</p>
+      <div id="holoDetail" class="holo-detail" style="display:none;"></div>
 
       <div class="integration-box" id="holoIntegrationNote"></div>
 
@@ -184,6 +210,13 @@
       });
     }
 
+    let tasksByFunction = {};
+    try {
+      tasksByFunction = await loadTaskData();
+    } catch (err) {
+      console.error("Task/tool data unavailable — function detail will just show the name:", err);
+    }
+
     function updateEditGate() {
       const btn = document.getElementById("holoManageConnections");
       if (btn) btn.style.display = Auth.isSignedIn() ? "" : "none";
@@ -254,7 +287,7 @@
     } else {
       let scene3d;
       try {
-        scene3d = buildScene(data);
+        scene3d = buildScene(data, tasksByFunction);
       } catch (err) {
         console.error("Hologram scene failed to initialize:", err);
         showFallback(`This browser/device couldn't start the 3D scene (${err.message}).`);
@@ -287,7 +320,11 @@
     ]);
   }
 
-  function buildScene(data) {
+  function esc(s) {
+    return String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  }
+
+  function buildScene(data, tasksByFunction) {
     const THREE = window.THREE;
     const canvas = document.getElementById("holoCanvas");
     const wrap = document.getElementById("holoCanvasWrap");
@@ -516,6 +553,30 @@
       if (n.expanded) collapse(id); else expand(id);
     }
 
+    let detailOpenId = null;
+    function showFunctionDetail(id) {
+      const detail = document.getElementById("holoDetail");
+      if (!detail) return;
+      if (detailOpenId === id) { detail.style.display = "none"; detailOpenId = null; return; }
+      detailOpenId = id;
+      const n = nodes.get(id);
+      const name = n ? n.fill.userData.name : id;
+      const tasks = tasksByFunction[id] || [];
+      detail.innerHTML = `
+        <button class="holo-detail-close" type="button">✕</button>
+        <h4>${esc(name)}</h4>
+        ${tasks.length ? tasks.map(t => `
+          <div class="holo-detail-task">
+            <div class="holo-detail-task-name">${esc(t.name)}</div>
+            ${t.description ? `<div class="holo-detail-task-desc">${esc(t.description)}</div>` : ""}
+            ${t.tools.length ? `<div class="holo-detail-tools">${t.tools.map(tool => `<span class="holo-tool-chip">${esc(tool.name)}</span>`).join("")}</div>` : ""}
+          </div>
+        `).join("") : `<p class="cmap-detail-empty">No tasks recorded yet for this function.</p>`}
+      `;
+      detail.style.display = "block";
+      detail.querySelector(".holo-detail-close").addEventListener("click", () => { detail.style.display = "none"; detailOpenId = null; });
+    }
+
     function editKindFor(kind) {
       if (kind === "division") return "division";
       if (kind === "vertical") return "vertical";
@@ -626,7 +687,9 @@
       const dt = performance.now() - downT;
       if (dist > 6 || dt > 500) return;
       const hit = raycastAt(e.clientX, e.clientY);
-      if (hit) toggle(hit.userData.id);
+      if (!hit) return;
+      if (hit.userData.tier === 3) showFunctionDetail(hit.userData.id);
+      else toggle(hit.userData.id);
     });
     renderer.domElement.addEventListener("pointermove", onPointerMove);
 
