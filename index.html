@@ -44,6 +44,28 @@
 
   .app-shell { display: grid; grid-template-columns: 220px 1fr; min-height: 100vh; }
   @media (max-width: 760px) { .app-shell { grid-template-columns: 1fr; } .sidebar { position: fixed; inset: 0 auto 0 0; width: 220px; transform: translateX(-100%); transition: transform .25s ease; z-index: 50; } .sidebar.open { transform: translateX(0); } .menu-toggle { display: inline-flex !important; } }
+
+  /* Full-screen routes (currently just Hologram): collapse chrome to a corner toggle, let the view fill the viewport */
+  body.route-fullscreen .app-shell { grid-template-columns: 1fr; }
+  body.route-fullscreen .sidebar {
+    position: fixed; inset: 0 auto 0 0; width: 220px; transform: translateX(-100%);
+    transition: transform .25s ease; z-index: 50;
+  }
+  body.route-fullscreen .sidebar.open { transform: translateX(0); }
+  body.route-fullscreen .sidebar-backdrop {
+    display: block; position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 45;
+    opacity: 0; pointer-events: none; transition: opacity .2s ease;
+  }
+  body.route-fullscreen .sidebar-backdrop.show { opacity: 1; pointer-events: auto; }
+  body.route-fullscreen.sidebar-lock { overflow: hidden; }
+  body.route-fullscreen .menu-toggle { display: inline-flex !important; }
+  body.route-fullscreen .topbar {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 40; border-bottom: none;
+    background: rgba(10,9,18,0.55); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+  }
+  body.route-fullscreen .search-wrap { display: none; }
+  body.route-fullscreen main { padding: 0; max-width: none; }
+  body.route-fullscreen .app-footer { display: none; }
   .sidebar-backdrop { display: none; }
   @media (max-width: 760px) {
     .sidebar-backdrop {
@@ -618,18 +640,29 @@
   .cmap-outcome-sub { font-size: 9.5px; fill: var(--cmap-ink-muted); text-anchor: middle; font-style: italic; }
 
   /* ---- Hologram page ---- */
+  .holo-page { position: relative; }
+  .holo-header {
+    display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap;
+    padding: 70px 24px 12px; position: relative; z-index: 5;
+  }
+  .holo-header h1 { font-size: 1.3rem; }
+  .holo-header a { font-size: 0.84rem; font-weight: 600; color: var(--accent); text-decoration: none; }
+  .holo-header a:hover { text-decoration: underline; }
   .holo-legend {
     display: flex; align-items: center; gap: 18px; flex-wrap: wrap; font-size: 0.8rem; color: var(--ink-soft);
-    background: var(--surface); border-radius: var(--radius-md); box-shadow: var(--shadow-card); padding: 12px 16px; margin-bottom: 14px;
+    background: var(--surface); border-radius: var(--radius-md); box-shadow: var(--shadow-card); padding: 12px 16px; margin: 0 24px 14px;
   }
   .holo-legend-item { display: inline-flex; align-items: center; gap: 6px; }
   .holo-swatch { width: 12px; height: 12px; border-radius: 50%; display: inline-block; }
   #holoCanvasWrap {
-    position: relative; background: #04060a; border-radius: var(--radius-lg); box-shadow: var(--shadow-card);
-    overflow: hidden; margin-bottom: 10px;
+    position: relative; background: #04060a; overflow: hidden; margin: 0 24px 10px; border-radius: var(--radius-lg); box-shadow: var(--shadow-card);
   }
   #holoCanvas { width: 100%; height: 600px; display: block; touch-action: none; }
   @media (max-width: 640px) { #holoCanvas { height: 420px; } }
+  body.route-fullscreen .holo-legend, body.route-fullscreen #holoCanvasWrap { margin-left: 0; margin-right: 0; border-radius: 0; }
+  body.route-fullscreen #holoCanvasWrap { box-shadow: none; }
+  body.route-fullscreen #holoCanvas { height: calc(100vh - 132px); }
+  @media (max-width: 640px) { body.route-fullscreen #holoCanvas { height: calc(100vh - 160px); } }
   .holo-label {
     position: fixed; pointer-events: none; display: none; align-items: center; gap: 10px;
     background: rgba(11,16,23,0.92); border: 1px solid rgba(255,255,255,0.12); color: #e7ebf0;
@@ -894,6 +927,7 @@
       <a href="#/insights" data-route="insights"><span class="dot"></span>Insights</a>
       <a href="#/landscape" data-route="landscape"><span class="dot"></span>Landscape</a>
       <a href="#/hologram" data-route="hologram"><span class="dot"></span>Hologram</a>
+      <a href="#/company" data-route="company"><span class="dot"></span>Company</a>
       <a href="study/"><span class="dot"></span>Exam Prep ↗</a>
     </nav>
     <div class="foot">One app, one address — no more separate .html pages to keep in sync.</div>
@@ -943,7 +977,6 @@
 <script src="js/supabase-client.js"></script>
 <script src="js/migrate.js"></script>
 <script src="js/auth.js"></script>
-<script src="js/orgmap.js"></script>
 <script src="js/orgedit.js"></script>
 <script src="js/divisionflow.js"></script>
 <script src="js/connectionmap.js"></script>
@@ -962,6 +995,7 @@
 <script src="js/views/insights.js"></script>
 <script src="js/views/landscape.js"></script>
 <script src="js/views/hologram.js"></script>
+<script src="js/views/company.js"></script>
 <script src="js/app.js"></script>
 </body>
 </html>

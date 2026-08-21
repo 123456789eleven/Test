@@ -8,8 +8,13 @@ function setSidebarOpen(open) {
 
 const Router = {
   routes: {},
-  register(path, renderFn) { this.routes[path] = renderFn; },
+  cleanup: null,
+  register(path, renderFn, options) { this.routes[path] = { renderFn, options: options || {} }; },
   async navigate() {
+    if (typeof this.cleanup === "function") {
+      try { this.cleanup(); } catch (err) { console.error("Route cleanup failed:", err); }
+      this.cleanup = null;
+    }
     const hash = window.location.hash.replace(/^#\/?/, "") || "overview";
     const [route, ...rest] = hash.split("/");
     document.querySelectorAll("#sidenav a[data-route]").forEach(a => {
@@ -23,10 +28,11 @@ const Router = {
         <div class="sk-block sk-line" style="width:80%;"></div>
       </div>
     `;
-    const renderFn = this.routes[route];
-    if (renderFn) {
+    const entry = this.routes[route];
+    document.body.classList.toggle("route-fullscreen", !!(entry && entry.options.fullscreen));
+    if (entry) {
       try {
-        await renderFn(mount, rest.join("/"));
+        this.cleanup = await entry.renderFn(mount, rest.join("/")) || null;
       } catch (err) {
         mount.innerHTML = `<div class="loading">Something broke loading this view.<br><span class="mono" style="font-size:0.78rem;">${err.message}</span></div>`;
         console.error(err);
