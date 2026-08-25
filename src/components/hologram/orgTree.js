@@ -1,0 +1,153 @@
+// Pure, React/Three-agnostic logic for the Hologram scene's hierarchy: which
+// nodes exist at each tier, where they sit, and how connections resolve to
+// whichever tier is currently on screen. Kept free of any rendering concerns
+// so the accordion/progressive-disclosure math can be read (and checked)
+// on its own, the same way the original buildScene()'s bookkeeping could be
+// read independent of its Three.js calls.
+
+export const EXEC_IDS = ["fx3", "frankIII"];
+export const DIVISION_ORDER = ["strategies", "advantage", "payroll", "advisory"];
+export const RADIUS = { division: 0.75, vertical: 0.34, function: 0.19 };
+export const GLOW = 0x46d6ff;
+export const SHARED_GLOW = 0xffb84f;
+export const QUIET = 0x3a4250;
+export const PEOPLE_GLOW = 0x8b93c9;
+
+// tier1 -> tier2 (division/corpfn -> vertical/person) and tier2 -> tier3
+// (vertical -> function) each get their own fixed angular wedge and outward/
+// downward step, matching the original's two expansion "styles".
+const TIER1_WEDGE = 0.95, TIER1_OUTWARD = 1.9, TIER1_YSTEP = -0.65;
+const TIER2_WEDGE = 0.5, TIER2_OUTWARD = 1.6, TIER2_YSTEP = -0.55;
+
+// Fixed total wedge divided by however many children exist, not a fixed step
+// per child — so 2 siblings and 7 siblings both fit their allotted angular
+// space instead of the spread growing unbounded with count.
+export function distributeAngles(centerAngle, count, totalWedge) {
+  if (count <= 1) return [centerAngle];
+  const step = totalWedge / (count - 1);
+  const out = [];
+  for (let i = 0; i < count; i++) out.push(centerAngle - totalWedge / 2 + i * step);
+  return out;
+}
+
+export function findVerticalOf(functionId, verticals) {
+  for (const [vid, v] of Object.entries(verticals)) {
+    if (v.funcs.some((f) => f.id === functionId)) return vid;
+  }
+  return null;
+}
+
+// Mirrors the old buildState(): derives the fixed tier-1 list plus which
+// divisions/verticals/functions currently have any modeled connection at all
+// (used only to pick a node's "quiet" vs "glowing" color — connectivity
+// itself never changes what's expandable or visible).
+export function buildSceneState(data) {
+  const verticals = data.verticals || {};
+  const divisions = DIVISION_ORDER.map((id) => (data.divisions || []).find((d) => d.id === id)).filter(Boolean);
+  const corpfnPeople = (data.leadership || []).filter((l) => l.parent === "root" && !EXEC_IDS.includes(l.id));
+  const tier1 = [
+    ...divisions.map((d) => ({ id: d.id, name: d.name, isCorpfn: false })),
+    { id: "corpfn", name: "Corporate Functions", isCorpfn: true },
+  ];
+
+  const funcConnected = new Set();
+  (data.processConnections || []).forEach((c) => { funcConnected.add(c.from); funcConnected.add(c.to); });
+  const vertConnected = new Set(
+    Object.entries(verticals).filter(([, v]) => v.funcs.some((f) => funcConnected.has(f.id))).map(([id]) => id)
+  );
+  const divConnected = new Set(
+    divisions.filter((d) => Object.entries(verticals).some(([id, v]) => v.division === d.id && vertConnected.has(id))).map((d) => d.id)
+  );
+
+  return { verticals, divisions, corpfnPeople, tier1, funcConnected, vertConnected, divConnected, processConnections: data.processConnections || [] };
+}
+
+function colorAndConnected(sceneState, tier, item, isPerson) {
+  let connected;
+  if (tier === 1) connected = item.isCorpfn ? sceneState.corpfnPeople.length > 0 : sceneState.divConnected.has(item.id);
+  else if (tier === 2) connected = isPerson ? true : sceneState.vertConnected.has(item.id);
+  else connected = sceneState.funcConnected.has(item.id);
+  const color = isPerson ? PEOPLE_GLOW : connected ? GLOW : QUIET;
+  return { connected, color };
+}
+
+// Full recompute of every currently-visible node (tier1 always, tier2 only
+// under expandedTier1, tier3 only under expandedTier2) plus the connection
+// lines between them, resolved to whichever tier is on screen for each
+// endpoint. Cheap at this data size and correct by construction on every
+// expand/collapse — same tradeoff the original's rebuildLines() made.
+export function computeVisibleNodes(sceneState, expandedTier1, expandedTier2) {
+  const nodesById = new Map();
+  const allNodes = [];
+
+  function place(item, tier, angle, radius, y, parentId) {
+    const isPerson = !!item.isPerson;
+    const size = tier === 1 ? RADIUS.division : tier === 2 ? RADIUS.vertical : RADIUS.function;
+    const { color } = colorAndConnected(sceneState, tier, item, isPerson);
+    const opacity = tier === 1 ? 0.3 : tier === 2 ? 0.34 : 0.38;
+    const kind = tier === 1 ? (item.isCorpfn ? "corpfn" : "division") : tier === 2 ? (isPerson ? "person" : "vertical") : "function";
+    const x = Math.cos(angle) * radius, z = Math.sin(angle) * radius;
+    const expandable = tier < 3 && !isPerson;
+    const expanded = tier === 1 ? item.id === expandedTier1 : tier === 2 ? item.id === expandedTier2 : false;
+    const node = {
+      id: item.id, name: item.name, tier, kind, isPerson, parentId,
+      angle, radius, y, position: [x, y, z], size, color, opacity, expandable, expanded,
+    };
+    nodesById.set(item.id, node);
+    allNodes.push(node);
+    return node;
+  }
+
+  sceneState.tier1.forEach((t1, i) => {
+    const angle = (i / sceneState.tier1.length) * Math.PI * 2;
+    place(t1, 1, angle, 5.5, 1.6, null);
+  });
+
+  if (expandedTier1) {
+    const parent = nodesById.get(expandedTier1);
+    if (parent) {
+      const children = parent.kind === "corpfn"
+        ? sceneState.corpfnPeople.map((p) => ({ id: p.id, name: p.name, isPerson: true }))
+        : Object.entries(sceneState.verticals).filter(([, v]) => v.division === parent.id).map(([id, v]) => ({ id, name: v.name }));
+      const angles = distributeAngles(parent.angle, children.length, TIER1_WEDGE);
+      children.forEach((child, i) => place(child, 2, angles[i], parent.radius + TIER1_OUTWARD, parent.y + TIER1_YSTEP, parent.id));
+    }
+  }
+
+  if (expandedTier2) {
+    const parent = nodesById.get(expandedTier2);
+    if (parent && parent.tier === 2 && !parent.isPerson) {
+      const v = sceneState.verticals[parent.id];
+      const children = v ? v.funcs.map((f) => ({ id: f.id, name: f.label })) : [];
+      const angles = distributeAngles(parent.angle, children.length, TIER2_WEDGE);
+      children.forEach((child, i) => place(child, 3, angles[i], parent.radius + TIER2_OUTWARD, parent.y + TIER2_YSTEP, parent.id));
+    }
+  }
+
+  // Every connection resolves to whichever tier is currently on screen for
+  // each end — the function itself if its department is drilled all the way
+  // in, else its department node, else its division (divisions are always
+  // visible, so this never fails to resolve).
+  function resolveVisible(functionId) {
+    if (nodesById.has(functionId)) return functionId;
+    const vertId = findVerticalOf(functionId, sceneState.verticals);
+    if (vertId && nodesById.has(vertId)) return vertId;
+    const divId = vertId ? sceneState.verticals[vertId]?.division : null;
+    if (divId && nodesById.has(divId)) return divId;
+    return null;
+  }
+
+  const seen = new Set();
+  const lines = [];
+  sceneState.processConnections.forEach((c) => {
+    const a = resolveVisible(c.from), b = resolveVisible(c.to);
+    if (!a || !b || a === b) return;
+    const key = [a, b].sort().join("|");
+    if (seen.has(key)) return;
+    seen.add(key);
+    const na = nodesById.get(a), nb = nodesById.get(b);
+    lines.push({ key, a, b, type: c.type, color: c.type === "shared" ? SHARED_GLOW : GLOW, from: na.position, to: nb.position });
+  });
+
+  return { nodesById, allNodes, lines };
+}

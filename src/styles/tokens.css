@@ -1,0 +1,24 @@
+/* ============================================================
+   Tokens — Aurora, Custodian's single site-wide visual identity
+   ============================================================ */
+
+/* Fraunces Display — used only by the homepage's Overview-hero treatment (piloted direction, isolated from the rest of the app) */
+@font-face {
+  font-family: "Fraunces Display";
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+  src: url("../assets/fraunces-display.woff") format('woff');
+}
+
+:root {
+  /* Aurora — Custodian's single visual identity (dark by design, no light variant: an ambient-glow palette doesn't translate to light mode) */
+  --page: #0a0912; --surface: #14111f; --surface-alt: #1a1729;
+  --ink: #f2f0f7; --ink-soft: #a9a2bf; --ink-muted: #6b6483;
+  --accent: #8b7cf0; --accent-wash: rgba(139,124,240,0.14); --accent-ink: #0a0912;
+  --border: rgba(242,240,247,0.10); --grid: #251f38; --manager: #e0a15c; --manager-soft: #2e2416;
+  --good: #5fc99a; --good-soft: #163024; --warn: #e0715c; --warn-soft: #301c17;
+  --radius-lg: 20px; --radius-md: 14px; --radius-sm: 10px;
+  --shadow-card: 0 1px 2px rgba(0,0,0,0.3), 0 10px 28px rgba(0,0,0,0.4);
+  --shadow-modal: 0 24px 64px rgba(0,0,0,0.55);
+}

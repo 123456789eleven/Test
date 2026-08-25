@@ -1,0 +1,100 @@
+/* ============================================================
+   Shell — app chrome: layout grid, sidebar, topbar, search, auth
+   ============================================================ */
+
+.app-shell { display: grid; grid-template-columns: 220px 1fr; min-height: 100vh; }
+@media (max-width: 760px) { .app-shell { grid-template-columns: 1fr; } .sidebar { position: fixed; inset: 0 auto 0 0; width: 220px; transform: translateX(-100%); transition: transform .25s ease; z-index: 50; } .sidebar.open { transform: translateX(0); } .menu-toggle { display: inline-flex !important; } }
+
+/* Full-screen routes (currently just Hologram): collapse chrome to a corner toggle, let the view fill the viewport */
+body.route-fullscreen .app-shell { grid-template-columns: 1fr; }
+body.route-fullscreen .sidebar {
+  position: fixed; inset: 0 auto 0 0; width: 220px; transform: translateX(-100%);
+  transition: transform .25s ease; z-index: 50;
+}
+body.route-fullscreen .sidebar.open { transform: translateX(0); }
+body.route-fullscreen .sidebar-backdrop {
+  display: block; position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 45;
+  opacity: 0; pointer-events: none; transition: opacity .2s ease;
+}
+body.route-fullscreen .sidebar-backdrop.show { opacity: 1; pointer-events: auto; }
+body.route-fullscreen.sidebar-lock { overflow: hidden; }
+body.route-fullscreen .menu-toggle { display: inline-flex !important; }
+body.route-fullscreen .topbar {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 40; border-bottom: none;
+  background: rgba(10,9,18,0.55); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+}
+body.route-fullscreen .search-wrap { display: none; }
+body.route-fullscreen main { padding: 0; max-width: none; }
+body.route-fullscreen .app-footer { display: none; }
+.sidebar-backdrop { display: none; }
+@media (max-width: 760px) {
+  .sidebar-backdrop {
+    display: block; position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 45;
+    opacity: 0; pointer-events: none; transition: opacity .2s ease;
+  }
+  .sidebar-backdrop.show { opacity: 1; pointer-events: auto; }
+  body.sidebar-lock { overflow: hidden; }
+}
+
+.sidebar { background: var(--surface); border-right: 1px solid var(--border); padding: 22px 16px; display: flex; flex-direction: column; gap: 22px; }
+.sidebar .brand { font-size: 0.92rem; padding: 0 6px; }
+.sidebar nav { display: flex; flex-direction: column; gap: 2px; }
+.sidebar nav a {
+  display: flex; align-items: center; gap: 10px; text-decoration: none; color: var(--ink-soft);
+  font-size: 0.88rem; font-weight: 600; padding: 9px 10px; border-radius: 8px; transition: background .15s ease, color .15s ease;
+}
+.sidebar nav a:hover { background: var(--surface-alt); color: var(--ink); }
+.sidebar nav a.active { background: var(--accent-wash); color: var(--accent); }
+.sidebar nav a .dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; opacity: 0; flex: none; }
+.sidebar nav a.active .dot { opacity: 1; }
+.sidebar .foot { margin-top: auto; font-size: 0.72rem; color: var(--ink-muted); padding: 0 6px; line-height: 1.5; }
+
+.main-col { display: flex; flex-direction: column; min-width: 0; }
+.topbar { display: flex; align-items: center; gap: 12px; padding: 14px clamp(16px, 3vw, 32px); border-bottom: 1px solid var(--border); background: var(--surface); position: sticky; top: 0; z-index: 20; }
+.menu-toggle { display: none; align-items: center; justify-content: center; width: 34px; height: 34px; border-radius: var(--radius-sm); border: none; background: var(--surface-alt); cursor: pointer; color: var(--ink); font-size: 1rem; }
+.search-wrap { flex: 1; min-width: 0; max-width: 420px; position: relative; }
+.search-wrap input {
+  width: 100%; font: inherit; font-size: 0.86rem; padding: 9px 14px 9px 34px; border-radius: 999px;
+  border: none; background: var(--surface-alt); color: var(--ink);
+}
+.search-wrap input:focus { outline: 2px solid var(--accent); outline-offset: -1px; }
+.search-wrap .icon { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--ink-muted); font-size: 0.85rem; pointer-events: none; }
+.search-results {
+  position: absolute; top: calc(100% + 8px); left: 0; right: 0; background: var(--surface);
+  border-radius: var(--radius-md); box-shadow: var(--shadow-modal); max-height: 340px; overflow-y: auto; display: none; z-index: 30;
+}
+.search-results.show { display: block; }
+.search-result-item { display: block; padding: 10px 14px; text-decoration: none; color: inherit; border-bottom: 1px solid var(--border); cursor: pointer; }
+.search-result-item:first-child { border-radius: var(--radius-md) var(--radius-md) 0 0; }
+.search-result-item:last-child { border-bottom: none; border-radius: 0 0 var(--radius-md) var(--radius-md); }
+.search-result-item:hover { background: var(--surface-alt); }
+.search-result-item .src { font-size: 0.66rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--accent); font-weight: 700; }
+.search-result-item .ttl { font-size: 0.86rem; font-weight: 600; margin-top: 2px; }
+.search-empty { padding: 14px; font-size: 0.82rem; color: var(--ink-muted); }
+
+.auth-btn { font: inherit; font-size: 0.8rem; font-weight: 600; padding: 8px 16px; border-radius: 999px; border: none; background: var(--surface-alt); color: var(--ink-soft); cursor: pointer; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: none; transition: background .15s ease, color .15s ease; }
+@media (max-width: 500px) { .auth-btn { max-width: 120px; } }
+.auth-btn:hover { background: var(--accent-wash); color: var(--accent); }
+.auth-btn[data-mode="signout"] { color: var(--accent); background: var(--accent-wash); }
+
+.auth-modal-overlay { display: none; position: fixed; inset: 0; background: rgba(10,10,14,0.4); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); z-index: 100; align-items: center; justify-content: center; padding: 20px; }
+.auth-modal-overlay.show { display: flex; }
+.auth-modal { position: relative; width: 100%; max-width: 360px; background: var(--surface); border-radius: var(--radius-lg); box-shadow: var(--shadow-modal); padding: 28px 30px; }
+.auth-modal h3 { font-size: 1.15rem; margin-bottom: 6px; }
+.auth-modal-sub { color: var(--ink-soft); font-size: 0.84rem; line-height: 1.5; margin: 0 0 18px; }
+.auth-modal-close { position: absolute; top: 18px; right: 18px; background: none; border: none; color: var(--ink-muted); cursor: pointer; font-size: 0.85rem; }
+#authForm { display: flex; flex-direction: column; gap: 10px; }
+#authForm input { font: inherit; font-size: 0.9rem; padding: 11px 14px; border-radius: var(--radius-sm); border: none; background: var(--surface-alt); color: var(--ink); }
+#authForm input:focus { outline: 2px solid var(--accent); outline-offset: -1px; }
+#authForm button[type="submit"] { font: inherit; font-size: 0.88rem; font-weight: 600; padding: 11px; border-radius: 999px; border: none; background: var(--accent); color: var(--accent-ink); cursor: pointer; margin-top: 4px; transition: opacity .15s ease; }
+#authForm button[type="submit"]:hover { opacity: 0.88; }
+.auth-error { color: var(--warn); font-size: 0.8rem; min-height: 1em; }
+.auth-toggle-mode { display: block; width: 100%; text-align: center; background: none; border: none; color: var(--accent); font: inherit; font-size: 0.8rem; margin-top: 14px; cursor: pointer; }
+
+.auth-gate { background: var(--accent-wash); border-radius: var(--radius-md); padding: 14px 18px; color: var(--ink-soft); font-size: 0.88rem; margin-bottom: 16px; }
+.auth-gate button { font: inherit; font-size: 0.85rem; font-weight: 600; color: var(--accent); background: none; border: none; cursor: pointer; text-decoration: underline; }
+
+main { flex: 1; padding: 28px clamp(16px, 3vw, 40px) 70px; width: 100%; margin: 0 auto; }
+.loading { color: var(--ink-muted); font-size: 0.9rem; padding: 40px 0; text-align: center; }
+
+footer.app-footer { border-top: 1px solid var(--border); padding: 18px clamp(16px, 3vw, 40px); font-size: 0.76rem; color: var(--ink-muted); }

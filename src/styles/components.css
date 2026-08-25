@@ -1,0 +1,271 @@
+/* ============================================================
+   Components — shared, reusable UI pieces used across pages
+   ============================================================ */
+
+/* ---- Kelly Benefits: executive hero header ---- */
+.kb-hero {
+  position: relative; border-radius: var(--radius-lg); overflow: hidden; padding: 34px 32px; margin-bottom: 26px;
+  background:
+    radial-gradient(circle at 15% 20%, rgba(139,124,240,0.32), transparent 55%),
+    radial-gradient(circle at 90% 85%, rgba(224,161,92,0.16), transparent 50%),
+    linear-gradient(160deg, #0a0912, #14111f 65%, #1a1729);
+  color: #f4f8fb;
+}
+.kb-hero-content { max-width: 74ch; position: relative; }
+.kb-hero-content h1 { font-size: clamp(1.6rem, 3vw, 2.1rem); color: #ffffff; }
+.kb-hero-content p { color: rgba(244,248,251,0.78); font-size: 0.96rem; margin: 10px 0 0; line-height: 1.6; }
+.kb-hero-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-top: 26px; position: relative; }
+@media (max-width: 700px) { .kb-hero-stats { grid-template-columns: 1fr; } }
+.kb-stat {
+  background: rgba(255,255,255,0.07); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255,255,255,0.14); border-radius: var(--radius-md); padding: 16px 18px;
+}
+.kb-stat-big { font-family: "Fraunces Display", serif; font-size: 2.1rem; font-weight: 600; color: #ffffff; line-height: 1; }
+.kb-stat-label { font-size: 0.78rem; color: rgba(244,248,251,0.72); margin-top: 8px; line-height: 1.4; }
+
+/* ---- Shared: charts ---- */
+.charts { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; }
+@media (max-width: 900px) { .charts { grid-template-columns: 1fr; } }
+.chart-card { background: var(--surface); border-radius: var(--radius-lg); box-shadow: var(--shadow-card); padding: 22px 24px; }
+.chart-card.wide { grid-column: 1 / -1; }
+.chart-card h3 { font-size: 1.02rem; margin-bottom: 4px; }
+.chart-card .cap { color: var(--ink-soft); font-size: 0.85rem; line-height: 1.5; margin: 6px 0 20px; max-width: 62ch; }
+
+/* .hbar-* is the canonical horizontal-bar-chart component (Insights/Landscape). .co-hbar-* was an
+   identical duplicate under a Company-page-only prefix — consolidated here, old names kept as aliases.
+   (Company's original wider label column (150px vs 92px), .val font-size (0.82rem) and margin-bottom
+   (12px) were folded into the shared .hbar-* values below as part of the merge.) */
+.hbar-row, .co-hbar-row { display: grid; grid-template-columns: 92px 1fr 64px; align-items: center; gap: 10px; margin-bottom: 14px; }
+.hbar-row .lbl, .co-hbar-row .lbl { font-size: 0.82rem; color: var(--ink-soft); }
+.hbar-row .lbl .sub, .co-hbar-row .lbl .sub { display: block; color: var(--ink-muted); font-size: 0.72rem; }
+.hbar-track, .co-hbar-track { position: relative; height: 20px; background: var(--surface-alt); border-radius: 3px; }
+.hbar-fill, .co-hbar-fill { position: absolute; left: 0; top: 0; height: 100%; background: var(--accent); border-radius: 3px 1px 1px 3px; width: 0; transition: width .9s cubic-bezier(.2,.8,.2,1); }
+.hbar-fill.kelly, .co-hbar-fill.kelly { background: var(--manager); }
+@media (prefers-reduced-motion: reduce) { .hbar-fill, .co-hbar-fill { transition: none; } }
+.hbar-row .val, .co-hbar-row .val { font-size: 0.84rem; font-weight: 600; text-align: right; }
+.chart-caption { font-size: 0.8rem; color: var(--ink-muted); margin-top: 10px; }
+
+.axis-ticks { display: grid; grid-template-columns: 92px 1fr 64px; margin-top: 2px; }
+.axis-ticks .ticks { display: flex; justify-content: space-between; font-size: 0.68rem; color: var(--ink-muted); padding-top: 4px; border-top: 1px solid var(--grid); }
+.linechart { width: 100%; height: 220px; }
+.linechart .gridline { stroke: var(--grid); stroke-width: 1; }
+.linechart .baseline { stroke: var(--border); stroke-width: 1; }
+.linechart .area { fill: var(--accent); opacity: 0.08; }
+.linechart .line { fill: none; stroke: var(--accent); stroke-width: 2; }
+.linechart .dot { fill: var(--accent); stroke: var(--page); stroke-width: 2; }
+.linechart text { font-size: 10px; fill: var(--ink-muted); font-family: "Inter", sans-serif; }
+.linechart text.endlabel { fill: var(--ink); font-weight: 700; font-size: 11px; }
+.table-toggle { margin-top: 14px; }
+.table-toggle summary { font-size: 0.78rem; color: var(--accent); cursor: pointer; list-style: none; }
+.table-toggle summary::-webkit-details-marker { display: none; }
+.table-toggle table { width: 100%; margin-top: 10px; border-collapse: collapse; font-size: 0.82rem; }
+.table-toggle th, .table-toggle td { text-align: left; padding: 6px 8px; border-top: 1px solid var(--border); }
+.table-toggle th { color: var(--ink-soft); font-weight: 600; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.04em; }
+.kpis { display: grid; grid-template-columns: repeat(3, 1fr); }
+@media (max-width: 700px) { .kpis { grid-template-columns: 1fr; } }
+.kpi { padding: 2px 20px; border-left: 1px solid var(--border); }
+.kpi:first-child { padding-left: 0; border-left: none; }
+@media (max-width: 700px) { .kpi { border-left: none; padding: 14px 0; border-top: 1px solid var(--border); } .kpi:first-child { border-top: none; padding-top: 0; } }
+.kpi .l { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--ink-soft); }
+.kpi .v { font-size: 1.5rem; font-weight: 700; margin-top: 4px; }
+.kpi .d { font-size: 0.78rem; color: var(--ink-soft); margin-top: 4px; }
+
+/* ---- Shared: feed ---- */
+.refresh-badge { display: inline-flex; align-items: center; gap: 6px; margin-top: 12px; font-size: 0.78rem; color: var(--ink-soft); }
+.refresh-badge .pulse, .live-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); flex: none; animation: livePulse 2s ease-in-out infinite; }
+.live-dot { background: var(--good); }
+@keyframes livePulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+@media (prefers-reduced-motion: reduce) { .refresh-badge .pulse, .live-dot { animation: none; } }
+.live-card { background: var(--surface); border-radius: var(--radius-lg); box-shadow: var(--shadow-card); padding: 20px 22px; margin-bottom: 26px; }
+.live-card h3 { font-size: 0.88rem; display: flex; align-items: center; gap: 8px; }
+.live-card p.cap { color: var(--ink-soft); font-size: 0.82rem; margin: 6px 0 14px; max-width: 68ch; }
+.live-links { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 8px 20px; }
+.live-links a { display: flex; align-items: center; gap: 6px; font-size: 0.86rem; color: var(--ink); text-decoration: none; padding: 4px 0; }
+.live-links a:hover { color: var(--accent); }
+.live-links a::after { content: "↗"; font-size: 0.72rem; color: var(--ink-muted); }
+.cat-filters { display: flex; gap: 20px; flex-wrap: wrap; margin: 38px 0 20px; border-bottom: 1px solid var(--border); padding-bottom: 12px; }
+.cat-chip { font: inherit; font-size: 0.82rem; font-weight: 600; padding: 0; border: none; background: none; color: var(--ink-soft); cursor: pointer; }
+.cat-chip.active { color: var(--ink); }
+.feed { display: flex; flex-direction: column; max-width: 82ch; background: var(--surface); border-radius: var(--radius-lg); box-shadow: var(--shadow-card); padding: 4px 22px; }
+.entry { padding: 20px 0; border-bottom: 1px solid var(--border); }
+.entry:last-child { border-bottom: none; }
+.entry .meta { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; flex-wrap: wrap; }
+.entry .tag { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.06em; font-weight: 700; color: var(--accent); }
+.entry .date { font-size: 0.76rem; color: var(--ink-muted); }
+.entry h3 { font-size: 1.02rem; margin-bottom: 6px; font-family: inherit; }
+.entry p { color: var(--ink-soft); font-size: 0.9rem; line-height: 1.55; margin: 0; }
+.entry .srcs { margin-top: 10px; display: flex; gap: 12px; flex-wrap: wrap; }
+.entry .srcs a { font-size: 0.78rem; color: var(--accent); text-decoration: none; }
+
+/* ---- Shared: tabs (iOS-style segmented control) ---- */
+.tabs { display: inline-flex; gap: 2px; background: var(--surface-alt); border-radius: var(--radius-sm); padding: 3px; margin-bottom: 28px; width: fit-content; max-width: 100%; overflow-x: auto; }
+.tabs button { font: inherit; font-size: 0.86rem; font-weight: 600; padding: 8px 16px; border: none; border-radius: 8px; background: transparent; color: var(--ink-soft); cursor: pointer; white-space: nowrap; transition: background .18s ease, color .18s ease, box-shadow .18s ease; }
+.tabs button.active { background: var(--surface); color: var(--ink); box-shadow: 0 1px 3px rgba(20,22,31,0.1); }
+.tabs button:hover:not(.active) { color: var(--ink); }
+
+/* ---- Kelly Benefits: unified Overview/Connections/COBRA page (sticky scroll-spy sub-nav) ---- */
+.kb-subnav {
+  display: flex; gap: 4px; position: sticky; top: 63px; z-index: 15; margin: 0 0 30px;
+  background: var(--page); padding: 10px 0; border-bottom: 1px solid var(--border);
+  overflow-x: auto; -webkit-overflow-scrolling: touch;
+}
+.kb-subnav a {
+  font-size: 0.82rem; font-weight: 600; letter-spacing: 0.01em; color: var(--ink-soft); text-decoration: none;
+  padding: 8px 16px; border-radius: 999px; transition: background .18s ease, color .18s ease;
+  white-space: nowrap; flex: none;
+}
+.kb-subnav a:hover { color: var(--ink); }
+.kb-subnav a.active { background: var(--accent-wash); color: var(--accent); }
+.kb-section { scroll-margin-top: 118px; padding-top: 6px; }
+.kb-section + .kb-section { margin-top: 56px; padding-top: 40px; border-top: 1px solid var(--border); }
+
+/* ---- Landscape: scale note ---- */
+.scale-note { background: var(--accent-wash); border-radius: var(--radius-md); padding: 16px 20px; margin-bottom: 26px; font-size: 0.9rem; display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+.scale-note .big { font-size: 1.4rem; font-weight: 700; color: var(--accent); }
+.scale-note .rest { color: var(--ink-soft); }
+
+/* ---- Landscape: profile table ---- */
+.profile-card { background: var(--surface); border-radius: var(--radius-lg); box-shadow: var(--shadow-card); padding: 22px 24px; margin-bottom: 26px; }
+.profile-card h3 { font-size: 1.02rem; margin-bottom: 16px; }
+.table-wrap { overflow-x: auto; }
+table.profiles { width: 100%; border-collapse: collapse; font-size: 0.86rem; min-width: 720px; }
+table.profiles th, table.profiles td { text-align: left; padding: 10px 12px; border-top: 1px solid var(--border); }
+table.profiles th { color: var(--ink-soft); font-weight: 600; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.04em; }
+table.profiles td.status { font-size: 0.78rem; }
+.status-pill { display: inline-block; padding: 2px 9px; border-radius: 999px; font-size: 0.72rem; font-weight: 600; background: var(--accent-wash); color: var(--accent); }
+.status-pill.private { background: var(--surface-alt); color: var(--ink-soft); }
+.caveat { font-size: 0.8rem; color: var(--ink-muted); margin-top: 14px; line-height: 1.5; }
+
+/* ---- Landscape: timeline ---- */
+.timeline-card { background: var(--surface); border-radius: var(--radius-lg); box-shadow: var(--shadow-card); padding: 22px 24px; margin-bottom: 26px; }
+.timeline-card h3 { font-size: 1.02rem; margin-bottom: 4px; }
+.timeline-card .cap { color: var(--ink-soft); font-size: 0.85rem; line-height: 1.5; margin: 6px 0 22px; max-width: 68ch; }
+.timeline { position: relative; padding-left: 22px; border-left: 1px solid var(--border); }
+.tl-item { position: relative; padding-bottom: 22px; }
+.tl-item:last-child { padding-bottom: 0; }
+.tl-item::before { content: ""; position: absolute; left: -25px; top: 4px; width: 6px; height: 6px; border-radius: 50%; background: var(--accent); }
+.tl-item .tl-date { font-size: 0.74rem; font-weight: 700; color: var(--accent); text-transform: uppercase; letter-spacing: 0.04em; }
+.tl-item .tl-deal { font-size: 0.94rem; font-weight: 600; margin-top: 3px; }
+.tl-item .tl-value { font-size: 0.78rem; color: var(--ink-muted); margin-top: 2px; }
+.tl-item .tl-sig { font-size: 0.86rem; color: var(--ink-soft); margin-top: 6px; line-height: 1.5; max-width: 70ch; }
+
+/* ---- Landscape: trends ---- */
+.trends-intro { max-width: 74ch; margin-bottom: 24px; }
+.trends-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
+.trend-field-label { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--ink-soft); font-weight: 700; margin: 14px 0 4px; }
+.trend-field-label:first-of-type { margin-top: 10px; }
+.trend-baseline { font-size: 0.86rem; color: var(--ink); }
+.trend-date { color: var(--ink-muted); font-size: 0.78rem; }
+
+/* ---- Landscape: industry forces ---- */
+.forces-card { background: var(--surface); border-radius: var(--radius-lg); box-shadow: var(--shadow-card); padding: 22px 24px; margin-bottom: 26px; }
+.forces-card h3 { font-size: 1.02rem; margin-bottom: 4px; }
+.forces-card .cap { color: var(--ink-soft); font-size: 0.85rem; line-height: 1.5; margin: 6px 0 20px; max-width: 68ch; }
+.forces-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 4px 32px; }
+@media (max-width: 800px) { .forces-grid { grid-template-columns: 1fr; } }
+.force-item { padding: 16px 0; border-top: 1px solid var(--border); }
+.force-item:nth-child(-n+2) { border-top: none; padding-top: 0; }
+@media (max-width: 800px) { .force-item:nth-child(-n+2) { border-top: 1px solid var(--border); padding-top: 16px; } .force-item:first-child { border-top: none; padding-top: 0; } }
+.force-item .fh { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 8px; }
+.force-item h4 { font-size: 0.9rem; font-family: "Inter", sans-serif; font-weight: 700; }
+.force-level { display: flex; align-items: center; gap: 6px; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--ink-soft); font-weight: 700; white-space: nowrap; }
+.force-dots { display: flex; gap: 3px; }
+.force-dots span { width: 6px; height: 6px; border-radius: 50%; background: var(--border); }
+.force-dots span.on { background: var(--accent); }
+.force-item p { font-size: 0.86rem; color: var(--ink-soft); line-height: 1.55; margin: 0; }
+
+/* ---- Notes / hub layer (shared across pages) ---- */
+.notes-card { background: var(--surface); border-radius: var(--radius-lg); box-shadow: var(--shadow-card); padding: 22px 24px; margin-bottom: 26px; }
+.notes-card h3 { font-size: 1.02rem; margin-bottom: 4px; }
+.notes-card .cap { color: var(--ink-soft); font-size: 0.85rem; line-height: 1.5; margin: 6px 0 18px; max-width: 68ch; }
+.note-form { display: grid; grid-template-columns: 130px 1fr; gap: 10px; margin-bottom: 8px; }
+@media (max-width: 640px) { .note-form { grid-template-columns: 1fr; } }
+.note-form select, .note-form input, .note-form textarea {
+  font: inherit; font-size: 0.87rem; padding: 9px 0; border: none; border-bottom: 1px solid var(--border);
+  background: transparent; color: var(--ink); resize: vertical; border-radius: 0;
+}
+.note-form select:focus, .note-form input:focus, .note-form textarea:focus { outline: none; border-bottom-color: var(--accent); }
+.note-form textarea { grid-column: 1 / -1; min-height: 56px; }
+.note-form .row2 { grid-column: 1 / -1; display: flex; gap: 16px; flex-wrap: wrap; align-items: center; }
+.note-form .row2 input { flex: 1; min-width: 160px; }
+.note-form button {
+  font: inherit; font-size: 0.85rem; font-weight: 600; padding: 9px 18px; border-radius: 999px; border: 1px solid var(--ink);
+  background: var(--ink); color: var(--page); cursor: pointer; transition: opacity .15s ease;
+}
+.note-form button:hover { opacity: 0.82; }
+.notes-list { margin-top: 20px; display: flex; flex-direction: column; }
+.note-item { padding: 16px 0; border-top: 1px solid var(--border); position: relative; }
+.note-item:first-child { border-top: none; padding-top: 0; }
+.note-item .nmeta { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; flex-wrap: wrap; }
+.note-tag { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.06em; font-weight: 700; }
+.note-tag.observation { color: var(--accent); }
+.note-tag.question { color: #5a78c8; }
+.note-tag.idea { color: var(--manager); }
+.note-related { font-size: 0.76rem; color: var(--ink-muted); }
+.note-date { font-size: 0.72rem; color: var(--ink-muted); margin-left: auto; }
+.note-text { font-size: 0.87rem; line-height: 1.5; }
+.note-del { position: absolute; top: 16px; right: 0; background: none; border: none; color: var(--ink-muted); cursor: pointer; font-size: 0.8rem; padding: 2px 6px; }
+.note-del:hover { color: var(--warn); }
+.notes-empty { color: var(--ink-muted); font-size: 0.86rem; font-style: italic; }
+
+/* ---- Kelly Benefits: snapshot + leadership ---- */
+.snapshot { display: grid; grid-template-columns: 1fr 1fr; gap: 4px 40px; margin-bottom: 26px; background: var(--surface); border-radius: var(--radius-lg); box-shadow: var(--shadow-card); padding: 8px 22px 14px; }
+@media (max-width: 560px) { .snapshot { grid-template-columns: 1fr; } }
+.snap-card { display: flex; justify-content: space-between; align-items: baseline; gap: 16px; padding: 12px 0; border-top: 1px solid var(--border); }
+.snap-card:nth-child(-n+2) { border-top: none; padding-top: 12px; }
+@media (max-width: 560px) { .snap-card:nth-child(-n+2) { border-top: 1px solid var(--border); } .snap-card:first-child { border-top: none; } }
+.snap-card .l { font-size: 0.78rem; color: var(--ink-soft); flex: none; }
+.snap-card .v { font-size: 0.88rem; font-weight: 600; text-align: right; line-height: 1.4; }
+
+.section-label { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--ink-soft); font-weight: 700; margin: 0 0 14px; }
+.leadership { display: flex; flex-direction: column; margin-bottom: 26px; background: var(--surface); border-radius: var(--radius-lg); box-shadow: var(--shadow-card); padding: 6px 22px; }
+.leader-card { display: flex; align-items: baseline; gap: 14px; padding: 14px 0; border-top: 1px solid var(--border); flex-wrap: wrap; }
+.leader-card:first-child { border-top: none; }
+.leader-card .name { font-weight: 700; font-size: 0.9rem; flex: 0 0 170px; }
+.leader-card .title { font-size: 0.82rem; color: var(--accent); font-weight: 600; flex: 1 1 260px; }
+.leader-card .note { font-size: 0.82rem; color: var(--ink-soft); line-height: 1.5; flex: 1 1 100%; margin-top: 2px; }
+@media (max-width: 700px) { .leader-card { flex-direction: column; gap: 4px; } .leader-card .name, .leader-card .title { flex: none; } }
+
+/* ---- Where I fit ---- */
+.fit-box { background: var(--surface); border-radius: var(--radius-lg); box-shadow: var(--shadow-card); padding: 18px 22px; margin-bottom: 26px; }
+.fit-box .lbl { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--ink-soft); font-weight: 700; margin-bottom: 8px; }
+.fit-box textarea { width: 100%; font: inherit; font-size: 0.9rem; padding: 8px 0; border: none; border-bottom: 1px solid var(--border); background: transparent; color: var(--ink); min-height: 44px; resize: vertical; }
+.fit-box textarea:focus { outline: none; border-bottom-color: var(--accent); }
+.fit-box textarea[readonly] { color: var(--ink-soft); }
+.fit-box .hint { font-size: 0.76rem; color: var(--ink-muted); margin-top: 8px; }
+
+/* ---- Kelly Benefits: SWOT ---- */
+.swot-card { background: var(--surface); border-radius: var(--radius-lg); box-shadow: var(--shadow-card); padding: 22px 24px; margin-bottom: 26px; }
+.swot-card h3 { font-size: 1.02rem; margin-bottom: 4px; }
+.swot-card .cap { color: var(--ink-soft); font-size: 0.85rem; line-height: 1.5; margin: 6px 0 20px; max-width: 68ch; }
+.swot-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px 40px; }
+@media (max-width: 700px) { .swot-grid { grid-template-columns: 1fr; } }
+.swot-item { padding-top: 16px; border-top: 2px solid var(--border); }
+.swot-item.strengths { border-top-color: var(--good); }
+.swot-item.weaknesses { border-top-color: var(--warn); }
+.swot-item.opportunities { border-top-color: var(--accent); }
+.swot-item.threats { border-top-color: var(--manager); }
+.swot-item h4 { font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 10px; font-family: "Inter", sans-serif; }
+.swot-item.strengths h4 { color: var(--good); }
+.swot-item.weaknesses h4 { color: var(--warn); }
+.swot-item.opportunities h4 { color: var(--accent); }
+.swot-item.threats h4 { color: var(--manager); }
+.swot-item ul { margin: 0; padding-left: 18px; font-size: 0.86rem; line-height: 1.6; color: var(--ink); }
+.swot-item li { margin-bottom: 6px; }
+
+/* ---- Shared filter-button style (used by COBRA Process role filters) ---- */
+.wb-filter { font: inherit; font-size: 0.8rem; font-weight: 600; padding: 0; border: none; background: none; color: var(--ink-soft); cursor: pointer; }
+.wb-filter.active { color: var(--ink); }
+
+/* .integration-box (Company page) and .crosscutting-box (COBRA process) were the same left-accent
+   callout box defined twice under different names — consolidated to .callout-box, old names kept as
+   aliases. (integration-box's margin-bottom:26px and crosscutting-box's margin-top:22px were merged
+   into one margin shorthand below; font-size/line-height took integration-box's slightly larger values.) */
+.callout-box, .integration-box, .crosscutting-box {
+  border-left: 3px solid var(--manager); background: var(--manager-soft); border-radius: 0 var(--radius-md) var(--radius-md) 0;
+  padding: 14px 18px; margin: 22px 0 26px; font-size: 0.92rem; line-height: 1.6; color: var(--ink-soft);
+}
+.callout-box b, .integration-box b { color: var(--manager); }
+.callout-box h4, .crosscutting-box h4 { font-family: "Inter", sans-serif; font-size: 0.9rem; margin-bottom: 8px; color: var(--manager); }
+.callout-box p, .crosscutting-box p { margin: 0 0 8px; }
+.callout-box p:last-child, .crosscutting-box p:last-child { margin-bottom: 0; }

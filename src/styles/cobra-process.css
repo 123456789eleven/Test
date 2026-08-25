@@ -1,0 +1,97 @@
+/* ============================================================
+   COBRA process — real internal flowchart, roles, improvement lens
+   (.crosscutting-box was consolidated into components.css's
+   .callout-box — see the note there)
+   ============================================================ */
+
+/* ---- Kelly Benefits: COBRA process (real internal flowchart, transcribed) ---- */
+.cobra-wrap { background: var(--surface); border-radius: var(--radius-lg); box-shadow: var(--shadow-card); padding: 22px 24px 26px; margin-bottom: 26px; }
+.cobra-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; margin-bottom: 18px; }
+.cobra-head h3 { font-size: 1.05rem; color: var(--ink); }
+.cobra-source { color: var(--ink-muted); font-size: 0.78rem; margin-top: 4px; }
+.cobra-wrap:fullscreen { background: var(--page); padding: 28px; overflow-y: auto; }
+.cflow-phase-marker {
+  display: flex; align-items: center; gap: 12px; background: var(--ink); color: var(--page);
+  padding: 9px 22px; border-radius: 999px; max-width: 480px; width: 100%; box-sizing: border-box; justify-content: center;
+}
+.cflow-phase-num {
+  flex: none; width: 22px; height: 22px; border-radius: 50%; background: var(--accent); color: var(--accent-ink);
+  font-size: 0.7rem; font-weight: 700; display: flex; align-items: center; justify-content: center;
+}
+.cflow-phase-title { font-size: 0.9rem; font-weight: 700; }
+
+.cobra-badge { font-size: 0.72rem; padding: 3px 9px; border-radius: 999px; flex: none; }
+.cobra-badge-who { background: var(--accent-wash); color: var(--accent); }
+.cobra-badge-time { background: var(--surface-alt); color: var(--ink-soft); }
+
+/* ---- COBRA process: connected flowchart (trunk of steps, decisions fork into branch columns) ---- */
+.cflow { display: flex; flex-direction: column; align-items: center; }
+.cflow-step { display: flex; flex-direction: column; align-items: center; width: 100%; }
+.cflow-connector { width: 1.5px; height: 26px; background: var(--border); position: relative; flex: none; }
+.cflow-connector::after {
+  content: "▾"; position: absolute; bottom: -8px; left: 50%; transform: translateX(-50%);
+  font-size: 10px; line-height: 1; color: var(--ink-muted); background: var(--surface);
+}
+.cflow-node { max-width: 480px; width: 100%; box-sizing: border-box; background: var(--surface-alt); border-radius: var(--radius-md); padding: 14px 18px; text-align: left; border-left: 3px solid var(--accent); }
+.cflow-node-text { font-size: 0.88rem; color: var(--ink); line-height: 1.5; }
+.cflow-node-meta { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
+.cflow-decision { border-left-color: var(--manager); background: var(--manager-soft); }
+.cflow-decision .cflow-node-text::before { content: "◆ "; color: var(--manager); font-size: 0.78em; }
+.cflow-transition { border-left-style: dashed; border-left-color: var(--good); background: var(--good-soft); }
+.cflow-transition .cflow-node-text { font-style: italic; color: var(--ink-soft); }
+
+.cflow-fork { display: flex; gap: 22px; justify-content: center; align-items: flex-start; margin-top: 22px; position: relative; padding-top: 22px; width: 100%; }
+.cflow-fork::before { content: ""; position: absolute; top: 0; left: 12%; right: 12%; height: 1.5px; background: var(--border); }
+.cflow-fork.cflow-fork-single::before { left: 50%; right: 50%; }
+.cflow-branch-col { flex: 1 1 0; min-width: 200px; max-width: 340px; position: relative; padding-top: 22px; display: flex; flex-direction: column; align-items: center; }
+.cflow-branch-col::before { content: ""; position: absolute; top: 0; left: 50%; width: 1.5px; height: 22px; background: var(--border); }
+.cflow-branch-label {
+  font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 700; color: var(--manager);
+  text-align: center; margin-bottom: 12px; padding: 0 6px;
+}
+.cflow-branch-empty { font-size: 0.8rem; color: var(--ink-muted); font-style: italic; text-align: center; }
+@media (max-width: 720px) {
+  .cflow-fork { flex-direction: column; align-items: center; gap: 20px; }
+  .cflow-fork::before { display: none; }
+  .cflow-branch-col { max-width: 100%; width: 100%; padding-top: 0; }
+  .cflow-branch-col::before { display: none; }
+}
+
+.cflow-role-badge {
+  display: inline-block; font-size: 0.62rem; text-transform: uppercase; letter-spacing: 0.04em; font-weight: 700;
+  padding: 2px 7px; border-radius: 999px; margin-bottom: 6px;
+}
+.cflow-role-cobraAdminI { background: var(--accent-wash); color: var(--accent); }
+.cflow-role-cobraAdminII { background: var(--manager-soft); color: var(--manager); }
+.cflow-node.cflow-dim { opacity: 0.25; }
+
+.cobra-roles { background: var(--surface-alt); border-radius: var(--radius-md); padding: 18px 20px; margin-bottom: 24px; }
+.cobra-roles h4 { font-size: 0.95rem; margin-bottom: 6px; }
+.cobra-roles-note { font-size: 0.82rem; color: var(--ink-soft); line-height: 1.5; margin: 0 0 16px; max-width: 74ch; }
+.cobra-roles-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; margin-bottom: 16px; }
+.cobra-role-card { background: var(--surface); border-radius: var(--radius-sm); padding: 14px 16px; border-left: 3px solid var(--border); }
+.cobra-role-card.cobra-role-cobraAdminI { border-left-color: var(--accent); }
+.cobra-role-card.cobra-role-cobraAdminII { border-left-color: var(--manager); }
+.cobra-role-card h5 { font-size: 0.86rem; margin-bottom: 8px; }
+.cobra-role-card ul { list-style: none; margin: 0; padding: 0; }
+.cobra-role-card li { font-size: 0.82rem; color: var(--ink-soft); padding: 4px 0; }
+.cobra-role-filters { display: flex; gap: 18px; flex-wrap: wrap; }
+
+/* ---- Kelly Benefits: COBRA process improvement lens ---- */
+.cflow-improve-badge { display: inline-block; font-size: 0.72rem; color: var(--accent); margin-left: 6px; vertical-align: middle; }
+.cflow-improve-panel { display: none; background: var(--accent-wash); border-radius: var(--radius-sm); padding: 10px 14px; margin: 8px 0 14px; font-size: 0.82rem; line-height: 1.55; max-width: 60ch; }
+.cflow-improve-on .cflow-improve-panel { display: block; }
+.cflow-improve-tag { display: inline-block; font-size: 0.66rem; text-transform: uppercase; letter-spacing: 0.04em; font-weight: 700; color: var(--accent); margin-bottom: 6px; }
+.cflow-improve-note { color: var(--ink); margin: 0 0 6px; }
+.cflow-improve-ask { color: var(--ink-soft); margin: 0; font-style: italic; }
+
+.improve-lens-card { background: var(--surface-alt); border-radius: var(--radius-md); padding: 18px 20px; margin-bottom: 24px; }
+.improve-lens-head h4 { font-size: 0.95rem; margin-bottom: 6px; }
+.improve-lens-head .cap { font-size: 0.82rem; color: var(--ink-soft); line-height: 1.5; margin: 0 0 16px; max-width: 74ch; }
+.improve-glossary { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-bottom: 16px; }
+.improve-glossary-item { background: var(--surface); border-radius: var(--radius-sm); padding: 12px 14px; }
+.improve-glossary-label { display: block; font-size: 0.74rem; font-weight: 700; color: var(--accent); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 4px; }
+.improve-glossary-item p { font-size: 0.8rem; color: var(--ink-soft); line-height: 1.5; margin: 0; }
+.improve-lens-toggle { font: inherit; font-size: 0.82rem; font-weight: 600; padding: 8px 16px; border-radius: 999px; border: 1px solid var(--border); background: var(--surface); color: var(--ink); cursor: pointer; transition: all .15s ease; }
+.improve-lens-toggle:hover { border-color: var(--accent); color: var(--accent); }
+.improve-lens-toggle.active { background: var(--ink); color: var(--page); border-color: var(--ink); }

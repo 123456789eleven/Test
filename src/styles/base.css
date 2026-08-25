@@ -1,0 +1,27 @@
+/* ============================================================
+   Base — reset, global typography, view/page-level scaffolding
+   ============================================================ */
+
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; background: var(--page); color: var(--ink); font-family: "Inter", system-ui, -apple-system, sans-serif; }
+a { color: inherit; }
+h1, h2, h3 { font-family: "Inter", sans-serif; font-weight: 700; letter-spacing: -0.02em; margin: 0; }
+.wordmark { font-family: "Inter", sans-serif; font-weight: 800; letter-spacing: 0.02em; }
+.mono { font-variant-numeric: tabular-nums; }
+
+/* ---- Kelly Benefits: unified Overview/Connections/COBRA page (sticky scroll-spy sub-nav) ---- */
+html { scroll-behavior: smooth; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+.view { display: none; }
+.view.active { display: block; }
+
+.view-skeleton { display: flex; flex-direction: column; gap: 12px; }
+.sk-block { border-radius: var(--radius-md); background: linear-gradient(90deg, var(--surface-alt) 25%, var(--border) 37%, var(--surface-alt) 63%); background-size: 400% 100%; animation: skShimmer 1.4s ease infinite; }
+.sk-hero { height: 140px; }
+.sk-line { height: 16px; }
+@keyframes skShimmer { 0% { background-position: 100% 50%; } 100% { background-position: 0 50%; } }
+@media (prefers-reduced-motion: reduce) { .sk-block { animation: none; opacity: 0.6; } }
+
+.page-head { max-width: 76ch; margin-bottom: 28px; }
+.page-head h1 { font-size: 1.9rem; }
+.page-head p { color: var(--ink-soft); font-size: 0.96rem; margin: 10px 0 0; line-height: 1.55; }
