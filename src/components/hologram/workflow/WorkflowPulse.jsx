@@ -285,8 +285,8 @@ export default function WorkflowPulse({
     <>
       <Trail
         target={groupRef}
-        width={reduceMotion ? 0.02 : 1.1}
-        length={reduceMotion ? 0.4 : 4}
+        width={reduceMotion ? 0.01 : 0.1}
+        length={reduceMotion ? 0.4 : 2}
         decay={1}
         local={false}
         color={GLOW}

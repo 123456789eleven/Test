@@ -1,11 +1,11 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Canvas } from "@react-three/fiber";
 import { useAuth } from "../hooks/useAuth";
 import { useSearchRegister } from "../hooks/useSearchRegister";
 import Scene from "../components/hologram/Scene";
 import HoverLabel from "../components/hologram/HoverLabel";
 import DetailPanel from "../components/hologram/DetailPanel";
-import { buildSceneState, computeVisibleNodes, buildExternalNodes } from "../components/hologram/orgTree";
+import { buildSceneState, computeVisibleNodes, buildExternalNodes, locateStepOwner } from "../components/hologram/orgTree";
 import {
   useOrgDivisions, useOrgVerticals, useOrgFunctions, useOrgPeople, useOrgConnections,
   useTasks, useTools, useTaskTools, useCompanyStatic, assembleOrgData, buildTasksByFunction,
@@ -95,6 +95,23 @@ export default function Hologram() {
   const [detailFunction, setDetailFunction] = useState(null);
   const [editRequest, setEditRequest] = useState(null); // { kind, mode, id, parentId }
   const [connectionsOpen, setConnectionsOpen] = useState(false);
+
+  // Drives the accordion from whatever step is currently playing, so the
+  // scene actually opens up and follows the pulse around instead of most
+  // steps silently collapsing onto whichever one or two divisions happen to
+  // already be expanded. Same accordion rule as a manual click (one open
+  // branch per level) — this just triggers it from the workflow instead of
+  // a pointer event. External/unresolved steps have no owning division to
+  // open, so they leave the accordion exactly as it was.
+  useEffect(() => {
+    if (!sceneState || !simulation.currentStep) return;
+    if (simulation.status !== "playing" && simulation.status !== "at-decision") return;
+    const owner = locateStepOwner(simulation.currentStep, { tasksById, sceneState });
+    if (!owner) return;
+    setExpandedTier1(owner.divisionId);
+    setExpandedTier2(owner.verticalId);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [simulation.currentStepId, simulation.status, sceneState]);
 
   const visible = useMemo(
     () => (sceneState ? computeVisibleNodes(sceneState, expandedTier1, expandedTier2) : EMPTY_VISIBLE),

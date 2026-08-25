@@ -97,6 +97,26 @@ export function resolveStepLocation(step, { tasksById, sceneState, nodesById, ex
   return { kind: "unresolved", nodeId: null, position: null };
 }
 
+// The reverse of resolveVisible(): given a step, finds which division/
+// vertical it actually belongs to, regardless of what's currently expanded —
+// so the workflow-simulation feature can *drive* the accordion (open
+// whatever tier a step lives in) rather than only reading whatever tier
+// happens to already be open. Every real org_function belongs to exactly
+// one vertical, and every vertical to exactly one of the 4 real divisions
+// (Corporate Functions has no functions of its own, only people), so this
+// always resolves cleanly for any function-linked step. Returns null for
+// external/unresolved steps — there's no division/vertical to open for those.
+export function locateStepOwner(step, { tasksById, sceneState }) {
+  const taskFunctionId = step.task_id ? (tasksById[step.task_id] || {}).function_id : null;
+  const functionId = taskFunctionId || step.function_id;
+  if (!functionId) return null;
+  const verticalId = findVerticalOf(functionId, sceneState.verticals);
+  if (!verticalId) return null;
+  const divisionId = sceneState.verticals[verticalId]?.division || null;
+  if (!divisionId) return null;
+  return { divisionId, verticalId };
+}
+
 // Mirrors the old buildState(): derives the fixed tier-1 list plus which
 // divisions/verticals/functions currently have any modeled connection at all
 // (used only to pick a node's "quiet" vs "glowing" color — connectivity
