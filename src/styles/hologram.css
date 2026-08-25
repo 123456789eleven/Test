@@ -52,3 +52,98 @@ body.route-fullscreen #holoCanvasWrap { box-shadow: none; height: calc(100vh - 1
 .holo-detail-task-desc { font-size: 0.84rem; color: var(--ink-soft); line-height: 1.5; margin-top: 4px; }
 .holo-detail-tools { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px; }
 .holo-tool-chip { font-size: 0.74rem; background: var(--accent-wash); color: var(--accent); border-radius: 999px; padding: 3px 11px; }
+
+/* ============================================================
+   Workflow simulation — 2D DOM controls + step readout for the
+   traveling-pulse feature (WorkflowControls / WorkflowStepInfo)
+   ============================================================ */
+.wf-controls {
+  background: var(--surface); border-radius: var(--radius-md); box-shadow: var(--shadow-card);
+  padding: 16px 18px; display: flex; flex-direction: column; gap: 12px;
+}
+.wf-controls-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.wf-controls-title { font-size: 0.86rem; font-weight: 700; color: var(--ink); margin: 0; }
+
+.wf-status-badge {
+  font-size: 0.66rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;
+  padding: 3px 10px; border-radius: 999px; white-space: nowrap;
+}
+.wf-status-playing { background: var(--accent-wash); color: var(--accent); }
+.wf-status-at-decision { background: var(--manager-soft); color: var(--manager); }
+.wf-status-done { background: var(--good-soft); color: var(--good); }
+
+.wf-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.wf-list-item {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  background: var(--surface-alt); border-radius: var(--radius-sm); padding: 10px 12px;
+  border: 1px solid transparent; transition: border-color .15s ease;
+}
+.wf-list-item-active { border-color: var(--accent); }
+.wf-list-item-info { min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.wf-list-item-name { font-size: 0.86rem; font-weight: 600; color: var(--ink); }
+.wf-list-item-trigger { font-size: 0.76rem; color: var(--ink-soft); line-height: 1.4; }
+.wf-list-empty { font-size: 0.84rem; color: var(--ink-muted); font-style: italic; padding: 6px 2px; }
+
+.wf-play-btn {
+  flex: none; font: inherit; font-size: 0.78rem; font-weight: 600; padding: 7px 14px; border-radius: 999px;
+  border: none; background: var(--accent); color: var(--accent-ink); cursor: pointer; transition: opacity .15s ease; white-space: nowrap;
+}
+.wf-play-btn:hover:not(:disabled) { opacity: 0.88; }
+.wf-play-btn:disabled { background: var(--surface-alt); color: var(--ink-muted); cursor: default; }
+
+.wf-reset-btn {
+  align-self: flex-start; font: inherit; font-size: 0.78rem; font-weight: 600; padding: 7px 14px; border-radius: 999px;
+  border: 1px solid var(--border); background: none; color: var(--ink-soft); cursor: pointer; transition: all .15s ease;
+}
+.wf-reset-btn:hover { border-color: var(--warn); color: var(--warn); }
+
+/* Decision point — the one moment this feature exists to make legible, so it
+   gets the loudest treatment on the page: an accent-glow border and wash
+   instead of the quiet var(--surface-alt) everything else here uses. */
+.wf-decision {
+  background: var(--accent-wash); border: 1px solid rgba(139,124,240,0.4); border-radius: var(--radius-sm);
+  padding: 12px 14px; display: flex; flex-direction: column; gap: 10px;
+  animation: wfDecisionIn 0.25s ease;
+}
+.wf-decision-label { font-size: 0.74rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--accent); }
+.wf-decision-choices { display: flex; flex-direction: column; gap: 8px; }
+.wf-decision-choice {
+  font: inherit; font-size: 0.86rem; font-weight: 600; text-align: left; padding: 10px 14px; border-radius: var(--radius-sm);
+  border: 1px solid var(--border); background: var(--surface); color: var(--ink); cursor: pointer; transition: all .15s ease;
+}
+.wf-decision-choice:hover, .wf-decision-choice:focus-visible { border-color: var(--accent); background: var(--accent-wash); color: var(--accent); outline: none; }
+@keyframes wfDecisionIn { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: translateY(0); } }
+@media (prefers-reduced-motion: reduce) { .wf-decision { animation: none; } }
+
+/* Step readout — the real content (title/description) of whichever step the
+   pulse currently occupies. */
+.wf-step-info {
+  background: var(--surface); border-radius: var(--radius-md); box-shadow: var(--shadow-card);
+  padding: 16px 18px; display: flex; flex-direction: column; gap: 8px;
+}
+.wf-step-info-done { border: 1px solid rgba(95,201,154,0.35); }
+.wf-step-info-badges { display: flex; gap: 6px; flex-wrap: wrap; }
+.wf-step-info-badge {
+  display: inline-block; font-size: 0.66rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;
+  padding: 3px 10px; border-radius: 999px;
+}
+.wf-step-info-badge-order { background: var(--surface-alt); color: var(--ink-soft); }
+.wf-step-info-badge-decision { background: var(--manager-soft); color: var(--manager); }
+.wf-step-info-badge-done { align-self: flex-start; background: var(--good-soft); color: var(--good); }
+.wf-step-title { font-size: 1rem; color: var(--ink); margin: 0; }
+.wf-step-desc { font-size: 0.86rem; color: var(--ink-soft); line-height: 1.55; margin: 0; }
+.wf-step-desc-empty { color: var(--ink-muted); font-style: italic; }
+
+/* Floats WorkflowStepInfo + WorkflowControls over the bottom-left of the
+   canvas (#holoCanvasWrap is already position:relative) rather than pushing
+   the 3D scene down in normal document flow — the scene stays the visual
+   focus, the workflow UI reads as an overlay on top of it, similar in spirit
+   to how .holo-label already floats over the canvas. */
+.holo-workflow-overlay {
+  position: absolute; left: 20px; bottom: 20px; z-index: 15;
+  display: flex; flex-direction: column; gap: 10px;
+  width: min(340px, calc(100% - 40px)); max-height: calc(100% - 40px); overflow-y: auto;
+  pointer-events: none;
+}
+.holo-workflow-overlay > * { pointer-events: auto; }
+@media (max-width: 640px) { .holo-workflow-overlay { left: 12px; right: 12px; bottom: 12px; width: auto; } }

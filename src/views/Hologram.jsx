@@ -5,11 +5,15 @@ import { useSearchRegister } from "../hooks/useSearchRegister";
 import Scene from "../components/hologram/Scene";
 import HoverLabel from "../components/hologram/HoverLabel";
 import DetailPanel from "../components/hologram/DetailPanel";
-import { buildSceneState, computeVisibleNodes } from "../components/hologram/orgTree";
+import { buildSceneState, computeVisibleNodes, buildExternalNodes } from "../components/hologram/orgTree";
 import {
   useOrgDivisions, useOrgVerticals, useOrgFunctions, useOrgPeople, useOrgConnections,
   useTasks, useTools, useTaskTools, useCompanyStatic, assembleOrgData, buildTasksByFunction,
+  useExternalStakeholders, useWorkflows, useWorkflowSteps, useWorkflowTransitions,
 } from "../components/hologram/orgQueries";
+import { useWorkflowSimulation } from "../components/hologram/workflow/useWorkflowSimulation";
+import WorkflowControls from "../components/hologram/workflow/WorkflowControls";
+import WorkflowStepInfo from "../components/hologram/workflow/WorkflowStepInfo";
 import DivisionForm from "../components/orgedit/DivisionForm";
 import VerticalForm from "../components/orgedit/VerticalForm";
 import FunctionForm from "../components/orgedit/FunctionForm";
@@ -17,6 +21,7 @@ import PersonForm from "../components/orgedit/PersonForm";
 import ConnectionsManager from "../components/orgedit/ConnectionsManager";
 
 const EMPTY_VISIBLE = { nodesById: new Map(), allNodes: [], lines: [] };
+const EMPTY_EXTERNAL_IDS = new Map();
 
 export default function Hologram() {
   const { isSignedIn } = useAuth();
@@ -30,6 +35,10 @@ export default function Hologram() {
   const tasksQ = useTasks();
   const toolsQ = useTools();
   const taskToolsQ = useTaskTools();
+  const stakeholdersQ = useExternalStakeholders();
+  const workflowsQ = useWorkflows();
+  const workflowStepsQ = useWorkflowSteps();
+  const workflowTransitionsQ = useWorkflowTransitions();
 
   // All-or-nothing per source, same as the old loadOrgData() catch: falls
   // back to the last-saved static snapshot only once a live org query has
@@ -51,6 +60,26 @@ export default function Hologram() {
   );
 
   const sceneState = useMemo(() => (orgData ? buildSceneState(orgData) : null), [orgData]);
+
+  // Keyed by task id (not function id like tasksByFunction above) — what
+  // orgTree.resolveStepLocation needs to walk workflow_steps.task_id ->
+  // tasks.function_id for the workflow-animation feature.
+  const tasksById = useMemo(() => {
+    const map = {};
+    (tasksQ.data || []).forEach((t) => { map[t.id] = t; });
+    return map;
+  }, [tasksQ.data]);
+
+  const externalNodesById = useMemo(() => {
+    if (!stakeholdersQ.data) return EMPTY_EXTERNAL_IDS;
+    return new Map(buildExternalNodes(stakeholdersQ.data).map((n) => [n.id, n]));
+  }, [stakeholdersQ.data]);
+
+  // Called exactly once here so the pulse (inside <Canvas>, via Scene) and
+  // the 2D controls/step-info below both drive/read the same state instance
+  // — see useWorkflowSimulation.js's own header comment for why neither of
+  // those components calls this hook itself.
+  const simulation = useWorkflowSimulation(workflowStepsQ.data, workflowTransitionsQ.data);
 
   useSearchRegister(
     "Hologram",
@@ -168,9 +197,19 @@ export default function Hologram() {
                 onUnhover={handleUnhover}
                 onMove={handleMove}
                 onClick={handleClick}
+                stakeholders={stakeholdersQ.data}
+                simulation={simulation}
+                sceneState={sceneState}
+                nodesById={visible.nodesById}
+                externalNodesById={externalNodesById}
+                tasksById={tasksById}
               />
             </Canvas>
             <HoverLabel hovered={hovered} isSignedIn={isSignedIn} onEdit={openEdit} onAdd={openAdd} />
+            <div className="holo-workflow-overlay">
+              <WorkflowStepInfo simulation={simulation} />
+              <WorkflowControls simulation={simulation} workflows={workflowsQ.data} />
+            </div>
           </>
         )}
       </div>

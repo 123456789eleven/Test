@@ -7,15 +7,24 @@ import ConnectionLines from "./ConnectionLines";
 import Particles from "./Particles";
 import ScanRing from "./ScanRing";
 import PostFX from "./PostFX";
+import { ExternalNodes } from "./ExternalNode";
+import WorkflowPulse from "./workflow/WorkflowPulse";
 
 // The actual <Canvas> content: base platform, particle field, node tree and
 // connection lines, camera controls and bloom. Nodes/lines are plain data
 // (positions already computed by orgTree.computeVisibleNodes) rendered
 // declaratively — mounting/unmounting a <Node> as the accordion state
 // changes replaces the old code's manual nodeLayer.add()/.remove() calls.
+//
+// stakeholders/simulation/sceneState/nodesById/externalNodesById/tasksById
+// are additive props for the workflow-animation feature — ExternalNodes and
+// WorkflowPulse both no-op gracefully (render nothing) when simulation is
+// idle/not yet ready, so passing them through doesn't change anything about
+// the scene's existing behavior when no workflow is running.
 export default function Scene({
   nodes, lines, hoveredId, reduceMotion, smallViewport,
   onHover, onUnhover, onMove, onClick,
+  stakeholders, simulation, sceneState, nodesById, externalNodesById, tasksById,
 }) {
   // Single shared clock for the scan ring pulse and the connection lines'
   // breathing glow, so both stay in the same rhythm the original's one
@@ -46,6 +55,20 @@ export default function Scene({
         <Node key={n.id} node={n} hoveredId={hoveredId} onHover={onHover} onUnhover={onUnhover} onMove={onMove} onClick={onClick} />
       ))}
       <ConnectionLines lines={lines} hoveredId={hoveredId} reduceMotion={reduceMotion} scanT={scanT} />
+
+      {stakeholders ? (
+        <ExternalNodes stakeholders={stakeholders} hoveredId={hoveredId} onHover={onHover} onUnhover={onUnhover} onMove={onMove} onClick={onClick} />
+      ) : null}
+      {simulation && sceneState && nodesById ? (
+        <WorkflowPulse
+          simulation={simulation}
+          sceneState={sceneState}
+          nodesById={nodesById}
+          externalNodesById={externalNodesById}
+          tasksById={tasksById}
+          reduceMotion={reduceMotion}
+        />
+      ) : null}
 
       <OrbitControls
         enableDamping
