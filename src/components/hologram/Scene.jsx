@@ -9,6 +9,7 @@ import ScanRing from "./ScanRing";
 import PostFX from "./PostFX";
 import { ExternalNodes } from "./ExternalNode";
 import WorkflowPulse from "./workflow/WorkflowPulse";
+import WorkflowMap from "./workflow/WorkflowMap";
 
 // The actual <Canvas> content: base platform, particle field, node tree and
 // connection lines, camera controls and bloom. Nodes/lines are plain data
@@ -25,6 +26,7 @@ export default function Scene({
   nodes, lines, hoveredId, reduceMotion, smallViewport,
   onHover, onUnhover, onMove, onClick,
   stakeholders, simulation, sceneState, nodesById, externalNodesById, tasksById,
+  showFullPath, workflowSteps, workflowTransitions,
 }) {
   // Single shared clock for the scan ring pulse and the connection lines'
   // breathing glow, so both stay in the same rhythm the original's one
@@ -67,6 +69,16 @@ export default function Scene({
           externalNodesById={externalNodesById}
           tasksById={tasksById}
           reduceMotion={reduceMotion}
+        />
+      ) : null}
+      {showFullPath && sceneState && nodesById ? (
+        <WorkflowMap
+          steps={workflowSteps}
+          transitions={workflowTransitions}
+          tasksById={tasksById}
+          sceneState={sceneState}
+          nodesById={nodesById}
+          externalNodesById={externalNodesById}
         />
       ) : null}
 

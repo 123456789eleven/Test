@@ -2,6 +2,7 @@ import { useMemo, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 import { buildExternalNodes } from "./orgTree";
+import NodeLabel from "./NodeLabel";
 
 // External-stakeholder node -- same hand-rolled mount/hover lerp technique as
 // Node.jsx (no tween library, ref-based ease-in-on-mount + hover-scale-bump
@@ -52,24 +53,28 @@ export default function ExternalNode({ node, hoveredId, onHover, onUnhover, onMo
   // the stakeholder's real name/type on hover the same way, without a
   // separate tooltip needing to be built here.
   return (
-    <group ref={groupRef} position={position} scale={0}>
-      <mesh
-        geometry={geometry}
-        onPointerOver={(e) => { e.stopPropagation(); onHover(node, e); }}
-        onPointerMove={(e) => { e.stopPropagation(); onMove(node, e); }}
-        onPointerOut={(e) => { e.stopPropagation(); onUnhover(node); }}
-      >
-        <meshBasicMaterial
-          color={EXTERNAL_COLOR}
-          transparent
-          opacity={isHovered ? Math.min(1, EXTERNAL_OPACITY + 0.25) : EXTERNAL_OPACITY}
-        />
-      </mesh>
-      <lineSegments>
-        <edgesGeometry args={[geometry]} />
-        <lineBasicMaterial color={EXTERNAL_COLOR} transparent opacity={0.9} />
-      </lineSegments>
-    </group>
+    <>
+      <group ref={groupRef} position={position} scale={0}>
+        <mesh
+          geometry={geometry}
+          onPointerOver={(e) => { e.stopPropagation(); onHover(node, e); }}
+          onPointerMove={(e) => { e.stopPropagation(); onMove(node, e); }}
+          onPointerOut={(e) => { e.stopPropagation(); onUnhover(node); }}
+        >
+          <meshBasicMaterial
+            color={EXTERNAL_COLOR}
+            transparent
+            opacity={isHovered ? Math.min(1, EXTERNAL_OPACITY + 0.25) : EXTERNAL_OPACITY}
+          />
+        </mesh>
+        <lineSegments>
+          <edgesGeometry args={[geometry]} />
+          <lineBasicMaterial color={EXTERNAL_COLOR} transparent opacity={0.9} />
+        </lineSegments>
+      </group>
+      {/* Sibling, not a child of the scaling group above — see Node.jsx for why. */}
+      <NodeLabel position={position} yOffset={EXTERNAL_SIZE + 0.15} text={node.name} tier={2} dim={isHovered} />
+    </>
   );
 }
 

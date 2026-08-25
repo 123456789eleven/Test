@@ -95,6 +95,7 @@ export default function Hologram() {
   const [detailFunction, setDetailFunction] = useState(null);
   const [editRequest, setEditRequest] = useState(null); // { kind, mode, id, parentId }
   const [connectionsOpen, setConnectionsOpen] = useState(false);
+  const [showFullPath, setShowFullPath] = useState(false);
 
   // Drives the accordion from whatever step is currently playing, so the
   // scene actually opens up and follows the pulse around instead of most
@@ -220,12 +221,20 @@ export default function Hologram() {
                 nodesById={visible.nodesById}
                 externalNodesById={externalNodesById}
                 tasksById={tasksById}
+                showFullPath={showFullPath}
+                workflowSteps={workflowStepsQ.data}
+                workflowTransitions={workflowTransitionsQ.data}
               />
             </Canvas>
             <HoverLabel hovered={hovered} isSignedIn={isSignedIn} onEdit={openEdit} onAdd={openAdd} />
             <div className="holo-workflow-overlay">
               <WorkflowStepInfo simulation={simulation} />
-              <WorkflowControls simulation={simulation} workflows={workflowsQ.data} />
+              <WorkflowControls
+                simulation={simulation}
+                workflows={workflowsQ.data}
+                showFullPath={showFullPath}
+                onToggleFullPath={() => setShowFullPath((v) => !v)}
+              />
             </div>
           </>
         )}

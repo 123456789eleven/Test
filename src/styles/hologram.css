@@ -2,6 +2,23 @@
    Hologram page — full-screen 3D org visualization chrome
    ============================================================ */
 
+/* Persistent per-node name label (NodeLabel.jsx, drei <Html>) -- a real
+   styled DOM chip using the site's own tokens/font, not raw 3D text, so
+   every division/department/function/person/external node is legible
+   without hovering. Kept deliberately quiet (translucent, thin border, no
+   shadow) so a scene with a dozen-plus of these still reads as clean rather
+   than a wall of badges -- weight comes from font-size tiering (set inline
+   per node in NodeLabel.jsx), not from heavier chrome here. pointer-events
+   is off so labels never intercept the hover/click/drag that already drives
+   the actual nodes underneath them. */
+.holo-node-label {
+  font-family: "Inter", sans-serif; font-weight: 600; color: var(--ink);
+  background: rgba(20,17,31,0.72); border: 1px solid rgba(242,240,247,0.14);
+  border-radius: 999px; padding: 2px 9px; white-space: nowrap;
+  backdrop-filter: blur(3px); -webkit-backdrop-filter: blur(3px);
+  pointer-events: none; user-select: none; transform: translateY(-4px);
+}
+
 .holo-page { position: relative; }
 .holo-header {
   display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap;
@@ -83,6 +100,16 @@ body.route-fullscreen #holoCanvasWrap { box-shadow: none; height: calc(100vh - 1
 .wf-list-item-name { font-size: 0.86rem; font-weight: 600; color: var(--ink); }
 .wf-list-item-trigger { font-size: 0.76rem; color: var(--ink-soft); line-height: 1.4; }
 .wf-list-empty { font-size: 0.84rem; color: var(--ink-muted); font-style: italic; padding: 6px 2px; }
+
+.wf-map-toggle-row { display: flex; flex-direction: column; gap: 6px; }
+.wf-map-toggle {
+  font: inherit; font-size: 0.78rem; font-weight: 600; padding: 7px 14px; border-radius: 999px;
+  border: 1px solid var(--border); background: none; color: var(--ink-soft); cursor: pointer;
+  transition: all .15s ease; align-self: flex-start;
+}
+.wf-map-toggle:hover { border-color: var(--accent); color: var(--accent); }
+.wf-map-toggle-active { border-color: var(--accent); background: var(--accent-wash); color: var(--accent); }
+.wf-map-hint { font-size: 0.74rem; color: var(--ink-muted); line-height: 1.45; margin: 0; }
 
 .wf-play-btn {
   flex: none; font: inherit; font-size: 0.78rem; font-weight: 600; padding: 7px 14px; border-radius: 999px;

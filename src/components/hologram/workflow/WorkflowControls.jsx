@@ -25,7 +25,7 @@ const STATUS_LABEL = {
   done: "Complete",
 };
 
-export default function WorkflowControls({ simulation, workflows }) {
+export default function WorkflowControls({ simulation, workflows, showFullPath, onToggleFullPath }) {
   const { status, currentStep, availableBranches, play, reset, chooseBranch, graph } = simulation;
   const list = workflows || [];
   const statusLabel = STATUS_LABEL[status] || null;
@@ -36,6 +36,24 @@ export default function WorkflowControls({ simulation, workflows }) {
         <h4 className="wf-controls-title">Simulate a workflow</h4>
         {statusLabel ? <span className={`wf-status-badge wf-status-${status}`}>{statusLabel}</span> : null}
       </div>
+
+      {onToggleFullPath ? (
+        <div className="wf-map-toggle-row">
+          <button
+            type="button"
+            className={`wf-map-toggle${showFullPath ? " wf-map-toggle-active" : ""}`}
+            onClick={onToggleFullPath}
+          >
+            {showFullPath ? "🗺️ Showing full path — click to hide" : "🗺️ Show full path at once"}
+          </button>
+          {showFullPath ? (
+            <p className="wf-map-hint">
+              Traced at whatever tier is currently expanded — drill into a division/department to see this workflow's
+              real step-by-step detail there instead of the coarser division-level view.
+            </p>
+          ) : null}
+        </div>
+      ) : null}
 
       <ul className="wf-list">
         {list.map((wf) => {
