@@ -37,6 +37,66 @@ export function findVerticalOf(functionId, verticals) {
   return null;
 }
 
+// A connection/workflow endpoint always resolves to whichever tier is
+// currently on screen — the function itself if its department is drilled
+// all the way in, else its department node, else its division (divisions
+// are always visible, so this never fails to resolve a real function id).
+// Extracted as a standalone export (was a closure inside computeVisibleNodes
+// only) so the workflow-animation feature can reuse the exact same
+// resolution rule rather than re-deriving it.
+export function resolveVisible(functionId, sceneState, nodesById) {
+  if (nodesById.has(functionId)) return functionId;
+  const vertId = findVerticalOf(functionId, sceneState.verticals);
+  if (vertId && nodesById.has(vertId)) return vertId;
+  const divId = vertId ? sceneState.verticals[vertId]?.division : null;
+  if (divId && nodesById.has(divId)) return divId;
+  return null;
+}
+
+export const EXTERNAL_STAKEHOLDER_IDS = ["stake-client", "stake-beneficiary", "stake-carrier", "stake-broker"];
+const EXTERNAL_RADIUS = 9.6, EXTERNAL_Y = 0.4;
+
+// External stakeholders (client, qualified beneficiary, carrier, broker) sit
+// on a fixed ring just outside the base disc (radius 8.6, see Scene.jsx) --
+// always visible, never part of the org accordion, since they represent the
+// world outside Kelly Benefits, not another department to drill into. Kept
+// deliberately separate from computeVisibleNodes()'s tier1/2/3 output rather
+// than folded in, so the carefully-debugged accordion logic above stays
+// untouched by this addition. Angle offset by half a step from tier1's own
+// angles so the two rings don't visually line up radially.
+export function buildExternalNodes(stakeholders) {
+  const ordered = EXTERNAL_STAKEHOLDER_IDS.map((id) => (stakeholders || []).find((s) => s.id === id)).filter(Boolean);
+  if (!ordered.length) return [];
+  return ordered.map((s, i) => {
+    const angle = (i / ordered.length) * Math.PI * 2 + Math.PI / ordered.length;
+    const x = Math.cos(angle) * EXTERNAL_RADIUS, z = Math.sin(angle) * EXTERNAL_RADIUS;
+    return { id: s.id, name: s.name, type: s.type, kind: "external", position: [x, EXTERNAL_Y, z] };
+  });
+}
+
+// Resolves a real workflow_steps row to wherever it should animate toward:
+// task_id -> tasks.function_id (existing, preferred, most specific) ->
+// function_id (direct) -> stakeholder_id (external) -> unresolved. Never
+// fabricates a location a step doesn't actually have -- callers must handle
+// `kind: "unresolved"` explicitly (e.g. skip the hop, or hold position)
+// rather than this function guessing on their behalf.
+export function resolveStepLocation(step, { tasksById, sceneState, nodesById, externalNodesById }) {
+  const taskFunctionId = step.task_id ? (tasksById[step.task_id] || {}).function_id : null;
+  const functionId = taskFunctionId || step.function_id;
+  if (functionId) {
+    const resolvedId = resolveVisible(functionId, sceneState, nodesById);
+    if (resolvedId) {
+      const node = nodesById.get(resolvedId);
+      return { kind: "internal", nodeId: resolvedId, position: node.position };
+    }
+  }
+  if (step.stakeholder_id && externalNodesById && externalNodesById.has(step.stakeholder_id)) {
+    const node = externalNodesById.get(step.stakeholder_id);
+    return { kind: "external", nodeId: step.stakeholder_id, position: node.position };
+  }
+  return { kind: "unresolved", nodeId: null, position: null };
+}
+
 // Mirrors the old buildState(): derives the fixed tier-1 list plus which
 // divisions/verticals/functions currently have any modeled connection at all
 // (used only to pick a node's "quiet" vs "glowing" color — connectivity
@@ -124,23 +184,10 @@ export function computeVisibleNodes(sceneState, expandedTier1, expandedTier2) {
     }
   }
 
-  // Every connection resolves to whichever tier is currently on screen for
-  // each end — the function itself if its department is drilled all the way
-  // in, else its department node, else its division (divisions are always
-  // visible, so this never fails to resolve).
-  function resolveVisible(functionId) {
-    if (nodesById.has(functionId)) return functionId;
-    const vertId = findVerticalOf(functionId, sceneState.verticals);
-    if (vertId && nodesById.has(vertId)) return vertId;
-    const divId = vertId ? sceneState.verticals[vertId]?.division : null;
-    if (divId && nodesById.has(divId)) return divId;
-    return null;
-  }
-
   const seen = new Set();
   const lines = [];
   sceneState.processConnections.forEach((c) => {
-    const a = resolveVisible(c.from), b = resolveVisible(c.to);
+    const a = resolveVisible(c.from, sceneState, nodesById), b = resolveVisible(c.to, sceneState, nodesById);
     if (!a || !b || a === b) return;
     const key = [a, b].sort().join("|");
     if (seen.has(key)) return;

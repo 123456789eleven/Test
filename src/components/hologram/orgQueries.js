@@ -15,6 +15,10 @@ export const QK = {
   tools: ["tools"],
   taskTools: ["task_tools"],
   companyStatic: ["company-static"],
+  workflows: ["workflows"],
+  workflowSteps: ["workflow_steps"],
+  workflowTransitions: ["workflow_transitions"],
+  externalStakeholders: ["external_stakeholders"],
 };
 
 async function selectAll(table, orderBy) {
@@ -48,6 +52,18 @@ export function useTools() {
 }
 export function useTaskTools() {
   return useQuery({ queryKey: QK.taskTools, queryFn: () => selectAll("task_tools") });
+}
+export function useWorkflows() {
+  return useQuery({ queryKey: QK.workflows, queryFn: () => selectAll("workflows") });
+}
+export function useWorkflowSteps() {
+  return useQuery({ queryKey: QK.workflowSteps, queryFn: () => selectAll("workflow_steps", "step_order") });
+}
+export function useWorkflowTransitions() {
+  return useQuery({ queryKey: QK.workflowTransitions, queryFn: () => selectAll("workflow_transitions") });
+}
+export function useExternalStakeholders() {
+  return useQuery({ queryKey: QK.externalStakeholders, queryFn: () => selectAll("external_stakeholders") });
 }
 
 // Last-saved static snapshot — used only as a fallback when the live org
