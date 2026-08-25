@@ -18,13 +18,13 @@
 .holo-swatch { width: 12px; height: 12px; border-radius: 50%; display: inline-block; }
 #holoCanvasWrap {
   position: relative; background: #04060a; overflow: hidden; margin: 0 24px 10px; border-radius: var(--radius-lg); box-shadow: var(--shadow-card);
+  height: 600px;
 }
-#holoCanvas { width: 100%; height: 600px; display: block; touch-action: none; }
-@media (max-width: 640px) { #holoCanvas { height: 420px; } }
+.holo-canvas { width: 100%; height: 100%; display: block; touch-action: none; }
+@media (max-width: 640px) { #holoCanvasWrap { height: 420px; } }
 body.route-fullscreen .holo-legend, body.route-fullscreen #holoCanvasWrap { margin-left: 0; margin-right: 0; border-radius: 0; }
-body.route-fullscreen #holoCanvasWrap { box-shadow: none; }
-body.route-fullscreen #holoCanvas { height: calc(100vh - 132px); }
-@media (max-width: 640px) { body.route-fullscreen #holoCanvas { height: calc(100vh - 160px); } }
+body.route-fullscreen #holoCanvasWrap { box-shadow: none; height: calc(100vh - 132px); }
+@media (max-width: 640px) { body.route-fullscreen #holoCanvasWrap { height: calc(100vh - 160px); } }
 .holo-label {
   position: fixed; pointer-events: none; display: none; align-items: center; gap: 10px;
   background: rgba(11,16,23,0.92); border: 1px solid rgba(255,255,255,0.12); color: #e7ebf0;
