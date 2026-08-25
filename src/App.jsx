@@ -1,5 +1,5 @@
 import { lazy, Suspense } from "react";
-import { Routes, Route } from "react-router-dom";
+import { createHashRouter } from "react-router-dom";
 import Shell from "./components/shell/Shell";
 import Overview from "./views/Overview";
 import Insights from "./views/Insights";
@@ -12,24 +12,27 @@ import Company from "./views/Company";
 // app's JS weight).
 const Hologram = lazy(() => import("./views/Hologram"));
 
-export default function App() {
-  return (
-    <Routes>
-      <Route element={<Shell />}>
-        <Route path="/" element={<Overview />} />
-        <Route path="/insights" element={<Insights />} />
-        <Route path="/landscape" element={<Landscape />} />
-        <Route path="/company" element={<Company />} />
-        <Route
-          path="/hologram"
-          element={
-            <Suspense fallback={<div className="loading">Loading the interactive structure…</div>}>
-              <Hologram />
-            </Suspense>
-          }
-          handle={{ fullscreen: true }}
-        />
-      </Route>
-    </Routes>
-  );
-}
+// A "data router" (createHashRouter + <RouterProvider>, wired up in
+// main.jsx) rather than the plain <HashRouter>/<Routes> component API --
+// Shell.jsx reads each route's `handle` (e.g. { fullscreen: true }) via
+// useMatches(), which only exists on the data-router APIs.
+export const router = createHashRouter([
+  {
+    element: <Shell />,
+    children: [
+      { path: "/", element: <Overview /> },
+      { path: "/insights", element: <Insights /> },
+      { path: "/landscape", element: <Landscape /> },
+      { path: "/company", element: <Company /> },
+      {
+        path: "/hologram",
+        element: (
+          <Suspense fallback={<div className="loading">Loading the interactive structure…</div>}>
+            <Hologram />
+          </Suspense>
+        ),
+        handle: { fullscreen: true },
+      },
+    ],
+  },
+]);
