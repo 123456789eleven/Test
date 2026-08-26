@@ -38,6 +38,9 @@ export default function Particles({ count, reduceMotion }) {
       <bufferGeometry ref={geomRef}>
         <bufferAttribute attach="attributes-position" args={[positions, 3]} />
       </bufferGeometry>
+      {/* fog defaults to true and isn't overridden here -- once Scene.jsx
+          registers scene fog, distant particles dim toward it automatically,
+          no per-point depth-fade math needed in this file. */}
       <pointsMaterial color={0x8b7cf0} size={0.03} transparent opacity={0.3} blending={THREE.AdditiveBlending} depthWrite={false} />
     </points>
   );

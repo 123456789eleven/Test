@@ -77,6 +77,19 @@ export default function Scene({
 
   return (
     <>
+      {/* Round 2 of the graphics-overhaul plan: real scene depth via native
+          three.js fog, tinted to the same dark tone as the base platform
+          (0x0a0912, matches --page) rather than a new color. Distant tier1
+          neighbors (~6.5 units apart) previously had zero visual cue of
+          being "far" -- everything read at the same flat depth regardless
+          of distance. Every fog-aware material (the unlit fills, the
+          connection lines, the particle field -- all default to fog:true)
+          picks this up automatically, no per-object changes needed. The
+          custom rim shader is raw GLSL without the standard fog chunks, so
+          it's NOT fogged by this -- a deliberate, low-risk scope boundary
+          for this round, not an oversight. */}
+      <fogExp2 attach="fog" args={[0x0a0912, 0.045]} />
+
       <mesh position={[0, -0.15, 0]}>
         <cylinderGeometry args={[8.6, 8.6, 0.25, 64]} />
         <meshBasicMaterial color={0x0a0912} />
