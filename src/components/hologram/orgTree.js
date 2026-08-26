@@ -69,7 +69,18 @@ const SPIRAL_THRESHOLD = 8;
 // app's visual feedback has resolved every other time.
 const LABEL_DENSE_THRESHOLD = 10;
 const GOLDEN_ANGLE = Math.PI * (3 - Math.sqrt(5)); // ~2.39996 rad (~137.5deg) -- the standard phyllotaxis/"sunflower" stepping angle that spaces an arbitrary number of points with no two ever radiating along the same line
-const SPIRAL_STEP = 0.24; // radius-per-sqrt(index) growth -- tuned for real, non-overlapping spacing at ~130 points; revisit if a much larger roster changes this
+// radius-per-sqrt(index) growth. The old value (0.24) was tuned by eye
+// against corpfn's full 130-person spiral and never actually checked
+// against node size -- a golden-angle spiral's real minimum nearest-
+// neighbor spacing works out to roughly SPIRAL_STEP*1.2, which at 0.24 is
+// ~0.29 units, well under a tier2 node's 0.68-unit diameter (guaranteed
+// overlap, independent of count). Since entry-point clustering (see
+// groupEntryPoints) keeps any single batch that still needs the spiral
+// down to a realistic max of ~20 (one manager's real direct reports, the
+// largest in the live data), 0.5 is sized against THAT ceiling instead:
+// spacing ~0.6, radius at 20 points ~2.2 -- comfortably inside the ~6.5
+// units between neighboring divisions.
+const SPIRAL_STEP = 0.5;
 
 // A phyllotaxis spiral centered on the PARENT's own world position (not the
 // scene origin) — capped by how far it grows outward, not by an angular
@@ -244,6 +255,43 @@ export function peopleBucketFor(tier1Id) {
   return tier1Id === "corpfn" ? "root" : tier1Id;
 }
 
+// Once a bucket has more solo individual-contributor entry points than this
+// (no real reports of their own), they collapse into one synthetic
+// "Individual Contributors (N)" cluster instead of showing as N separate
+// nodes. Real data: every bucket except Advantage has at most 1 solo IC
+// among its entry points (no clustering ever triggers there); Advantage has
+// 14. Real team leads (an entry point WITH reports) are never clustered --
+// each stays its own node, same as before, just with its real team size
+// appended to the display name.
+const SOLO_CLUSTER_THRESHOLD = 3;
+
+// Collapses one bucket's raw entry-point list into the final placeable set:
+// team leads (kept individual, name gets a real "(count)" suffix) plus
+// either the solo ICs directly (few enough to just show) or one synthetic
+// cluster node standing in for all of them. The cluster is registered in
+// reportsByManagerId under its own synthetic id with the real solo ICs as
+// its "reports" -- so the existing recursive drill-down (toggleInPath,
+// placePersonBatch) can expand it with no new interaction-model code at
+// all: a cluster is just a person-shaped node that happens to have real
+// people as its reports.
+function groupEntryPoints(entryPoints, reportsByManagerId, bucketId) {
+  const grouped = [];
+  const soloICs = [];
+  entryPoints.forEach((p) => {
+    const reports = reportsByManagerId.get(p.id) || [];
+    if (reports.length > 0) grouped.push({ ...p, name: `${p.name} (${reports.length})` });
+    else soloICs.push(p);
+  });
+  if (soloICs.length > SOLO_CLUSTER_THRESHOLD) {
+    const clusterId = `${bucketId}__ic`;
+    reportsByManagerId.set(clusterId, soloICs);
+    grouped.push({ id: clusterId, name: `Individual Contributors (${soloICs.length})`, managerId: null, isCluster: true });
+  } else {
+    grouped.push(...soloICs);
+  }
+  return grouped;
+}
+
 // Real entry points per bucket (manager_id null, or pointing at someone
 // outside this same bucket -- a real cross-division reporting line, kept
 // fully correct in that person's own PersonCard, just not rendered as a 3D
@@ -252,7 +300,9 @@ export function peopleBucketFor(tier1Id) {
 // roster rather than per-render, since every division genuinely has its own
 // people (root 132, strategies 60, advantage 177, payroll 66, advisory 29 --
 // verified against the live table, not assumed), not just Corporate
-// Functions.
+// Functions. Entry points are further grouped via groupEntryPoints (see
+// above) before being returned, so a caller never has to think about the
+// raw-vs-clustered distinction itself.
 function computePeopleHierarchy(leadership) {
   const byId = new Map((leadership || []).map((p) => [p.id, p]));
   const entryPointsByBucket = {};
@@ -268,6 +318,9 @@ function computePeopleHierarchy(leadership) {
       if (!reportsByManagerId.has(p.managerId)) reportsByManagerId.set(p.managerId, []);
       reportsByManagerId.get(p.managerId).push(p);
     }
+  });
+  PEOPLE_BUCKET_IDS.forEach((b) => {
+    entryPointsByBucket[b] = groupEntryPoints(entryPointsByBucket[b], reportsByManagerId, b);
   });
   return { entryPointsByBucket, reportsByManagerId };
 }
@@ -334,7 +387,7 @@ function colorAndConnected(sceneState, tier, item, isPerson) {
 // same layout decision.
 function placePersonBatch(place, people, reportsByManagerId, parent, outward, ystep) {
   const items = people.map((p) => ({
-    id: p.id, name: p.name, isPerson: true, managerId: p.managerId,
+    id: p.id, name: p.name, isPerson: true, managerId: p.managerId, isCluster: !!p.isCluster,
     hasReports: (reportsByManagerId.get(p.id) || []).length > 0,
   }));
   const showLabel = items.length <= LABEL_DENSE_THRESHOLD;
@@ -360,17 +413,26 @@ export function computeVisibleNodes(sceneState, expandedTier1, expandedTier2, pe
   function place(item, tier, angle, radius, y, parentId, opts = {}) {
     const { showLabel = true } = opts;
     const isPerson = !!item.isPerson;
+    const isCluster = !!item.isCluster;
     const size = tier === 1 ? RADIUS.division : tier === 2 ? RADIUS.vertical : RADIUS.function;
     const { color } = colorAndConnected(sceneState, tier, item, isPerson);
     const opacity = tier === 1 ? 0.3 : tier === 2 ? 0.34 : 0.38;
-    const kind = tier === 1 ? (item.isCorpfn ? "corpfn" : "division") : tier === 2 ? (isPerson ? "person" : "vertical") : "function";
+    // A synthetic cluster ("Individual Contributors (N)") gets its own kind
+    // rather than "person" -- HoverLabel's EDIT_KIND/addKindFor only
+    // recognize known kind strings, so this alone keeps the Edit/+Add
+    // buttons from ever appearing for a node that has no real PersonForm
+    // row behind it, with no changes needed in HoverLabel's kind-matching
+    // logic itself.
+    const kind = tier === 1 ? (item.isCorpfn ? "corpfn" : "division")
+      : tier === 2 ? (isPerson ? (isCluster ? "person-cluster" : "person") : "vertical")
+      : "function";
     const x = Math.cos(angle) * radius, z = Math.sin(angle) * radius;
     const expandable = isPerson ? !!item.hasReports : tier < 3;
     const expanded = tier === 1 ? item.id === expandedTier1
       : tier === 2 ? (isPerson ? personPath.includes(item.id) : item.id === expandedTier2)
       : false;
     const node = {
-      id: item.id, name: item.name, tier, kind, isPerson, parentId,
+      id: item.id, name: item.name, tier, kind, isPerson, isCluster, parentId,
       angle, radius, y, position: [x, y, z], size, color, opacity, expandable, expanded, showLabel,
       managerId: isPerson ? item.managerId || null : null,
     };
@@ -400,7 +462,7 @@ export function computeVisibleNodes(sceneState, expandedTier1, expandedTier2, pe
         // away, this is additive.
         const verticalItems = Object.entries(sceneState.verticals).filter(([, v]) => v.division === parent.id).map(([id, v]) => ({ id, name: v.name }));
         const personItems = entryPeople.map((p) => ({
-          id: p.id, name: p.name, isPerson: true, managerId: p.managerId,
+          id: p.id, name: p.name, isPerson: true, managerId: p.managerId, isCluster: !!p.isCluster,
           hasReports: (sceneState.reportsByManagerId.get(p.id) || []).length > 0,
         }));
         const children = [...verticalItems, ...personItems];

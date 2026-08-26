@@ -32,11 +32,13 @@ export default function HoverLabel({ hovered, isSignedIn, onEdit, onAdd, onViewP
       style={{ left: `${hovered.clientX + 14}px`, top: `${hovered.clientY + 14}px` }}
     >
       <span id="holoLabelText">{hovered.name}{suffix}</span>
-      {hovered.isPerson && hovered.expandable && onViewProfile ? (
+      {hovered.isPerson && !hovered.isCluster && hovered.expandable && onViewProfile ? (
         // A person WITH real direct reports primarily expands on click (see
         // Hologram.jsx's handleClick) -- this is the one place their profile
         // card is still reachable without collapsing/expanding anything.
         // Not signed-in-gated: viewing a profile isn't an edit action.
+        // Excludes synthetic "Individual Contributors" clusters -- there's
+        // no real person behind one to show a profile for.
         <button className="holo-label-edit" type="button" onClick={() => onViewProfile(hovered.id)}>👤 View profile</button>
       ) : null}
       {isSignedIn && addKind ? (

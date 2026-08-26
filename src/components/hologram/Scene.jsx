@@ -5,7 +5,6 @@ import * as THREE from "three";
 import Node from "./Node";
 import ConnectionLines from "./ConnectionLines";
 import Particles from "./Particles";
-import ScanRing from "./ScanRing";
 import PostFX from "./PostFX";
 import { ExternalNodes } from "./ExternalNode";
 import WorkflowPulse from "./workflow/WorkflowPulse";
@@ -31,10 +30,11 @@ export default function Scene({
   expandedTier1, expandedTier2, personPath,
   showManagerLines,
 }) {
-  // Single shared clock for the scan ring pulse and the connection lines'
-  // breathing glow, so both stay in the same rhythm the original's one
-  // scanT variable produced — a ref (not state) since nothing here needs a
-  // re-render, only per-frame imperative updates.
+  // Shared clock for the connection lines' breathing glow (also drove the
+  // sonar ScanRing, removed -- its vertical sweep was the actual "pane
+  // moving up and down" complaint, not the static platform rim) — a ref
+  // (not state) since nothing here needs a re-render, only per-frame
+  // imperative updates.
   const scanT = useRef(0);
   useFrame(() => {
     if (!reduceMotion) scanT.current += 0.006;
@@ -92,7 +92,6 @@ export default function Scene({
       </mesh>
 
       <Particles count={particleCount} reduceMotion={reduceMotion} />
-      <ScanRing reduceMotion={reduceMotion} scanT={scanT} />
 
       {nodes.map((n) => (
         <Node key={n.id} node={n} hoveredId={hoveredId} onHover={onHover} onUnhover={onUnhover} onMove={onMove} onClick={onClick} reduceMotion={reduceMotion} />
