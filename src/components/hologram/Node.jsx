@@ -70,7 +70,7 @@ const RIM_FRAGMENT_SHADER = /* glsl */ `
 // lerps/sines instead of a tween library, none of it touching the
 // interaction model (still the same click → toggle/detail routing).
 export default function Node({ node, hoveredId, onHover, onUnhover, onMove, onClick, reduceMotion = false }) {
-  const { id, size, color, opacity, position, name, tier, isPerson } = node;
+  const { id, size, color, opacity, position, name, tier, isPerson, showLabel = true } = node;
   const groupRef = useRef(null);
   const matRef = useRef(null);
   const mountedAtRef = useRef(null);
@@ -153,8 +153,14 @@ export default function Node({ node, hoveredId, onHover, onUnhover, onMove, onCl
       {/* Rendered as a sibling, not a child of the group above -- drei's <Html>
           doesn't play well with a parent that's actively being scaled (the
           0->1 mount-in animation), so the label reads position directly
-          rather than inheriting the group's transform. */}
-      <NodeLabel position={position} yOffset={size + 0.15} text={name} tier={isPerson ? 2 : tier} dim={isHovered} />
+          rather than inheriting the group's transform. Suppressed once a
+          batch is genuinely dense (showLabel:false, set in orgTree.js) --
+          hover still shows the name either way via HoverLabel; this only
+          drops the always-on floating badge once there are too many at once
+          to read cleanly. */}
+      {showLabel ? (
+        <NodeLabel position={position} yOffset={size + 0.15} text={name} tier={isPerson ? 2 : tier} dim={isHovered} />
+      ) : null}
     </>
   );
 }

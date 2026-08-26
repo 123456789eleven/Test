@@ -28,7 +28,7 @@ export default function Scene({
   onHover, onUnhover, onMove, onClick,
   stakeholders, simulation, sceneState, nodesById, externalNodesById, tasksById,
   showFullPath, workflowSteps, workflowTransitions,
-  expandedTier1, expandedTier2,
+  expandedTier1, expandedTier2, personPath,
   showManagerLines,
 }) {
   // Single shared clock for the scan ring pulse and the connection lines'
@@ -53,7 +53,11 @@ export default function Scene({
   const controlsRef = useRef(null);
   const cameraTargetRef = useRef(new THREE.Vector3(0, 0, 0));
   useEffect(() => {
-    const deepestParentId = expandedTier2 || expandedTier1 || null;
+    // A person drill chain is deeper than expandedTier2, so it wins when
+    // present -- same fallback order the accordion state itself follows
+    // (personPath only ever has entries while a person chain is open, and
+    // never coexists with an open vertical at the same tier2 slot).
+    const deepestParentId = (personPath && personPath.length ? personPath[personPath.length - 1] : null) || expandedTier2 || expandedTier1 || null;
     if (!deepestParentId) { cameraTargetRef.current.set(0, 0, 0); return; }
     const children = nodes.filter((n) => n.parentId === deepestParentId);
     if (!children.length) return;
@@ -63,7 +67,7 @@ export default function Scene({
     }, { x: 0, y: 0, z: 0 });
     cameraTargetRef.current.set(sum.x / children.length, sum.y / children.length, sum.z / children.length);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [expandedTier1, expandedTier2]);
+  }, [expandedTier1, expandedTier2, personPath]);
   useFrame(() => {
     if (!controlsRef.current || reduceMotion) return;
     controlsRef.current.target.lerp(cameraTargetRef.current, 0.045);

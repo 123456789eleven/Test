@@ -6,7 +6,7 @@ import Scene from "../components/hologram/Scene";
 import HoverLabel from "../components/hologram/HoverLabel";
 import DetailPanel from "../components/hologram/DetailPanel";
 import PersonCard from "../components/hologram/PersonCard";
-import { buildSceneState, computeVisibleNodes, buildExternalNodes, locateStepOwner } from "../components/hologram/orgTree";
+import { buildSceneState, computeVisibleNodes, buildExternalNodes, locateStepOwner, toggleInPath, peopleBucketFor } from "../components/hologram/orgTree";
 import {
   useOrgDivisions, useOrgVerticals, useOrgFunctions, useOrgPeople, useOrgTitles, useOrgConnections,
   useTasks, useTools, useTaskTools, useCompanyStatic, assembleOrgData, buildTasksByFunction,
@@ -116,6 +116,12 @@ export default function Hologram() {
   // the whole visible set from these two ids on every change.
   const [expandedTier1, setExpandedTier1] = useState(null);
   const [expandedTier2, setExpandedTier2] = useState(null);
+  // Arbitrary-depth person drill chain (real manager_id chains run up to 7
+  // levels deep) -- independent of expandedTier2 since a division's tier2 row
+  // can now hold either an open vertical OR an open person chain, never both
+  // at once (see handleClick below), same "one branch open per level" rule
+  // the rest of this accordion already follows.
+  const [personPath, setPersonPath] = useState([]);
   const [hovered, setHovered] = useState(null);
   const [detailFunction, setDetailFunction] = useState(null);
   const [detailPerson, setDetailPerson] = useState(null);
@@ -139,12 +145,13 @@ export default function Hologram() {
     if (!owner) return;
     setExpandedTier1(owner.divisionId);
     setExpandedTier2(owner.verticalId);
+    setPersonPath([]);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [simulation.currentStepId, simulation.status, sceneState]);
 
   const visible = useMemo(
-    () => (sceneState ? computeVisibleNodes(sceneState, expandedTier1, expandedTier2) : EMPTY_VISIBLE),
-    [sceneState, expandedTier1, expandedTier2]
+    () => (sceneState ? computeVisibleNodes(sceneState, expandedTier1, expandedTier2, personPath) : EMPTY_VISIBLE),
+    [sceneState, expandedTier1, expandedTier2, personPath]
   );
 
   const reduceMotion = useMemo(() => window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ?? false, []);
@@ -165,9 +172,9 @@ export default function Hologram() {
   // with no functions yet, shouldn't ever register as "expanded".
   function hasChildren(node) {
     if (node.tier === 1) {
-      return node.kind === "corpfn"
-        ? sceneState.corpfnPeople.length > 0
-        : Object.values(sceneState.verticals).some((v) => v.division === node.id);
+      const bucketId = peopleBucketFor(node.id);
+      const hasPeople = (sceneState.entryPointsByBucket[bucketId] || []).length > 0;
+      return node.kind === "corpfn" ? hasPeople : hasPeople || Object.values(sceneState.verticals).some((v) => v.division === node.id);
     }
     if (node.tier === 2) {
       const v = sceneState.verticals[node.id];
@@ -178,7 +185,12 @@ export default function Hologram() {
 
   function handleClick(node) {
     if (node.isPerson) {
-      setDetailPerson((prev) => (prev === node.id ? null : node.id));
+      if (node.expandable) {
+        setPersonPath((prev) => toggleInPath(prev, node.id, node.parentId));
+        setExpandedTier2(null); // a person chain and an open vertical never coexist at tier2
+      } else {
+        setDetailPerson((prev) => (prev === node.id ? null : node.id));
+      }
       return;
     }
     if (node.tier === 3) {
@@ -191,10 +203,12 @@ export default function Hologram() {
       if (!isOpen && !hasChildren(node)) return;
       setExpandedTier1(isOpen ? null : node.id);
       setExpandedTier2(null);
+      setPersonPath([]);
     } else if (node.tier === 2) {
       const isOpen = expandedTier2 === node.id;
       if (!isOpen && !hasChildren(node)) return;
       setExpandedTier2(isOpen ? null : node.id);
+      setPersonPath([]); // opening a vertical closes any open person chain at this same level
     }
   }
 
@@ -266,10 +280,11 @@ export default function Hologram() {
                 workflowTransitions={workflowTransitionsQ.data}
                 expandedTier1={expandedTier1}
                 expandedTier2={expandedTier2}
+                personPath={personPath}
                 showManagerLines={showManagerLines}
               />
             </Canvas>
-            <HoverLabel hovered={hovered} isSignedIn={isSignedIn} onEdit={openEdit} onAdd={openAdd} />
+            <HoverLabel hovered={hovered} isSignedIn={isSignedIn} onEdit={openEdit} onAdd={openAdd} onViewProfile={setDetailPerson} />
             <div className="holo-workflow-overlay">
               <WorkflowStepInfo simulation={simulation} />
               <WorkflowControls
