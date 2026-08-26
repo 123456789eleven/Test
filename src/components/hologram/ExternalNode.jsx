@@ -6,7 +6,10 @@ import NodeLabel from "./NodeLabel";
 
 // External-stakeholder node -- same hand-rolled mount/hover lerp technique as
 // Node.jsx (no tween library, ref-based ease-in-on-mount + hover-scale-bump
-// lerp), but drawn with a different geometry and a color outside the org
+// lerp), plus the same idle-breathing pulse and fresnel rim-glow shell (see
+// Node.jsx for the fuller rationale on why the fill stays an unlit
+// meshBasicMaterial and the rim glow lives on a separate additive mesh
+// instead), but drawn with a different geometry and a color outside the org
 // palette (GLOW/SHARED_GLOW/QUIET/PEOPLE_GLOW, all in orgTree.js) so the four
 // external nodes read at a glance as "outside the company," not another
 // department. A tetrahedron next to Node.jsx's octahedron is a big enough
@@ -23,14 +26,72 @@ const EXTERNAL_SIZE = 0.46;
 const EXTERNAL_COLOR = 0xb46bff;
 const EXTERNAL_OPACITY = 0.36;
 
-export default function ExternalNode({ node, hoveredId, onHover, onUnhover, onMove, onClick }) {
+// Deterministic per-node phase, same char-code-sum trick as Node.jsx/
+// ConnectionLines.jsx, keyed on the node's own stable id.
+function phaseOf(key) {
+  let phase = 0;
+  for (let i = 0; i < key.length; i++) phase += key.charCodeAt(i);
+  return phase;
+}
+
+// Idle breathing tuning -- kept identical to Node.jsx's so org and external
+// nodes read as the same living scene rather than two different rhythms.
+const BREATH_SPEED = 0.85; // rad/s
+const BREATH_SCALE_AMOUNT = 0.035;
+const BREATH_OPACITY_LOW = 0.85;
+const BREATH_OPACITY_RANGE = 0.15;
+const RIM_LOW = 0.7;
+const RIM_RANGE = 0.5;
+
+// Fresnel/rim-light shader -- identical technique to Node.jsx's (see that
+// file for the full rationale): brightens at grazing angles, dims head-on,
+// layered on top of the fill/wireframe as its own additive, non-interactive
+// mesh.
+const RIM_VERTEX_SHADER = /* glsl */ `
+  varying vec3 vNormal;
+  varying vec3 vViewDir;
+
+  void main() {
+    vNormal = normalize(normalMatrix * normal);
+    vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
+    vViewDir = normalize(-mvPosition.xyz);
+    gl_Position = projectionMatrix * mvPosition;
+  }
+`;
+
+const RIM_FRAGMENT_SHADER = /* glsl */ `
+  uniform vec3 glowColor;
+  uniform float power;
+  uniform float intensity;
+
+  varying vec3 vNormal;
+  varying vec3 vViewDir;
+
+  void main() {
+    float fresnel = pow(1.0 - clamp(dot(normalize(vNormal), normalize(vViewDir)), 0.0, 1.0), power);
+    float a = fresnel * intensity;
+    gl_FragColor = vec4(glowColor * a, a);
+  }
+`;
+
+export default function ExternalNode({ node, hoveredId, onHover, onUnhover, onMove, onClick, reduceMotion = false }) {
   const { id, position } = node;
   const groupRef = useRef(null);
+  const matRef = useRef(null);
   const mountedAtRef = useRef(null);
   if (mountedAtRef.current === null) mountedAtRef.current = performance.now();
   const isHovered = hoveredId === id;
 
   const geometry = useMemo(() => new THREE.TetrahedronGeometry(EXTERNAL_SIZE, 0), []);
+  const phase = useMemo(() => phaseOf(id), [id]);
+  const rimUniforms = useMemo(
+    () => ({
+      glowColor: { value: new THREE.Color(EXTERNAL_COLOR) },
+      power: { value: 2.6 },
+      intensity: { value: RIM_LOW },
+    }),
+    []
+  );
 
   useFrame(() => {
     const g = groupRef.current;
@@ -38,9 +99,27 @@ export default function ExternalNode({ node, hoveredId, onHover, onUnhover, onMo
     const elapsed = performance.now() - mountedAtRef.current;
     const growIn = Math.min(1, elapsed / 260);
     const eased = 1 - Math.pow(1 - growIn, 3);
-    const target = eased * (isHovered ? 1.12 : 1);
+    const hoverScale = isHovered ? 1.12 : 1;
+    const flatOpacity = isHovered ? Math.min(1, EXTERNAL_OPACITY + 0.25) : EXTERNAL_OPACITY;
+    const rimBase = isHovered ? 1.35 : 1;
+
+    // Idle breathing -- see Node.jsx for the full rationale. Same technique,
+    // own local clock (no shared scanT reaches this file), phase-shifted per
+    // node, fully inert under reduceMotion.
+    const s = reduceMotion ? 0 : Math.sin(performance.now() * 0.001 * BREATH_SPEED + phase);
+    const pulse = 0.5 + 0.5 * s;
+
+    const target = eased * hoverScale * (1 + BREATH_SCALE_AMOUNT * s);
     const next = g.scale.x + (target - g.scale.x) * 0.25;
     g.scale.set(next, next, next);
+
+    if (matRef.current) {
+      matRef.current.opacity = reduceMotion
+        ? flatOpacity
+        : flatOpacity * (BREATH_OPACITY_LOW + BREATH_OPACITY_RANGE * pulse);
+    }
+
+    rimUniforms.intensity.value = rimBase * (reduceMotion ? RIM_LOW : RIM_LOW + RIM_RANGE * pulse);
   });
 
   // Deliberately no click-to-expand: external nodes have no children and
@@ -62,12 +141,23 @@ export default function ExternalNode({ node, hoveredId, onHover, onUnhover, onMo
           onPointerOut={(e) => { e.stopPropagation(); onUnhover(node); }}
         >
           <meshBasicMaterial
+            ref={matRef}
             color={EXTERNAL_COLOR}
             transparent
             opacity={isHovered ? Math.min(1, EXTERNAL_OPACITY + 0.25) : EXTERNAL_OPACITY}
           />
         </mesh>
-        <lineSegments>
+        <mesh geometry={geometry} raycast={() => null} renderOrder={1}>
+          <shaderMaterial
+            args={[{ uniforms: rimUniforms }]}
+            vertexShader={RIM_VERTEX_SHADER}
+            fragmentShader={RIM_FRAGMENT_SHADER}
+            transparent
+            depthWrite={false}
+            blending={THREE.AdditiveBlending}
+          />
+        </mesh>
+        <lineSegments renderOrder={2}>
           <edgesGeometry args={[geometry]} />
           <lineBasicMaterial color={EXTERNAL_COLOR} transparent opacity={0.9} />
         </lineSegments>
@@ -83,7 +173,7 @@ export default function ExternalNode({ node, hoveredId, onHover, onUnhover, onMo
 // four external nodes, calling buildExternalNodes() itself so the caller
 // never has to. Mirrors ExternalNode's hover/click prop contract one level
 // up so it drops in next to the org tiers with the same wiring shape.
-export function ExternalNodes({ stakeholders, hoveredId, onHover, onUnhover, onMove, onClick }) {
+export function ExternalNodes({ stakeholders, hoveredId, onHover, onUnhover, onMove, onClick, reduceMotion }) {
   const nodes = buildExternalNodes(stakeholders);
   return (
     <>
@@ -96,6 +186,7 @@ export function ExternalNodes({ stakeholders, hoveredId, onHover, onUnhover, onM
           onUnhover={onUnhover}
           onMove={onMove}
           onClick={onClick}
+          reduceMotion={reduceMotion}
         />
       ))}
     </>

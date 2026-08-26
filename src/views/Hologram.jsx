@@ -96,6 +96,7 @@ export default function Hologram() {
   const [editRequest, setEditRequest] = useState(null); // { kind, mode, id, parentId }
   const [connectionsOpen, setConnectionsOpen] = useState(false);
   const [showFullPath, setShowFullPath] = useState(false);
+  const [showManagerLines, setShowManagerLines] = useState(false);
 
   // Drives the accordion from whatever step is currently playing, so the
   // scene actually opens up and follows the pulse around instead of most
@@ -183,6 +184,14 @@ export default function Hologram() {
         <span className="holo-legend-item"><span className="holo-swatch" style={{ background: "#46d6ff" }} /> Handoff connection</span>
         <span className="holo-legend-item"><span className="holo-swatch" style={{ background: "#ffb84f" }} /> Shared connection</span>
         <span className="holo-legend-item"><span className="holo-swatch" style={{ background: "#3a4250" }} /> No connections modeled yet</span>
+        <button
+          className={`orgmap-fs-btn${showManagerLines ? " orgmap-fs-btn-active" : ""}`}
+          style={{ marginLeft: isSignedIn ? undefined : "auto" }}
+          type="button"
+          onClick={() => setShowManagerLines((v) => !v)}
+        >
+          👤 {showManagerLines ? "Hide" : "Show"} reporting lines
+        </button>
         {isSignedIn ? (
           <button className="orgmap-fs-btn" style={{ marginLeft: "auto" }} type="button" onClick={() => setConnectionsOpen(true)}>
             🔗 Manage connections
@@ -226,6 +235,7 @@ export default function Hologram() {
                 workflowTransitions={workflowTransitionsQ.data}
                 expandedTier1={expandedTier1}
                 expandedTier2={expandedTier2}
+                showManagerLines={showManagerLines}
               />
             </Canvas>
             <HoverLabel hovered={hovered} isSignedIn={isSignedIn} onEdit={openEdit} onAdd={openAdd} />

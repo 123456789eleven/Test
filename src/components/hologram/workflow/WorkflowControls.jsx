@@ -34,7 +34,12 @@ export default function WorkflowControls({ simulation, workflows, showFullPath, 
     <div className="wf-controls">
       <div className="wf-controls-head">
         <h4 className="wf-controls-title">Simulate a workflow</h4>
-        {statusLabel ? <span className={`wf-status-badge wf-status-${status}`}>{statusLabel}</span> : null}
+        {statusLabel ? (
+          // Keyed on status so playing -> at-decision -> done each remount
+          // the badge and replay its entrance instead of the label just
+          // swapping text/color in place.
+          <span key={status} className={`wf-status-badge wf-status-${status}`}>{statusLabel}</span>
+        ) : null}
       </div>
 
       {onToggleFullPath ? (

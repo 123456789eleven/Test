@@ -43,15 +43,22 @@ body.route-fullscreen .holo-legend, body.route-fullscreen #holoCanvasWrap { marg
 body.route-fullscreen #holoCanvasWrap { box-shadow: none; height: calc(100vh - 132px); }
 @media (max-width: 640px) { body.route-fullscreen #holoCanvasWrap { height: calc(100vh - 160px); } }
 .holo-label {
-  position: fixed; pointer-events: none; display: none; align-items: center; gap: 10px;
+  /* `display: none` here was dead weight left from before the React port —
+     the vanilla version toggled visibility with a JS class flip on one
+     persistent element; the React version mounts/unmounts this element
+     entirely (HoverLabel.jsx's `if (!hovered) return null`), so the base
+     rule needs to actually show it rather than always hiding it. */
+  position: fixed; pointer-events: none; display: flex; align-items: center; gap: 10px;
   background: rgba(11,16,23,0.92); border: 1px solid rgba(255,255,255,0.12); color: #e7ebf0;
   font-size: 0.78rem; padding: 6px 10px; border-radius: 8px; z-index: 20; backdrop-filter: blur(6px);
+  box-shadow: var(--shadow-card); animation: wfPanelIn 0.14s ease;
 }
 .holo-label-edit {
   pointer-events: auto; font: inherit; font-size: 0.74rem; font-weight: 600; padding: 3px 9px; border-radius: 999px;
   border: 1px solid rgba(70,214,255,0.5); background: rgba(70,214,255,0.12); color: #9fe1ff; cursor: pointer;
+  transition: background-color .15s ease, transform .15s ease;
 }
-.holo-label-edit:hover { background: rgba(70,214,255,0.22); }
+.holo-label-edit:hover { background: rgba(70,214,255,0.22); transform: translateY(-1px); }
 .holo-fallback {
   padding: 60px 24px; text-align: center; color: var(--ink-soft); font-size: 0.9rem; line-height: 1.6;
 }
@@ -59,9 +66,13 @@ body.route-fullscreen #holoCanvasWrap { box-shadow: none; height: calc(100vh - 1
 .holo-detail {
   position: relative; background: var(--surface); border-radius: var(--radius-lg); box-shadow: var(--shadow-card);
   padding: 20px 24px; margin-bottom: 26px;
+  animation: wfPanelIn 0.22s ease;
 }
-.holo-detail h4 { font-size: 1rem; margin: 0 0 14px; padding-right: 30px; }
-.holo-detail-close { position: absolute; top: 16px; right: 18px; background: none; border: none; color: var(--ink-muted); cursor: pointer; font-size: 0.85rem; }
+.holo-detail h4 { font-size: 1rem; font-weight: 700; letter-spacing: -0.01em; margin: 0 0 14px; padding-right: 30px; }
+.holo-detail-close {
+  position: absolute; top: 16px; right: 18px; background: none; border: none; color: var(--ink-muted); cursor: pointer;
+  font-size: 0.85rem; transition: color .15s ease;
+}
 .holo-detail-close:hover { color: var(--ink); }
 .holo-detail-task { padding: 12px 0; border-top: 1px solid var(--border); }
 .holo-detail-task:first-of-type { border-top: none; padding-top: 0; }
@@ -79,11 +90,12 @@ body.route-fullscreen #holoCanvasWrap { box-shadow: none; height: calc(100vh - 1
   padding: 16px 18px; display: flex; flex-direction: column; gap: 12px;
 }
 .wf-controls-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
-.wf-controls-title { font-size: 0.86rem; font-weight: 700; color: var(--ink); margin: 0; }
+.wf-controls-title { font-size: 0.86rem; font-weight: 700; letter-spacing: -0.01em; color: var(--ink); margin: 0; }
 
 .wf-status-badge {
   font-size: 0.66rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;
   padding: 3px 10px; border-radius: 999px; white-space: nowrap;
+  animation: wfPanelIn 0.18s ease;
 }
 .wf-status-playing { background: var(--accent-wash); color: var(--accent); }
 .wf-status-at-decision { background: var(--manager-soft); color: var(--manager); }
@@ -93,9 +105,14 @@ body.route-fullscreen #holoCanvasWrap { box-shadow: none; height: calc(100vh - 1
 .wf-list-item {
   display: flex; align-items: center; justify-content: space-between; gap: 12px;
   background: var(--surface-alt); border-radius: var(--radius-sm); padding: 10px 12px;
-  border: 1px solid transparent; transition: border-color .15s ease;
+  border: 1px solid transparent; transition: border-color .15s ease, background-color .15s ease;
 }
-.wf-list-item-active { border-color: var(--accent); }
+.wf-list-item:hover { background: var(--surface); }
+/* The row for whichever real workflow is currently running gets its own
+   accent wash, not just a border — with several rows possible later (see
+   this component's header comment), "which one is live" should read at a
+   glance, not require reading every row's button label. */
+.wf-list-item-active { border-color: var(--accent); background: var(--accent-wash); }
 .wf-list-item-info { min-width: 0; display: flex; flex-direction: column; gap: 2px; }
 .wf-list-item-name { font-size: 0.86rem; font-weight: 600; color: var(--ink); }
 .wf-list-item-trigger { font-size: 0.76rem; color: var(--ink-soft); line-height: 1.4; }
@@ -113,9 +130,10 @@ body.route-fullscreen #holoCanvasWrap { box-shadow: none; height: calc(100vh - 1
 
 .wf-play-btn {
   flex: none; font: inherit; font-size: 0.78rem; font-weight: 600; padding: 7px 14px; border-radius: 999px;
-  border: none; background: var(--accent); color: var(--accent-ink); cursor: pointer; transition: opacity .15s ease; white-space: nowrap;
+  border: none; background: var(--accent); color: var(--accent-ink); cursor: pointer; white-space: nowrap;
+  transition: opacity .15s ease, transform .15s ease;
 }
-.wf-play-btn:hover:not(:disabled) { opacity: 0.88; }
+.wf-play-btn:hover:not(:disabled) { opacity: 0.88; transform: translateY(-1px); }
 .wf-play-btn:disabled { background: var(--surface-alt); color: var(--ink-muted); cursor: default; }
 
 .wf-reset-btn {
@@ -138,15 +156,30 @@ body.route-fullscreen #holoCanvasWrap { box-shadow: none; height: calc(100vh - 1
   font: inherit; font-size: 0.86rem; font-weight: 600; text-align: left; padding: 10px 14px; border-radius: var(--radius-sm);
   border: 1px solid var(--border); background: var(--surface); color: var(--ink); cursor: pointer; transition: all .15s ease;
 }
-.wf-decision-choice:hover, .wf-decision-choice:focus-visible { border-color: var(--accent); background: var(--accent-wash); color: var(--accent); outline: none; }
+/* The one genuinely interactive moment this whole feature exists to make
+   legible gets the most tactile feedback on the page: a small lift + real
+   shadow, not just a color swap like everything quieter around it. */
+.wf-decision-choice:hover, .wf-decision-choice:focus-visible {
+  border-color: var(--accent); background: var(--accent-wash); color: var(--accent); outline: none;
+  transform: translateY(-1px); box-shadow: var(--shadow-card);
+}
 @keyframes wfDecisionIn { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: translateY(0); } }
-@media (prefers-reduced-motion: reduce) { .wf-decision { animation: none; } }
+/* Shared "panel enters" motion — same fade + small vertical settle as
+   wfDecisionIn above, reused everywhere a piece of 2D chrome newly appears
+   (a hover label, a detail panel, a fresh step readout, a status badge) so
+   nothing across this feature just snaps into place, without every panel
+   inventing its own animation style. */
+@keyframes wfPanelIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+@media (prefers-reduced-motion: reduce) {
+  .wf-decision, .holo-label, .holo-detail, .wf-step-info, .wf-status-badge, .wf-improve { animation: none; }
+}
 
 /* Step readout — the real content (title/description) of whichever step the
    pulse currently occupies. */
 .wf-step-info {
   background: var(--surface); border-radius: var(--radius-md); box-shadow: var(--shadow-card);
   padding: 16px 18px; display: flex; flex-direction: column; gap: 8px;
+  animation: wfPanelIn 0.2s ease;
 }
 .wf-step-info-done { border: 1px solid rgba(95,201,154,0.35); }
 .wf-step-info-badges { display: flex; gap: 6px; flex-wrap: wrap; }
@@ -157,9 +190,33 @@ body.route-fullscreen #holoCanvasWrap { box-shadow: none; height: calc(100vh - 1
 .wf-step-info-badge-order { background: var(--surface-alt); color: var(--ink-soft); }
 .wf-step-info-badge-decision { background: var(--manager-soft); color: var(--manager); }
 .wf-step-info-badge-done { align-self: flex-start; background: var(--good-soft); color: var(--good); }
-.wf-step-title { font-size: 1rem; color: var(--ink); margin: 0; }
+/* This title is the single most important line in the overlay at any given
+   moment — the pulse's current real location — so it gets real weight and
+   the same tightened letter-spacing base.css already gives every other
+   heading in the app, instead of relying on the browser's default h4 bold. */
+.wf-step-title { font-size: 1rem; font-weight: 700; letter-spacing: -0.01em; color: var(--ink); margin: 0; }
 .wf-step-desc { font-size: 0.86rem; color: var(--ink-soft); line-height: 1.55; margin: 0; }
 .wf-step-desc-empty { color: var(--ink-muted); font-style: italic; }
+
+/* Process-improvement callout — the real "why this step is risky" note from
+   cobra-process.json's `improve` field (see improvementLens.js), shown only
+   for the 5 of 56 real steps that carry one. Uses --warn rather than the
+   --accent this feature already spends on decision points, so a viewer can
+   tell "this is a branch" (accent, .wf-decision) apart from "this step is a
+   known friction point" (warn) at a glance instead of both competing for
+   the same color. */
+.wf-improve {
+  background: var(--warn-soft); border: 1px solid rgba(224,113,92,0.35); border-radius: var(--radius-sm);
+  padding: 12px 14px; display: flex; flex-direction: column; gap: 6px;
+  animation: wfPanelIn 0.22s ease 0.05s backwards;
+}
+.wf-improve-tag {
+  align-self: flex-start; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;
+  color: var(--warn);
+}
+.wf-improve-note { font-size: 0.82rem; color: var(--ink); line-height: 1.55; margin: 0; }
+.wf-improve-ask { font-size: 0.78rem; color: var(--ink-soft); line-height: 1.5; margin: 0; }
+.wf-improve-ask strong { color: var(--ink); font-weight: 600; }
 
 /* Floats WorkflowStepInfo + WorkflowControls over the bottom-left of the
    canvas (#holoCanvasWrap is already position:relative) rather than pushing

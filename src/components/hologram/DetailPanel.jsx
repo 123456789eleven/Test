@@ -3,7 +3,10 @@
 // children of their own. Rendered outside the <Canvas> as plain HTML.
 export default function DetailPanel({ name, tasks, onClose }) {
   return (
-    <div id="holoDetail" className="holo-detail">
+    // Keyed on `name` so switching straight from one function's panel to
+    // another's (no close/reopen in between) still remounts the panel and
+    // replays its entrance animation rather than silently swapping content.
+    <div id="holoDetail" className="holo-detail" key={name}>
       <button className="holo-detail-close" type="button" onClick={onClose}>✕</button>
       <h4>{name}</h4>
       {tasks.length ? (

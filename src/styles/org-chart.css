@@ -47,6 +47,7 @@
 .orgmap-wrap .cap { color: var(--ink-soft); font-size: 0.9rem; line-height: 1.55; max-width: 74ch; margin-bottom: 20px; }
 .orgmap-fs-btn { flex: none; font: inherit; font-size: 0.8rem; font-weight: 600; padding: 8px 14px; border-radius: 999px; border: none; background: var(--surface-alt); color: var(--ink-soft); cursor: pointer; white-space: nowrap; }
 .orgmap-fs-btn:hover { background: var(--accent-wash); color: var(--accent); }
+.orgmap-fs-btn-active { background: var(--accent-wash); color: var(--accent); }
 .orgmap-container { width: 100%; overflow-x: auto; overflow-y: visible; padding: 4px 4px 20px; }
 .orgmap-caption { color: var(--ink-muted); font-size: 0.8rem; line-height: 1.5; margin: 14px 2px 0; max-width: 74ch; }
 .orgmap-live-note { color: var(--warn); font-size: 0.8rem; margin: -8px 2px 12px; }

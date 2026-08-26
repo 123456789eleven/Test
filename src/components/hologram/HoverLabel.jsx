@@ -19,7 +19,16 @@ export default function HoverLabel({ hovered, isSignedIn, onEdit, onAdd }) {
   const addLabel = addKind === "person" ? "+ Add person" : addKind === "function" ? "+ Add function" : "+ Add department";
 
   return (
-    <div id="holoLabel" className="holo-label" style={{ left: `${hovered.clientX + 14}px`, top: `${hovered.clientY + 14}px` }}>
+    <div
+      id="holoLabel"
+      className="holo-label"
+      // Keyed on the hovered node's own id so moving the pointer straight from
+      // one node to another (no gap where the label unmounts) still remounts
+      // this element and replays its entrance animation, instead of the
+      // fade only ever playing once per hover session.
+      key={hovered.id}
+      style={{ left: `${hovered.clientX + 14}px`, top: `${hovered.clientY + 14}px` }}
+    >
       <span id="holoLabelText">{hovered.name}{suffix}</span>
       {isSignedIn && addKind ? (
         <button className="holo-label-edit" type="button" onClick={() => onAdd(addKind, hovered.id)}>{addLabel}</button>

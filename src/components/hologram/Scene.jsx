@@ -10,6 +10,7 @@ import PostFX from "./PostFX";
 import { ExternalNodes } from "./ExternalNode";
 import WorkflowPulse from "./workflow/WorkflowPulse";
 import WorkflowMap from "./workflow/WorkflowMap";
+import ManagerLines from "./ManagerLines";
 
 // The actual <Canvas> content: base platform, particle field, node tree and
 // connection lines, camera controls and bloom. Nodes/lines are plain data
@@ -28,6 +29,7 @@ export default function Scene({
   stakeholders, simulation, sceneState, nodesById, externalNodesById, tasksById,
   showFullPath, workflowSteps, workflowTransitions,
   expandedTier1, expandedTier2,
+  showManagerLines,
 }) {
   // Single shared clock for the scan ring pulse and the connection lines'
   // breathing glow, so both stay in the same rhythm the original's one
@@ -84,12 +86,13 @@ export default function Scene({
       <ScanRing reduceMotion={reduceMotion} scanT={scanT} />
 
       {nodes.map((n) => (
-        <Node key={n.id} node={n} hoveredId={hoveredId} onHover={onHover} onUnhover={onUnhover} onMove={onMove} onClick={onClick} />
+        <Node key={n.id} node={n} hoveredId={hoveredId} onHover={onHover} onUnhover={onUnhover} onMove={onMove} onClick={onClick} reduceMotion={reduceMotion} />
       ))}
       <ConnectionLines lines={lines} hoveredId={hoveredId} reduceMotion={reduceMotion} scanT={scanT} />
+      {nodesById ? <ManagerLines nodesById={nodesById} hoveredId={hoveredId} enabled={!!showManagerLines} /> : null}
 
       {stakeholders ? (
-        <ExternalNodes stakeholders={stakeholders} hoveredId={hoveredId} onHover={onHover} onUnhover={onUnhover} onMove={onMove} onClick={onClick} />
+        <ExternalNodes stakeholders={stakeholders} hoveredId={hoveredId} onHover={onHover} onUnhover={onUnhover} onMove={onMove} onClick={onClick} reduceMotion={reduceMotion} />
       ) : null}
       {simulation && sceneState && nodesById ? (
         <WorkflowPulse
