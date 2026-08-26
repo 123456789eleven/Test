@@ -106,15 +106,24 @@ export function buildExternalNodes(stakeholders) {
   });
 }
 
-// Resolves a real workflow_steps row to wherever it should animate toward:
-// task_id -> tasks.function_id (existing, preferred, most specific) ->
-// function_id (direct) -> stakeholder_id (external) -> unresolved. Never
-// fabricates a location a step doesn't actually have -- callers must handle
-// `kind: "unresolved"` explicitly (e.g. skip the hop, or hold position)
-// rather than this function guessing on their behalf.
-export function resolveStepLocation(step, { tasksById, sceneState, nodesById, externalNodesById }) {
+// The step->function resolution rule shared by resolveStepLocation (3D
+// position) and describeStepOwner (text label): task_id -> tasks.function_id
+// (existing, preferred, most specific) -> function_id (direct). Pulled out
+// on its own so both callers agree on the exact same priority instead of two
+// copies quietly drifting apart.
+export function resolveStepFunctionId(step, tasksById) {
   const taskFunctionId = step.task_id ? (tasksById[step.task_id] || {}).function_id : null;
-  const functionId = taskFunctionId || step.function_id;
+  return taskFunctionId || step.function_id || null;
+}
+
+// Resolves a real workflow_steps row to wherever it should animate toward:
+// resolveStepFunctionId (existing, preferred, most specific) ->
+// stakeholder_id (external) -> unresolved. Never fabricates a location a
+// step doesn't actually have -- callers must handle `kind: "unresolved"`
+// explicitly (e.g. skip the hop, or hold position) rather than this function
+// guessing on their behalf.
+export function resolveStepLocation(step, { tasksById, sceneState, nodesById, externalNodesById }) {
+  const functionId = resolveStepFunctionId(step, tasksById);
   if (functionId) {
     const resolvedId = resolveVisible(functionId, sceneState, nodesById);
     if (resolvedId) {
@@ -127,6 +136,30 @@ export function resolveStepLocation(step, { tasksById, sceneState, nodesById, ex
     return { kind: "external", nodeId: step.stakeholder_id, position: node.position };
   }
   return { kind: "unresolved", nodeId: null, position: null };
+}
+
+// Same resolution priority as resolveStepLocation (function -> stakeholder ->
+// unresolved), but returns a human-readable owner label instead of a 3D
+// position -- for the workflow card's text outline, which has no on-screen
+// node to point at. Deliberately doesn't fall back through resolveVisible's
+// coarser tiers (division/vertical) the way the 3D scene does, since a
+// text label can just name the function/vertical/division directly rather
+// than needing "whichever tier happens to be expanded right now."
+export function describeStepOwner(step, { tasksById, functionsById, sceneState, externalNodesById }) {
+  const functionId = resolveStepFunctionId(step, tasksById);
+  if (functionId) {
+    const fn = functionsById[functionId];
+    if (fn) {
+      const verticalId = findVerticalOf(functionId, sceneState.verticals);
+      const vertical = verticalId ? sceneState.verticals[verticalId] : null;
+      const division = vertical ? sceneState.divisions.find((d) => d.id === vertical.division) : null;
+      return { label: fn.label, division: division ? division.name : null, vertical: vertical ? vertical.name : null };
+    }
+  }
+  if (step.stakeholder_id && externalNodesById && externalNodesById.has(step.stakeholder_id)) {
+    return { label: externalNodesById.get(step.stakeholder_id).name, external: true };
+  }
+  return null;
 }
 
 // Real manager->report lines between currently-visible person nodes, for the

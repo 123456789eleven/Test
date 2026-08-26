@@ -13,7 +13,9 @@ function addKindFor(node) {
 export default function HoverLabel({ hovered, isSignedIn, onEdit, onAdd }) {
   if (!hovered) return null;
 
-  const suffix = hovered.expandable ? (hovered.expanded ? " (click to collapse)" : " (click to expand)") : "";
+  const suffix = hovered.expandable
+    ? (hovered.expanded ? " (click to collapse)" : " (click to expand)")
+    : hovered.isPerson ? " (click for profile)" : "";
   const editKind = EDIT_KIND[hovered.kind] || null;
   const addKind = addKindFor(hovered);
   const addLabel = addKind === "person" ? "+ Add person" : addKind === "function" ? "+ Add function" : "+ Add department";

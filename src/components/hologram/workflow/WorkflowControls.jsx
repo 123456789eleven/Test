@@ -25,7 +25,7 @@ const STATUS_LABEL = {
   done: "Complete",
 };
 
-export default function WorkflowControls({ simulation, workflows, showFullPath, onToggleFullPath }) {
+export default function WorkflowControls({ simulation, workflows, showFullPath, onToggleFullPath, onViewCard }) {
   const { status, currentStep, availableBranches, play, reset, chooseBranch, graph } = simulation;
   const list = workflows || [];
   const statusLabel = STATUS_LABEL[status] || null;
@@ -77,14 +77,19 @@ export default function WorkflowControls({ simulation, workflows, showFullPath, 
                 <span className="wf-list-item-name">{wf.name}</span>
                 {wf.trigger_description ? <span className="wf-list-item-trigger">{wf.trigger_description}</span> : null}
               </div>
-              <button
-                type="button"
-                className="wf-play-btn"
-                disabled={!canPlay}
-                onClick={play}
-              >
-                {label}
-              </button>
+              <div className="wf-list-item-actions">
+                {onViewCard ? (
+                  <button type="button" className="wf-card-btn" onClick={() => onViewCard(wf.id)}>🗂 View card</button>
+                ) : null}
+                <button
+                  type="button"
+                  className="wf-play-btn"
+                  disabled={!canPlay}
+                  onClick={play}
+                >
+                  {label}
+                </button>
+              </div>
             </li>
           );
         })}

@@ -117,6 +117,17 @@ body.route-fullscreen #holoCanvasWrap { box-shadow: none; height: calc(100vh - 1
 .wf-list-item-name { font-size: 0.86rem; font-weight: 600; color: var(--ink); }
 .wf-list-item-trigger { font-size: 0.76rem; color: var(--ink-soft); line-height: 1.4; }
 .wf-list-empty { font-size: 0.84rem; color: var(--ink-muted); font-style: italic; padding: 6px 2px; }
+.wf-list-item-actions { flex: none; display: flex; align-items: center; gap: 8px; }
+/* Secondary, outline-styled action next to the filled-accent Play button —
+   deliberately not a second filled-accent button, so "start the 3D
+   simulation" stays the one loud action per row and "read the structural
+   card" reads as the quieter, secondary option. */
+.wf-card-btn {
+  flex: none; font: inherit; font-size: 0.76rem; font-weight: 600; padding: 7px 12px; border-radius: 999px;
+  border: 1px solid var(--border); background: none; color: var(--ink-soft); cursor: pointer;
+  white-space: nowrap; transition: all .15s ease;
+}
+.wf-card-btn:hover { border-color: var(--accent); color: var(--accent); }
 
 .wf-map-toggle-row { display: flex; flex-direction: column; gap: 6px; }
 .wf-map-toggle {
@@ -231,3 +242,64 @@ body.route-fullscreen #holoCanvasWrap { box-shadow: none; height: calc(100vh - 1
 }
 .holo-workflow-overlay > * { pointer-events: auto; }
 @media (max-width: 640px) { .holo-workflow-overlay { left: 12px; right: 12px; bottom: 12px; width: auto; } }
+
+/* ============================================================
+   Person card — profile overlay opened by clicking a Corporate
+   Functions person node (PersonCard.jsx)
+   ============================================================ */
+.holo-person-card-overlay {
+  position: absolute; top: 20px; right: 20px; z-index: 16;
+  width: min(320px, calc(100% - 40px)); max-height: calc(100% - 40px); overflow-y: auto;
+}
+@media (max-width: 640px) { .holo-person-card-overlay { left: 12px; right: 12px; top: 12px; width: auto; } }
+.holo-person-card { margin-bottom: 0; display: flex; flex-direction: column; gap: 14px; }
+.holo-person-headline { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-top: -8px; }
+.holo-person-title { font-size: 0.86rem; color: var(--ink-soft); }
+.holo-person-rank { font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; background: var(--accent-wash); color: var(--accent); border-radius: 999px; padding: 2px 10px; }
+.holo-person-note { font-size: 0.82rem; color: var(--ink-soft); line-height: 1.5; margin: 0; }
+.holo-person-section { display: flex; flex-direction: column; gap: 6px; }
+.holo-person-section-label { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--ink-muted); }
+.holo-person-empty { font-size: 0.82rem; color: var(--ink-muted); font-style: italic; margin: 0; }
+.holo-person-reports { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 4px; }
+.holo-person-link {
+  font: inherit; font-size: 0.84rem; font-weight: 600; text-align: left; color: var(--ink);
+  background: var(--surface-alt); border: 1px solid transparent; border-radius: var(--radius-sm);
+  padding: 7px 11px; cursor: pointer; transition: all .15s ease; display: block; width: 100%;
+}
+.holo-person-link:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-wash); }
+
+/* ============================================================
+   Workflow card — full structural read of one real workflow
+   (WorkflowCard.jsx), opened from a workflow row's "View card"
+   button — a modal overlay (unlike the corner-anchored person
+   card), since it's a deliberate, longer read rather than a
+   glanceable side panel.
+   ============================================================ */
+.holo-workflow-card-backdrop {
+  position: absolute; inset: 0; z-index: 25;
+  background: rgba(4,6,10,0.6);
+  display: flex; align-items: center; justify-content: center; padding: 24px;
+}
+.holo-workflow-card {
+  width: min(560px, 100%); max-height: 100%; overflow-y: auto;
+  box-shadow: var(--shadow-modal); margin-bottom: 0;
+}
+.wf-card-meta { font-size: 0.84rem; color: var(--ink-soft); line-height: 1.5; margin: 0 0 6px; }
+.wf-card-meta strong { color: var(--ink); font-weight: 600; }
+.wf-card-steps { list-style: none; margin: 18px 0 0; padding: 0; display: flex; flex-direction: column; gap: 14px; }
+.wf-card-step { border-top: 1px solid var(--border); padding-top: 14px; }
+.wf-card-step:first-child { border-top: none; padding-top: 0; }
+.wf-card-step-badges { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 6px; }
+.wf-card-badge {
+  display: inline-block; font-size: 0.66rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;
+  padding: 3px 10px; border-radius: 999px; background: var(--surface-alt); color: var(--ink-soft);
+}
+.wf-card-badge-order { background: var(--surface-alt); color: var(--ink-soft); }
+.wf-card-badge-decision { background: var(--manager-soft); color: var(--manager); }
+.wf-card-badge-external { background: var(--accent-wash); color: var(--accent); }
+.wf-card-badge-unresolved { background: none; border: 1px solid var(--border); color: var(--ink-muted); }
+.wf-card-step-title { font-size: 0.92rem; font-weight: 600; color: var(--ink); }
+.wf-card-step-desc { font-size: 0.82rem; color: var(--ink-soft); line-height: 1.5; margin: 4px 0 0; }
+.wf-card-branches { list-style: none; margin: 8px 0 0; padding: 0; display: flex; flex-direction: column; gap: 3px; }
+.wf-card-branches li { font-size: 0.78rem; color: var(--ink-muted); }
+.wf-card-branches-empty { font-size: 0.78rem; color: var(--ink-muted); font-style: italic; margin: 8px 0 0; }

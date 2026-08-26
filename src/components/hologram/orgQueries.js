@@ -10,6 +10,7 @@ export const QK = {
   verticals: ["org_verticals"],
   functions: ["org_functions"],
   people: ["org_people"],
+  titles: ["org_titles"],
   connections: ["org_connections"],
   tasks: ["tasks"],
   tools: ["tools"],
@@ -40,6 +41,9 @@ export function useOrgFunctions() {
 }
 export function useOrgPeople() {
   return useQuery({ queryKey: QK.people, queryFn: () => selectAll("org_people", "sort_order") });
+}
+export function useOrgTitles() {
+  return useQuery({ queryKey: QK.titles, queryFn: () => selectAll("org_titles", "rank") });
 }
 export function useOrgConnections() {
   return useQuery({ queryKey: QK.connections, queryFn: () => selectAll("org_connections") });

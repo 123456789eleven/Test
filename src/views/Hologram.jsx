@@ -5,15 +5,17 @@ import { useSearchRegister } from "../hooks/useSearchRegister";
 import Scene from "../components/hologram/Scene";
 import HoverLabel from "../components/hologram/HoverLabel";
 import DetailPanel from "../components/hologram/DetailPanel";
+import PersonCard from "../components/hologram/PersonCard";
 import { buildSceneState, computeVisibleNodes, buildExternalNodes, locateStepOwner } from "../components/hologram/orgTree";
 import {
-  useOrgDivisions, useOrgVerticals, useOrgFunctions, useOrgPeople, useOrgConnections,
+  useOrgDivisions, useOrgVerticals, useOrgFunctions, useOrgPeople, useOrgTitles, useOrgConnections,
   useTasks, useTools, useTaskTools, useCompanyStatic, assembleOrgData, buildTasksByFunction,
   useExternalStakeholders, useWorkflows, useWorkflowSteps, useWorkflowTransitions,
 } from "../components/hologram/orgQueries";
 import { useWorkflowSimulation } from "../components/hologram/workflow/useWorkflowSimulation";
 import WorkflowControls from "../components/hologram/workflow/WorkflowControls";
 import WorkflowStepInfo from "../components/hologram/workflow/WorkflowStepInfo";
+import WorkflowCard from "../components/hologram/workflow/WorkflowCard";
 import DivisionForm from "../components/orgedit/DivisionForm";
 import VerticalForm from "../components/orgedit/VerticalForm";
 import FunctionForm from "../components/orgedit/FunctionForm";
@@ -31,6 +33,7 @@ export default function Hologram() {
   const verticalsQ = useOrgVerticals();
   const functionsQ = useOrgFunctions();
   const peopleQ = useOrgPeople();
+  const titlesQ = useOrgTitles();
   const connectionsQ = useOrgConnections();
   const tasksQ = useTasks();
   const toolsQ = useTools();
@@ -70,6 +73,28 @@ export default function Hologram() {
     return map;
   }, [tasksQ.data]);
 
+  const functionsById = useMemo(() => {
+    const map = {};
+    (functionsQ.data || []).forEach((f) => { map[f.id] = f; });
+    return map;
+  }, [functionsQ.data]);
+
+  // Full 464-person roster keyed by id -- not the ~130-person corpfnPeople
+  // subset that gets a 3D node. PersonCard resolves manager/direct-reports
+  // off this so the chain can walk the whole real company, including people
+  // who never get an individual node in the scene themselves.
+  const peopleById = useMemo(() => {
+    const map = new Map();
+    (peopleQ.data || []).forEach((p) => map.set(p.id, p));
+    return map;
+  }, [peopleQ.data]);
+
+  const titlesById = useMemo(() => {
+    const map = new Map();
+    (titlesQ.data || []).forEach((t) => map.set(t.id, t));
+    return map;
+  }, [titlesQ.data]);
+
   const externalNodesById = useMemo(() => {
     if (!stakeholdersQ.data) return EMPTY_EXTERNAL_IDS;
     return new Map(buildExternalNodes(stakeholdersQ.data).map((n) => [n.id, n]));
@@ -93,6 +118,8 @@ export default function Hologram() {
   const [expandedTier2, setExpandedTier2] = useState(null);
   const [hovered, setHovered] = useState(null);
   const [detailFunction, setDetailFunction] = useState(null);
+  const [detailPerson, setDetailPerson] = useState(null);
+  const [viewWorkflowId, setViewWorkflowId] = useState(null);
   const [editRequest, setEditRequest] = useState(null); // { kind, mode, id, parentId }
   const [connectionsOpen, setConnectionsOpen] = useState(false);
   const [showFullPath, setShowFullPath] = useState(false);
@@ -150,6 +177,10 @@ export default function Hologram() {
   }
 
   function handleClick(node) {
+    if (node.isPerson) {
+      setDetailPerson((prev) => (prev === node.id ? null : node.id));
+      return;
+    }
     if (node.tier === 3) {
       setDetailFunction((prev) => (prev && prev.id === node.id ? null : { id: node.id, name: node.name }));
       return;
@@ -246,8 +277,37 @@ export default function Hologram() {
                 workflows={workflowsQ.data}
                 showFullPath={showFullPath}
                 onToggleFullPath={() => setShowFullPath((v) => !v)}
+                onViewCard={setViewWorkflowId}
               />
             </div>
+            {detailPerson ? (
+              <div className="holo-person-card-overlay">
+                <PersonCard
+                  personId={detailPerson}
+                  peopleById={peopleById}
+                  titlesById={titlesById}
+                  onClose={() => setDetailPerson(null)}
+                  onSelectPerson={setDetailPerson}
+                />
+              </div>
+            ) : null}
+            {viewWorkflowId && workflowsQ.data ? (
+              (() => {
+                const workflow = workflowsQ.data.find((wf) => wf.id === viewWorkflowId);
+                return workflow ? (
+                  <WorkflowCard
+                    workflow={workflow}
+                    steps={workflowStepsQ.data}
+                    transitions={workflowTransitionsQ.data}
+                    tasksById={tasksById}
+                    functionsById={functionsById}
+                    sceneState={sceneState}
+                    externalNodesById={externalNodesById}
+                    onClose={() => setViewWorkflowId(null)}
+                  />
+                ) : null;
+              })()
+            ) : null}
           </>
         )}
       </div>
