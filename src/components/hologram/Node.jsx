@@ -38,26 +38,58 @@ const RIM_RANGE = 0.5;
 const RIM_VERTEX_SHADER = /* glsl */ `
   varying vec3 vNormal;
   varying vec3 vViewDir;
+  varying vec3 vLocalPos;
 
   void main() {
     vNormal = normalize(normalMatrix * normal);
+    vLocalPos = position;
     vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
     vViewDir = normalize(-mvPosition.xyz);
     gl_Position = projectionMatrix * mvPosition;
   }
 `;
 
+// Round 1 of the graphics-overhaul plan: the rim shader previously only
+// varied in *intensity* (idle breathing, hover) -- everything else about it
+// was a static fresnel falloff, which is why the material read as "glowing
+// shape," not "hologram." Two cheap, real additions, no new draw calls:
+// a scrolling scanline band (the one unmistakably hologram-specific cue
+// that was missing entirely) and a hash-based per-pixel grain that breaks
+// up the otherwise perfectly smooth glow. Both are deliberately subtle --
+// this scene has been flagged for clutter twice already, so "more per-pixel
+// variation" is being added carefully, not maximized.
 const RIM_FRAGMENT_SHADER = /* glsl */ `
   uniform vec3 glowColor;
   uniform float power;
   uniform float intensity;
+  uniform float time;
+  uniform float signal;
 
   varying vec3 vNormal;
   varying vec3 vViewDir;
+  varying vec3 vLocalPos;
+
+  // Cheap hash-based pseudo-random noise -- no texture lookup needed, just
+  // enough per-pixel variation to keep the glow from reading as flat/CG-smooth.
+  float hash(vec2 p) {
+    return fract(sin(dot(p, vec2(12.9898, 78.233))) * 43758.5453);
+  }
 
   void main() {
     float fresnel = pow(1.0 - clamp(dot(normalize(vNormal), normalize(vViewDir)), 0.0, 1.0), power);
-    float a = fresnel * intensity;
+
+    // Scrolls up the node's own local height; speeds up when this node is
+    // the one actively being interacted with (hovered or expanded) -- a
+    // real, legible "this one is active" signal beyond just brighter idle
+    // breathing.
+    float scanSpeed = mix(0.6, 1.8, signal);
+    float scan = sin(vLocalPos.y * 18.0 - time * scanSpeed) * 0.5 + 0.5;
+    float scanline = 0.85 + 0.15 * scan;
+
+    float grain = hash(gl_FragCoord.xy * 0.75 + time);
+    float noise = 0.92 + 0.08 * grain;
+
+    float a = fresnel * intensity * scanline * noise;
     gl_FragColor = vec4(glowColor * a, a);
   }
 `;
@@ -94,6 +126,8 @@ export default function Node({ node, hoveredId, onHover, onUnhover, onMove, onCl
       glowColor: { value: new THREE.Color(color) },
       power: { value: 2.6 },
       intensity: { value: RIM_LOW },
+      time: { value: 0 },
+      signal: { value: 0 },
     }),
     [color]
   );
@@ -106,7 +140,11 @@ export default function Node({ node, hoveredId, onHover, onUnhover, onMove, onCl
     const eased = 1 - Math.pow(1 - growIn, 3);
     const hoverScale = isHovered ? 1.12 : 1;
     const flatOpacity = isHovered ? Math.min(1, opacity + 0.25) : opacity;
-    const rimBase = isHovered ? 1.35 : 1;
+    // "Active" (hovered OR expanded) drives both a brighter rim and a
+    // faster scanline scroll -- real node state, not just idle breathing,
+    // now has a visible signal in the material itself.
+    const isActive = isHovered || node.expanded;
+    const rimBase = isActive ? 1.35 : 1;
 
     // Idle breathing: one slow sine drives scale wobble, fill-opacity pulse,
     // and rim intensity together so they read as a single ambient rhythm
@@ -128,6 +166,11 @@ export default function Node({ node, hoveredId, onHover, onUnhover, onMove, onCl
     }
 
     rimUniforms.intensity.value = rimBase * (reduceMotion ? RIM_LOW : RIM_LOW + RIM_RANGE * pulse);
+    // Scanline scroll freezes under reduceMotion (a static band, not an
+    // animated one) rather than being hidden -- the material still reads as
+    // holographic at rest, it just doesn't move.
+    rimUniforms.time.value = reduceMotion ? 0 : performance.now() * 0.001;
+    rimUniforms.signal.value = isActive ? 1 : 0;
   });
 
   return (

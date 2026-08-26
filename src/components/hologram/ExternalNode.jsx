@@ -50,26 +50,47 @@ const RIM_RANGE = 0.5;
 const RIM_VERTEX_SHADER = /* glsl */ `
   varying vec3 vNormal;
   varying vec3 vViewDir;
+  varying vec3 vLocalPos;
 
   void main() {
     vNormal = normalize(normalMatrix * normal);
+    vLocalPos = position;
     vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
     vViewDir = normalize(-mvPosition.xyz);
     gl_Position = projectionMatrix * mvPosition;
   }
 `;
 
+// Same scanline + grain extension as Node.jsx's rim shader -- see that file
+// for the full rationale. External nodes have no "expanded" concept of
+// their own (they're never expandable), so `signal` here is driven by hover
+// alone.
 const RIM_FRAGMENT_SHADER = /* glsl */ `
   uniform vec3 glowColor;
   uniform float power;
   uniform float intensity;
+  uniform float time;
+  uniform float signal;
 
   varying vec3 vNormal;
   varying vec3 vViewDir;
+  varying vec3 vLocalPos;
+
+  float hash(vec2 p) {
+    return fract(sin(dot(p, vec2(12.9898, 78.233))) * 43758.5453);
+  }
 
   void main() {
     float fresnel = pow(1.0 - clamp(dot(normalize(vNormal), normalize(vViewDir)), 0.0, 1.0), power);
-    float a = fresnel * intensity;
+
+    float scanSpeed = mix(0.6, 1.8, signal);
+    float scan = sin(vLocalPos.y * 18.0 - time * scanSpeed) * 0.5 + 0.5;
+    float scanline = 0.85 + 0.15 * scan;
+
+    float grain = hash(gl_FragCoord.xy * 0.75 + time);
+    float noise = 0.92 + 0.08 * grain;
+
+    float a = fresnel * intensity * scanline * noise;
     gl_FragColor = vec4(glowColor * a, a);
   }
 `;
@@ -89,6 +110,8 @@ export default function ExternalNode({ node, hoveredId, onHover, onUnhover, onMo
       glowColor: { value: new THREE.Color(EXTERNAL_COLOR) },
       power: { value: 2.6 },
       intensity: { value: RIM_LOW },
+      time: { value: 0 },
+      signal: { value: 0 },
     }),
     []
   );
@@ -120,6 +143,8 @@ export default function ExternalNode({ node, hoveredId, onHover, onUnhover, onMo
     }
 
     rimUniforms.intensity.value = rimBase * (reduceMotion ? RIM_LOW : RIM_LOW + RIM_RANGE * pulse);
+    rimUniforms.time.value = reduceMotion ? 0 : performance.now() * 0.001;
+    rimUniforms.signal.value = isHovered ? 1 : 0;
   });
 
   // Deliberately no click-to-expand: external nodes have no children and
