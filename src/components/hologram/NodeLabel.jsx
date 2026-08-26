@@ -16,11 +16,16 @@ import { Html } from "@react-three/drei";
 // of which tier it is.
 const TIER_FONT_SIZE = { 1: "0.74rem", 2: "0.66rem", 3: "0.58rem" };
 
-export default function NodeLabel({ position, yOffset, text, tier = 3, dim = false }) {
+export default function NodeLabel({ position, yOffset, text, tier = 3, dim = false, variant = "default" }) {
   return (
     <Html position={[position[0], position[1] + yOffset, position[2]]} center distanceFactor={9} zIndexRange={[10, 0]} occlude={false}>
       <div
-        className="holo-node-label"
+        // "department" reads as a section header (uppercase, bolder,
+        // letter-spaced) instead of the same plain name-tag style a person
+        // node uses -- real departments (Win, Serve, Connect...) need to be
+        // visibly a different kind of thing at a glance, not just another
+        // label sharing an identical look.
+        className={`holo-node-label${variant === "department" ? " holo-node-label-department" : ""}`}
         style={{ fontSize: TIER_FONT_SIZE[tier] || TIER_FONT_SIZE[3], opacity: dim ? 0.55 : 1 }}
       >
         {text}

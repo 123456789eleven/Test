@@ -27,6 +27,15 @@ export const PEOPLE_GLOW = 0xa599e8; // lighter violet -- person node fill, same
 const TIER1_OUTWARD = 1.9, TIER1_YSTEP = -0.65;
 const TIER2_WEDGE = 0.5, TIER2_OUTWARD = 1.6, TIER2_YSTEP = -0.55;
 
+// A real division's departments (verticals) are the primary, first-level
+// content at tier2 -- centered at the parent's own angle, the same position
+// the sole content used to occupy before people were added here. Real
+// people/teams get their own clearly secondary sector, offset by this fixed
+// angle so the two never blend into one ring -- comfortably clears both
+// sectors' capped wedge widths (personWedge tops out at 1.05 rad / 2, so two
+// sectors 2*0.75=1.5 rad apart never overlap even at max width).
+const SECTOR_GAP = 0.75;
+
 // Person batches (entry points, or any depth of real direct reports) get an
 // ADAPTIVE wedge instead of a fixed one: a guaranteed minimum angular gap
 // between siblings, growing the total wedge with count rather than
@@ -82,17 +91,21 @@ const GOLDEN_ANGLE = Math.PI * (3 - Math.sqrt(5)); // ~2.39996 rad (~137.5deg) -
 // units between neighboring divisions.
 const SPIRAL_STEP = 0.5;
 
-// A phyllotaxis spiral centered on the PARENT's own world position (not the
-// scene origin) — capped by how far it grows outward, not by an angular
-// wedge, so it fans out from wherever corpfn sits without reaching into a
-// neighboring division's space (tier1 neighbors sit ~6.5 units apart; this
-// spiral's radius at 130 points stays well inside that). Returns
-// {angle, radius} pairs (not raw x/z) so the existing place()'s x=cos*r,
-// z=sin*r math still applies unchanged — this only changes *how* those two
-// numbers are derived for this one case, not what happens with them after.
-function spiralPositions(count, parent) {
-  const px = Math.cos(parent.angle) * parent.radius;
-  const pz = Math.sin(parent.angle) * parent.radius;
+// A phyllotaxis spiral centered on a world position at the parent's own
+// radius but (optionally) a different angle -- not the scene origin --
+// capped by how far it grows outward, not by an angular wedge, so it fans
+// out without reaching into a neighboring division's space (tier1 neighbors
+// sit ~6.5 units apart; this spiral's radius at realistic counts stays well
+// inside that). `anchorAngle` defaults to the parent's own angle (today's
+// behavior, unchanged for corpfn/personPath callers); a caller placing a
+// second independent batch under the same parent (e.g. a division's people,
+// separate from its verticals) can pass a different anchor so the two
+// batches' spirals -- if either ever needs one -- don't share a center.
+// Returns {angle, radius} pairs (not raw x/z) so the existing place()'s
+// x=cos*r, z=sin*r math still applies unchanged.
+function spiralPositions(count, parent, anchorAngle = parent.angle) {
+  const px = Math.cos(anchorAngle) * parent.radius;
+  const pz = Math.sin(anchorAngle) * parent.radius;
   const out = [];
   for (let i = 0; i < count; i++) {
     const r = SPIRAL_STEP * Math.sqrt(i + 1);
@@ -271,7 +284,7 @@ const SOLO_CLUSTER_THRESHOLD = 3;
 // cluster node standing in for all of them. The cluster is registered in
 // reportsByManagerId under its own synthetic id with the real solo ICs as
 // its "reports" -- so the existing recursive drill-down (toggleInPath,
-// placePersonBatch) can expand it with no new interaction-model code at
+// placeNodeBatch) can expand it with no new interaction-model code at
 // all: a cluster is just a person-shaped node that happens to have real
 // people as its reports.
 function groupEntryPoints(entryPoints, reportsByManagerId, bucketId) {
@@ -378,26 +391,38 @@ function colorAndConnected(sceneState, tier, item, isPerson) {
   return { connected, color };
 }
 
-// Places one batch of same-depth person nodes (entry points, or one
-// manager's direct reports) around a parent position, picking the spiral vs
-// wedge-fan layout the same way every other batch in this function already
-// does, and suppressing labels once the batch is genuinely dense. Shared by
-// both the tier2 entry-point placement and the arbitrary-depth personPath
-// loop below so the two don't quietly duplicate (and drift apart on) the
-// same layout decision.
-function placePersonBatch(place, people, reportsByManagerId, parent, outward, ystep) {
-  const items = people.map((p) => ({
-    id: p.id, name: p.name, isPerson: true, managerId: p.managerId, isCluster: !!p.isCluster,
-    hasReports: (reportsByManagerId.get(p.id) || []).length > 0,
-  }));
+// Places one batch of same-depth tier2 nodes -- department verticals, entry-
+// point people, or one manager's/cluster's direct reports -- around a
+// parent, centered on the given angle rather than always the parent's own,
+// so two independent batches under the same parent (a division's verticals
+// and its people) can each get their own clearly separated sector instead
+// of blending into one combined ring. Picks the spiral vs wedge-fan layout
+// off THIS batch's own count (not any other batch sharing the parent), and
+// suppresses labels once the batch is genuinely dense. Purely geometric --
+// callers pre-shape their own items (isPerson/managerId/hasReports/
+// isCluster for people, plain {id,name} for verticals), so this function
+// doesn't need to know which kind of thing it's placing.
+function placeNodeBatch(place, items, parent, centerAngle, outward, ystep) {
+  if (!items.length) return;
   const showLabel = items.length <= LABEL_DENSE_THRESHOLD;
   if (items.length > SPIRAL_THRESHOLD) {
-    const spiral = spiralPositions(items.length, parent);
+    const spiral = spiralPositions(items.length, parent, centerAngle);
     items.forEach((child, i) => place(child, 2, spiral[i].angle, spiral[i].radius, parent.y + ystep + spiral[i].yOffset, parent.id, { showLabel }));
   } else {
-    const angles = distributeAngles(parent.angle, items.length, personWedge(items.length));
+    const angles = distributeAngles(centerAngle, items.length, personWedge(items.length));
     items.forEach((child, i) => place(child, 2, angles[i], parent.radius + outward, parent.y + ystep, parent.id, { showLabel }));
   }
+}
+
+// Shapes a raw entry-point/report row into the item shape place()/
+// placeNodeBatch expect for a person-kind tier2 node -- shared by every
+// call site below so the isPerson/managerId/hasReports/isCluster fields
+// never quietly drift out of sync between them.
+function personItem(p, reportsByManagerId) {
+  return {
+    id: p.id, name: p.name, isPerson: true, managerId: p.managerId, isCluster: !!p.isCluster,
+    hasReports: (reportsByManagerId.get(p.id) || []).length > 0,
+  };
 }
 
 // Full recompute of every currently-visible node (tier1 always, tier2 under
@@ -455,25 +480,20 @@ export function computeVisibleNodes(sceneState, expandedTier1, expandedTier2, pe
         // Corporate Functions has no verticals of its own -- only real
         // entry-point people (a small, real handful, not the full 132-person
         // roster this used to flat-place at once).
-        placePersonBatch(place, entryPeople, sceneState.reportsByManagerId, parent, TIER1_OUTWARD, TIER1_YSTEP);
+        const personItems = entryPeople.map((p) => personItem(p, sceneState.reportsByManagerId));
+        placeNodeBatch(place, personItems, parent, parent.angle, TIER1_OUTWARD, TIER1_YSTEP);
       } else {
-        // A real division mixes its existing verticals with its own real
-        // entry-point leadership as tier2 siblings -- verticals aren't going
-        // away, this is additive.
+        // A real division's departments are the primary, first-level tier2
+        // content -- centered at the parent's own angle, same position the
+        // sole content occupied before people existed here. Real people/
+        // teams get their own clearly secondary sector, offset by
+        // SECTOR_GAP, and each sector picks its own wedge-vs-spiral layout
+        // off ITS OWN count -- not a combined total -- so one group's size
+        // never forces the other into a different layout.
         const verticalItems = Object.entries(sceneState.verticals).filter(([, v]) => v.division === parent.id).map(([id, v]) => ({ id, name: v.name }));
-        const personItems = entryPeople.map((p) => ({
-          id: p.id, name: p.name, isPerson: true, managerId: p.managerId, isCluster: !!p.isCluster,
-          hasReports: (sceneState.reportsByManagerId.get(p.id) || []).length > 0,
-        }));
-        const children = [...verticalItems, ...personItems];
-        const showLabel = children.length <= LABEL_DENSE_THRESHOLD;
-        if (children.length > SPIRAL_THRESHOLD) {
-          const spiral = spiralPositions(children.length, parent);
-          children.forEach((child, i) => place(child, 2, spiral[i].angle, spiral[i].radius, parent.y + TIER1_YSTEP + spiral[i].yOffset, parent.id, { showLabel }));
-        } else {
-          const angles = distributeAngles(parent.angle, children.length, personWedge(children.length));
-          children.forEach((child, i) => place(child, 2, angles[i], parent.radius + TIER1_OUTWARD, parent.y + TIER1_YSTEP, parent.id, { showLabel }));
-        }
+        const personItems = entryPeople.map((p) => personItem(p, sceneState.reportsByManagerId));
+        placeNodeBatch(place, verticalItems, parent, parent.angle, TIER1_OUTWARD, TIER1_YSTEP);
+        placeNodeBatch(place, personItems, parent, parent.angle + SECTOR_GAP, TIER1_OUTWARD, TIER1_YSTEP);
       }
     }
   }
@@ -498,7 +518,8 @@ export function computeVisibleNodes(sceneState, expandedTier1, expandedTier2, pe
     if (!personNode) break; // a stale path segment -- stop rather than guessing a position for it
     const reports = sceneState.reportsByManagerId.get(personId) || [];
     if (!reports.length) break;
-    placePersonBatch(place, reports, sceneState.reportsByManagerId, personNode, TIER2_OUTWARD, TIER2_YSTEP);
+    const items = reports.map((p) => personItem(p, sceneState.reportsByManagerId));
+    placeNodeBatch(place, items, personNode, personNode.angle, TIER2_OUTWARD, TIER2_YSTEP);
   }
 
   const seen = new Set();

@@ -18,6 +18,16 @@
   backdrop-filter: blur(3px); -webkit-backdrop-filter: blur(3px);
   pointer-events: none; user-select: none; transform: translateY(-4px);
 }
+/* Real departments (Win, Serve, Connect...) read as section headers, not
+   another name tag -- uppercase/letter-spaced/bolder, and a squared-off
+   radius (echoing the node's own box shape, see Node.jsx) instead of the
+   pill shape person labels use, so the two are legible as different kinds
+   of thing without needing a new color. */
+.holo-node-label-department {
+  text-transform: uppercase; letter-spacing: 0.07em; font-weight: 700;
+  border-radius: var(--radius-sm); border-color: rgba(139,124,240,0.35);
+  background: rgba(20,17,31,0.82);
+}
 
 .holo-page { position: relative; }
 .holo-header {

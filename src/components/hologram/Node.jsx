@@ -70,14 +70,24 @@ const RIM_FRAGMENT_SHADER = /* glsl */ `
 // lerps/sines instead of a tween library, none of it touching the
 // interaction model (still the same click → toggle/detail routing).
 export default function Node({ node, hoveredId, onHover, onUnhover, onMove, onClick, reduceMotion = false }) {
-  const { id, size, color, opacity, position, name, tier, isPerson, showLabel = true } = node;
+  const { id, size, color, opacity, position, name, tier, isPerson, kind, showLabel = true } = node;
   const groupRef = useRef(null);
   const matRef = useRef(null);
   const mountedAtRef = useRef(null);
   if (mountedAtRef.current === null) mountedAtRef.current = performance.now();
   const isHovered = hoveredId === id;
+  const isDepartment = kind === "vertical";
 
-  const geometry = useMemo(() => new THREE.OctahedronGeometry(size, 0), [size]);
+  // Departments (verticals) get a distinct box shape -- previously identical
+  // to every other node (an octahedron), which is exactly why a division's
+  // real departments and its real people/teams read as "the same kind of
+  // thing" once both showed up at the same tier. A cube reads as a
+  // structural container; people/teams keep the octahedron, matching
+  // Corporate Functions' own look exactly.
+  const geometry = useMemo(
+    () => (isDepartment ? new THREE.BoxGeometry(size * 1.15, size * 1.15, size * 1.15) : new THREE.OctahedronGeometry(size, 0)),
+    [size, isDepartment]
+  );
   const phase = useMemo(() => phaseOf(id), [id]);
   const rimUniforms = useMemo(
     () => ({
@@ -159,7 +169,14 @@ export default function Node({ node, hoveredId, onHover, onUnhover, onMove, onCl
           drops the always-on floating badge once there are too many at once
           to read cleanly. */}
       {showLabel ? (
-        <NodeLabel position={position} yOffset={size + 0.15} text={name} tier={isPerson ? 2 : tier} dim={isHovered} />
+        <NodeLabel
+          position={position}
+          yOffset={size + 0.15}
+          text={name}
+          tier={isPerson ? 2 : tier}
+          dim={isHovered}
+          variant={isDepartment ? "department" : "default"}
+        />
       ) : null}
     </>
   );
