@@ -30,6 +30,38 @@ export function distributeAngles(centerAngle, count, totalWedge) {
   return out;
 }
 
+// Beyond this many children, the fixed wedge-fan above (never designed for
+// more than a handful of siblings) would visibly overlap them — Corporate
+// Functions currently has 130 real people, squeezed into the same ~1 radian
+// wedge every other tier1->tier2 expansion uses for a handful of
+// departments. spiralPositions() below is the alternative for exactly that
+// case; every other expansion in the scene is untouched.
+const SPIRAL_THRESHOLD = 14;
+const GOLDEN_ANGLE = Math.PI * (3 - Math.sqrt(5)); // ~2.39996 rad (~137.5deg) -- the standard phyllotaxis/"sunflower" stepping angle that spaces an arbitrary number of points with no two ever radiating along the same line
+const SPIRAL_STEP = 0.24; // radius-per-sqrt(index) growth -- tuned for real, non-overlapping spacing at ~130 points; revisit if a much larger roster changes this
+
+// A phyllotaxis spiral centered on the PARENT's own world position (not the
+// scene origin) — capped by how far it grows outward, not by an angular
+// wedge, so it fans out from wherever corpfn sits without reaching into a
+// neighboring division's space (tier1 neighbors sit ~6.5 units apart; this
+// spiral's radius at 130 points stays well inside that). Returns
+// {angle, radius} pairs (not raw x/z) so the existing place()'s x=cos*r,
+// z=sin*r math still applies unchanged — this only changes *how* those two
+// numbers are derived for this one case, not what happens with them after.
+function spiralPositions(count, parent) {
+  const px = Math.cos(parent.angle) * parent.radius;
+  const pz = Math.sin(parent.angle) * parent.radius;
+  const out = [];
+  for (let i = 0; i < count; i++) {
+    const r = SPIRAL_STEP * Math.sqrt(i + 1);
+    const theta = i * GOLDEN_ANGLE;
+    const x = px + Math.cos(theta) * r;
+    const z = pz + Math.sin(theta) * r;
+    out.push({ angle: Math.atan2(z, x), radius: Math.hypot(x, z), yOffset: -r * 0.06 });
+  }
+  return out;
+}
+
 export function findVerticalOf(functionId, verticals) {
   for (const [vid, v] of Object.entries(verticals)) {
     if (v.funcs.some((f) => f.id === functionId)) return vid;
@@ -95,6 +127,27 @@ export function resolveStepLocation(step, { tasksById, sceneState, nodesById, ex
     return { kind: "external", nodeId: step.stakeholder_id, position: node.position };
   }
   return { kind: "unresolved", nodeId: null, position: null };
+}
+
+// Real manager->report lines between currently-visible person nodes, for the
+// manager-hierarchy visualization. Unlike resolveVisible()/resolveStepLocation,
+// there's no coarser tier to fall back to here -- a person node's manager is
+// either also a currently-rendered person node (both visible, corpfn
+// expanded) or it isn't (the manager is division-anchored and never gets an
+// individual node at all, per this project's standing "division-specific
+// leadership doesn't get 3D nodes" rule, or corpfn simply isn't expanded
+// right now) -- in which case there's honestly no line to draw for that
+// person, not a fallback position to invent one at. Also skips the 22 of
+// 464 real people with no manager_id recorded at all (never fabricated).
+export function resolveManagerLines(nodesById) {
+  const lines = [];
+  nodesById.forEach((node) => {
+    if (!node.isPerson || !node.managerId) return;
+    const managerNode = nodesById.get(node.managerId);
+    if (!managerNode) return;
+    lines.push({ key: `mgr:${managerNode.id}|${node.id}`, managerId: managerNode.id, reportId: node.id, from: managerNode.position, to: node.position });
+  });
+  return lines;
 }
 
 // The reverse of resolveVisible(): given a step, finds which division/
@@ -172,6 +225,7 @@ export function computeVisibleNodes(sceneState, expandedTier1, expandedTier2) {
     const node = {
       id: item.id, name: item.name, tier, kind, isPerson, parentId,
       angle, radius, y, position: [x, y, z], size, color, opacity, expandable, expanded,
+      managerId: isPerson ? item.managerId || null : null,
     };
     nodesById.set(item.id, node);
     allNodes.push(node);
@@ -187,10 +241,15 @@ export function computeVisibleNodes(sceneState, expandedTier1, expandedTier2) {
     const parent = nodesById.get(expandedTier1);
     if (parent) {
       const children = parent.kind === "corpfn"
-        ? sceneState.corpfnPeople.map((p) => ({ id: p.id, name: p.name, isPerson: true }))
+        ? sceneState.corpfnPeople.map((p) => ({ id: p.id, name: p.name, isPerson: true, managerId: p.managerId }))
         : Object.entries(sceneState.verticals).filter(([, v]) => v.division === parent.id).map(([id, v]) => ({ id, name: v.name }));
-      const angles = distributeAngles(parent.angle, children.length, TIER1_WEDGE);
-      children.forEach((child, i) => place(child, 2, angles[i], parent.radius + TIER1_OUTWARD, parent.y + TIER1_YSTEP, parent.id));
+      if (children.length > SPIRAL_THRESHOLD) {
+        const spiral = spiralPositions(children.length, parent);
+        children.forEach((child, i) => place(child, 2, spiral[i].angle, spiral[i].radius, parent.y + TIER1_YSTEP + spiral[i].yOffset, parent.id));
+      } else {
+        const angles = distributeAngles(parent.angle, children.length, TIER1_WEDGE);
+        children.forEach((child, i) => place(child, 2, angles[i], parent.radius + TIER1_OUTWARD, parent.y + TIER1_YSTEP, parent.id));
+      }
     }
   }
 

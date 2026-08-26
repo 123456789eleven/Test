@@ -106,6 +106,7 @@ export function assembleOrgData({ divisionsQ, verticalsQ, functionsQ, peopleQ, c
       verticals: groupVerticals(verticalsQ.data, functionsQ.data),
       leadership: peopleQ.data.map((p) => ({
         id: p.id, name: p.name, title: p.title, note: p.note, parent: p.parent, cross: p.cross_divisions,
+        managerId: p.manager_id,
       })),
       processConnections: connectionsQ.data.map((c) => ({ from: c.from_id, to: c.to_id, type: c.type, note: c.note })),
     };

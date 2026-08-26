@@ -224,6 +224,8 @@ export default function Hologram() {
                 showFullPath={showFullPath}
                 workflowSteps={workflowStepsQ.data}
                 workflowTransitions={workflowTransitionsQ.data}
+                expandedTier1={expandedTier1}
+                expandedTier2={expandedTier2}
               />
             </Canvas>
             <HoverLabel hovered={hovered} isSignedIn={isSignedIn} onEdit={openEdit} onAdd={openAdd} />

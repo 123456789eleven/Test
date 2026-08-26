@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import { OrbitControls } from "@react-three/drei";
 import * as THREE from "three";
@@ -27,6 +27,7 @@ export default function Scene({
   onHover, onUnhover, onMove, onClick,
   stakeholders, simulation, sceneState, nodesById, externalNodesById, tasksById,
   showFullPath, workflowSteps, workflowTransitions,
+  expandedTier1, expandedTier2,
 }) {
   // Single shared clock for the scan ring pulse and the connection lines'
   // breathing glow, so both stay in the same rhythm the original's one
@@ -35,6 +36,35 @@ export default function Scene({
   const scanT = useRef(0);
   useFrame(() => {
     if (!reduceMotion) scanT.current += 0.006;
+  });
+
+  // Camera-follow-on-expand: eases OrbitControls' own orbit target toward
+  // the centroid of whatever tier just got revealed, instead of only
+  // recentering when the user manually drags. Deliberately only moves the
+  // *target* (what the orbit is centered on), never camera.position or
+  // controls.update() directly — OrbitControls already calls its own
+  // .update() every frame (required for enableDamping/autoRotate to work
+  // at all); mutating the target here and letting that existing internal
+  // update pick it up avoids fighting drei's own per-frame handling of the
+  // same controls instance. Falls back to the scene's own center when
+  // nothing is expanded.
+  const controlsRef = useRef(null);
+  const cameraTargetRef = useRef(new THREE.Vector3(0, 0, 0));
+  useEffect(() => {
+    const deepestParentId = expandedTier2 || expandedTier1 || null;
+    if (!deepestParentId) { cameraTargetRef.current.set(0, 0, 0); return; }
+    const children = nodes.filter((n) => n.parentId === deepestParentId);
+    if (!children.length) return;
+    const sum = children.reduce((acc, n) => {
+      acc.x += n.position[0]; acc.y += n.position[1]; acc.z += n.position[2];
+      return acc;
+    }, { x: 0, y: 0, z: 0 });
+    cameraTargetRef.current.set(sum.x / children.length, sum.y / children.length, sum.z / children.length);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [expandedTier1, expandedTier2]);
+  useFrame(() => {
+    if (!controlsRef.current || reduceMotion) return;
+    controlsRef.current.target.lerp(cameraTargetRef.current, 0.045);
   });
 
   const particleCount = smallViewport ? 90 : 220;
@@ -83,6 +113,7 @@ export default function Scene({
       ) : null}
 
       <OrbitControls
+        ref={controlsRef}
         enableDamping
         dampingFactor={0.06}
         autoRotate={!reduceMotion}
