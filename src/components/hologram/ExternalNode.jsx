@@ -9,13 +9,13 @@ import NodeLabel from "./NodeLabel";
 // lerp), plus the same idle-breathing pulse and fresnel rim-glow shell (see
 // Node.jsx for the fuller rationale on why the fill stays an unlit
 // meshBasicMaterial and the rim glow lives on a separate additive mesh
-// instead), but drawn with a different geometry and a color outside the org
-// palette (GLOW/SHARED_GLOW/QUIET/PEOPLE_GLOW, all in orgTree.js) so the four
-// external nodes read at a glance as "outside the company," not another
-// department. A tetrahedron next to Node.jsx's octahedron is a big enough
-// silhouette change to spot even at a distance or small scale; a muted
-// violet keeps the family "warm" without colliding with SHARED_GLOW's amber
-// or PEOPLE_GLOW's blue-lavender.
+// instead), but drawn with a different geometry and a deliberate third color
+// family (see orgTree.js's palette comment: violet for GLOW/PEOPLE_GLOW,
+// amber for SHARED_GLOW/MANAGER_GLOW) so the four external nodes read at a
+// glance as "outside the company," not another department. A tetrahedron
+// next to Node.jsx's octahedron is a big enough silhouette change to spot
+// even at a distance or small scale. Warm copper rather than --warn's red --
+// external partners aren't an error/warning, just a different domain.
 //
 // buildExternalNodes() only returns {id, name, type, kind, position} -- no
 // size/color/opacity like tier nodes carry, since all four external nodes
@@ -23,7 +23,7 @@ import NodeLabel from "./NodeLabel";
 // tier state to reflect in color the way org nodes have). Those visual
 // constants live here instead.
 const EXTERNAL_SIZE = 0.46;
-const EXTERNAL_COLOR = 0xb46bff;
+const EXTERNAL_COLOR = 0xd68c4a;
 const EXTERNAL_OPACITY = 0.36;
 
 // Deterministic per-node phase, same char-code-sum trick as Node.jsx/

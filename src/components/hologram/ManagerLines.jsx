@@ -2,14 +2,14 @@ import { useMemo } from "react";
 import * as THREE from "three";
 import { resolveManagerLines } from "./orgTree";
 
-// A lighter, more saturated variant of PEOPLE_GLOW (0x8b93c9 -- the color
-// person nodes themselves already use) so a manager->report line reads as
-// "this is about people" at a glance, without being identical to the node
-// color it's drawn between. Kept clearly distinct from GLOW (0x46d6ff,
-// process handoffs) and SHARED_GLOW (0xffb84f, shared work) -- this is a
-// third, different kind of relationship (real reporting line, not a work
+// A paler tint of SHARED_GLOW's amber (the app's real --manager token family
+// -- see orgTree.js's palette comment) so a manager->report line reads as
+// "same family as hierarchy/emphasis, quieter" rather than inventing a
+// fourth unrelated hue. Kept clearly distinct from GLOW/PEOPLE_GLOW's violet
+// family (process handoffs and person nodes themselves) -- this is a
+// different kind of relationship (a real reporting line, not a work
 // connection) and shouldn't get confused with either at a glance.
-const MANAGER_GLOW = 0xb9a8ff;
+const MANAGER_GLOW = 0xf0c896;
 
 // Deliberately subtle: these lines are meant to read as ambient org
 // structure sitting quietly under the primary handoff/shared connections

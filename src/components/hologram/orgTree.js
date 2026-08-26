@@ -8,16 +8,38 @@
 export const EXEC_IDS = ["fx3", "frankIII"];
 export const DIVISION_ORDER = ["strategies", "advantage", "payroll", "advisory"];
 export const RADIUS = { division: 0.75, vertical: 0.34, function: 0.19 };
-export const GLOW = 0x46d6ff;
-export const SHARED_GLOW = 0xffb84f;
-export const QUIET = 0x3a4250;
-export const PEOPLE_GLOW = 0x8b93c9;
+// A coordinated 3-family palette anchored in the app's own Aurora tokens
+// (tokens.css: --accent violet, --manager amber) rather than each feature
+// round picking its own unrelated hue -- violet for "real/internal" signal,
+// amber for "secondary/hierarchy" emphasis, a dark plum neutral for "no
+// data yet" so it recedes into the same dark world instead of standing out
+// as its own unrelated blue-gray.
+export const GLOW = 0x8b7cf0; // --accent violet -- real handoff connections
+export const SHARED_GLOW = 0xe0a15c; // --manager amber -- shared connections
+export const QUIET = 0x2e2840; // dark plum-neutral, matches --surface-alt's undertone
+export const PEOPLE_GLOW = 0xa599e8; // lighter violet -- person node fill, same family as GLOW
 
 // tier1 -> tier2 (division/corpfn -> vertical/person) and tier2 -> tier3
-// (vertical -> function) each get their own fixed angular wedge and outward/
-// downward step, matching the original's two expansion "styles".
-const TIER1_WEDGE = 0.95, TIER1_OUTWARD = 1.9, TIER1_YSTEP = -0.65;
+// (vertical -> function) each get their own outward/downward step, matching
+// the original's two expansion "styles". tier2->tier3 also keeps its own
+// fixed wedge (TIER2_WEDGE) -- functions are small and few enough per
+// vertical that a fixed total angle has never been a problem there.
+const TIER1_OUTWARD = 1.9, TIER1_YSTEP = -0.65;
 const TIER2_WEDGE = 0.5, TIER2_OUTWARD = 1.6, TIER2_YSTEP = -0.55;
+
+// Person batches (entry points, or any depth of real direct reports) get an
+// ADAPTIVE wedge instead of a fixed one: a guaranteed minimum angular gap
+// between siblings, growing the total wedge with count rather than
+// squeezing an ever-larger batch into the same fixed budget. Capped so it
+// never sprawls past one division's own "lane" (tier1 neighbors sit 2*PI/5
+// = ~1.257 rad apart). Once even this capped wedge can't honor the minimum
+// gap, SPIRAL_THRESHOLD below hands off to the phyllotaxis spiral instead,
+// which is already proven to space an arbitrary count without overlap.
+const MIN_PERSON_ANGLE_STEP = 0.16;
+const MAX_PERSON_WEDGE = 1.05;
+function personWedge(count) {
+  return Math.min(MAX_PERSON_WEDGE, MIN_PERSON_ANGLE_STEP * Math.max(1, count - 1));
+}
 
 // Fixed total wedge divided by however many children exist, not a fixed step
 // per child — so 2 siblings and 7 siblings both fit their allotted angular
@@ -30,13 +52,15 @@ export function distributeAngles(centerAngle, count, totalWedge) {
   return out;
 }
 
-// Beyond this many children, the fixed wedge-fan above (never designed for
-// more than a handful of siblings) would visibly overlap them — Corporate
-// Functions currently has 130 real people, squeezed into the same ~1 radian
-// wedge every other tier1->tier2 expansion uses for a handful of
-// departments. spiralPositions() below is the alternative for exactly that
-// case; every other expansion in the scene is untouched.
-const SPIRAL_THRESHOLD = 14;
+// Beyond this many children, even personWedge()'s adaptive, capped wedge
+// can no longer honor its own guaranteed minimum gap (the math: at
+// MAX_PERSON_WEDGE=1.05 and MIN_PERSON_ANGLE_STEP=0.16, that starts around
+// 8 siblings) — spiralPositions() below is the more robust choice past that
+// point, a phyllotaxis spiral that's already proven to space an arbitrary
+// count (verified up to Corporate Functions' full 132-person roster before
+// entry-point filtering existed) without overlap. Every other expansion in
+// the scene (division wedge, vertical->function wedge) is untouched.
+const SPIRAL_THRESHOLD = 8;
 // Beyond this many siblings in a single batch, the always-on floating
 // NodeLabel gets suppressed (hover still shows the name either way) -- the
 // real fix for "Corporate Functions reads as a wall of clutter": 132
@@ -318,7 +342,7 @@ function placePersonBatch(place, people, reportsByManagerId, parent, outward, ys
     const spiral = spiralPositions(items.length, parent);
     items.forEach((child, i) => place(child, 2, spiral[i].angle, spiral[i].radius, parent.y + ystep + spiral[i].yOffset, parent.id, { showLabel }));
   } else {
-    const angles = distributeAngles(parent.angle, items.length, TIER2_WEDGE);
+    const angles = distributeAngles(parent.angle, items.length, personWedge(items.length));
     items.forEach((child, i) => place(child, 2, angles[i], parent.radius + outward, parent.y + ystep, parent.id, { showLabel }));
   }
 }
@@ -385,7 +409,7 @@ export function computeVisibleNodes(sceneState, expandedTier1, expandedTier2, pe
           const spiral = spiralPositions(children.length, parent);
           children.forEach((child, i) => place(child, 2, spiral[i].angle, spiral[i].radius, parent.y + TIER1_YSTEP + spiral[i].yOffset, parent.id, { showLabel }));
         } else {
-          const angles = distributeAngles(parent.angle, children.length, TIER1_WEDGE);
+          const angles = distributeAngles(parent.angle, children.length, personWedge(children.length));
           children.forEach((child, i) => place(child, 2, angles[i], parent.radius + TIER1_OUTWARD, parent.y + TIER1_YSTEP, parent.id, { showLabel }));
         }
       }

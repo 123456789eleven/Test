@@ -4,6 +4,8 @@ import * as THREE from "three";
 
 // Ambient drifting particle field — purely decorative, matches the original
 // 1:1: same radius/height distribution, same upward drift speed and wrap.
+// Violet (was an unrelated teal-green) -- see orgTree.js's palette comment
+// for the coordinated 3-family scheme this ambient chrome now belongs to.
 export default function Particles({ count, reduceMotion }) {
   const geomRef = useRef(null);
 
@@ -36,7 +38,7 @@ export default function Particles({ count, reduceMotion }) {
       <bufferGeometry ref={geomRef}>
         <bufferAttribute attach="attributes-position" args={[positions, 3]} />
       </bufferGeometry>
-      <pointsMaterial color={0x5dcaa5} size={0.03} transparent opacity={0.3} blending={THREE.AdditiveBlending} depthWrite={false} />
+      <pointsMaterial color={0x8b7cf0} size={0.03} transparent opacity={0.3} blending={THREE.AdditiveBlending} depthWrite={false} />
     </points>
   );
 }

@@ -226,9 +226,9 @@ export default function Hologram() {
         <a href="#/company">Company details, leadership &amp; history →</a>
       </div>
       <div className="holo-legend">
-        <span className="holo-legend-item"><span className="holo-swatch" style={{ background: "#46d6ff" }} /> Handoff connection</span>
-        <span className="holo-legend-item"><span className="holo-swatch" style={{ background: "#ffb84f" }} /> Shared connection</span>
-        <span className="holo-legend-item"><span className="holo-swatch" style={{ background: "#3a4250" }} /> No connections modeled yet</span>
+        <span className="holo-legend-item"><span className="holo-swatch" style={{ background: "#8b7cf0" }} /> Handoff connection</span>
+        <span className="holo-legend-item"><span className="holo-swatch" style={{ background: "#e0a15c" }} /> Shared connection</span>
+        <span className="holo-legend-item"><span className="holo-swatch" style={{ background: "#2e2840" }} /> No connections modeled yet</span>
         <button
           className={`orgmap-fs-btn${showManagerLines ? " orgmap-fs-btn-active" : ""}`}
           style={{ marginLeft: isSignedIn ? undefined : "auto" }}

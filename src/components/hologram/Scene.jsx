@@ -79,11 +79,16 @@ export default function Scene({
     <>
       <mesh position={[0, -0.15, 0]}>
         <cylinderGeometry args={[8.6, 8.6, 0.25, 64]} />
-        <meshBasicMaterial color={0x0b1017} />
+        <meshBasicMaterial color={0x0a0912} />
       </mesh>
+      {/* Recolored into the violet family (was an unrelated teal-green) and
+          dropped to a much quieter opacity -- at low camera angles this
+          thin rim was filling a large fraction of the frame and blooming
+          into a dominant green pane; see maxPolarAngle below for the other
+          half of that fix. */}
       <mesh rotation-x={-Math.PI / 2} position={[0, -0.02, 0]}>
         <ringGeometry args={[8.5, 8.6, 64]} />
-        <meshBasicMaterial color={0x1d9e75} side={THREE.DoubleSide} transparent opacity={0.6} />
+        <meshBasicMaterial color={0x4b3d78} side={THREE.DoubleSide} transparent opacity={0.22} />
       </mesh>
 
       <Particles count={particleCount} reduceMotion={reduceMotion} />
@@ -127,9 +132,9 @@ export default function Scene({
         autoRotateSpeed={0.6}
         minDistance={6}
         maxDistance={26}
-        maxPolarAngle={Math.PI * 0.49}
+        maxPolarAngle={Math.PI * 0.46}
       />
-      <PostFX strength={smallViewport ? 0.55 : 0.8} radius={0.22} threshold={0.28} />
+      <PostFX strength={smallViewport ? 0.55 : 0.8} radius={0.22} threshold={0.32} />
     </>
   );
 }
