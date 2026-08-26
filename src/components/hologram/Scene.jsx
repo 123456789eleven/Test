@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
-import { OrbitControls } from "@react-three/drei";
+import { CameraControls } from "@react-three/drei";
 import * as THREE from "three";
 import Node from "./Node";
 import ConnectionLines from "./ConnectionLines";
@@ -40,37 +40,46 @@ export default function Scene({
     if (!reduceMotion) scanT.current += 0.006;
   });
 
-  // Camera-follow-on-expand: eases OrbitControls' own orbit target toward
-  // the centroid of whatever tier just got revealed, instead of only
-  // recentering when the user manually drags. Deliberately only moves the
-  // *target* (what the orbit is centered on), never camera.position or
-  // controls.update() directly — OrbitControls already calls its own
-  // .update() every frame (required for enableDamping/autoRotate to work
-  // at all); mutating the target here and letting that existing internal
-  // update pick it up avoids fighting drei's own per-frame handling of the
-  // same controls instance. Falls back to the scene's own center when
-  // nothing is expanded.
+  // Round 4 of the graphics-overhaul plan: replaces OrbitControls + a
+  // hand-rolled fixed-0.045 lerp with drei's CameraControls (wraps
+  // yomotsu/camera-controls, real SmoothDamp-based easing) and its own
+  // real .moveTo(x, y, z, enableTransition) method -- "move target position
+  // to given point" (confirmed by reading the library's own source, not
+  // assumed), the exact semantic equivalent of the old lerp: only the orbit
+  // pivot moves, never camera.position, so the user's chosen distance/angle
+  // is preserved across a refocus exactly like before. Falls back to the
+  // scene's own center when nothing is expanded.
   const controlsRef = useRef(null);
-  const cameraTargetRef = useRef(new THREE.Vector3(0, 0, 0));
+  const userDraggingRef = useRef(false);
   useEffect(() => {
+    const controls = controlsRef.current;
+    if (!controls) return;
     // A person drill chain is deeper than expandedTier2, so it wins when
     // present -- same fallback order the accordion state itself follows
     // (personPath only ever has entries while a person chain is open, and
     // never coexists with an open vertical at the same tier2 slot).
     const deepestParentId = (personPath && personPath.length ? personPath[personPath.length - 1] : null) || expandedTier2 || expandedTier1 || null;
-    if (!deepestParentId) { cameraTargetRef.current.set(0, 0, 0); return; }
+    if (!deepestParentId) { controls.moveTo(0, 0, 0, !reduceMotion); return; }
     const children = nodes.filter((n) => n.parentId === deepestParentId);
     if (!children.length) return;
     const sum = children.reduce((acc, n) => {
       acc.x += n.position[0]; acc.y += n.position[1]; acc.z += n.position[2];
       return acc;
     }, { x: 0, y: 0, z: 0 });
-    cameraTargetRef.current.set(sum.x / children.length, sum.y / children.length, sum.z / children.length);
+    controls.moveTo(sum.x / children.length, sum.y / children.length, sum.z / children.length, !reduceMotion);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [expandedTier1, expandedTier2, personPath]);
-  useFrame(() => {
-    if (!controlsRef.current || reduceMotion) return;
-    controlsRef.current.target.lerp(cameraTargetRef.current, 0.045);
+
+  // Manual idle auto-rotation -- camera-controls has no built-in autoRotate
+  // (confirmed by reading its source; OrbitControls has one, this library
+  // doesn't), so this replicates it: a small continuous azimuth rotate,
+  // frame-rate-independent via `delta`, paused while the user is actively
+  // dragging (onControlStart/onControlEnd below) so it doesn't fight real
+  // input the way a naive "always rotate" would.
+  const AUTOROTATE_SPEED = 0.12; // rad/s
+  useFrame((_, delta) => {
+    if (!controlsRef.current || reduceMotion || userDraggingRef.current) return;
+    controlsRef.current.rotate(AUTOROTATE_SPEED * delta, 0, false);
   });
 
   const particleCount = smallViewport ? 90 : 220;
@@ -136,15 +145,14 @@ export default function Scene({
         />
       ) : null}
 
-      <OrbitControls
+      <CameraControls
         ref={controlsRef}
-        enableDamping
-        dampingFactor={0.06}
-        autoRotate={!reduceMotion}
-        autoRotateSpeed={0.6}
         minDistance={6}
         maxDistance={26}
         maxPolarAngle={Math.PI * 0.46}
+        smoothTime={0.25}
+        onControlStart={() => { userDraggingRef.current = true; }}
+        onControlEnd={() => { userDraggingRef.current = false; }}
       />
       <PostFX strength={smallViewport ? 0.55 : 0.8} radius={0.22} threshold={0.32} />
     </>
