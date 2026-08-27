@@ -78,6 +78,13 @@ const RIM_FRAGMENT_SHADER = /* glsl */ `
   void main() {
     float fresnel = pow(1.0 - clamp(dot(normalize(vNormal), normalize(vViewDir)), 0.0, 1.0), power);
 
+    // Restored to the original round-1 amplitudes after a diagnostic pass
+    // (0.15+0.85*scan / 0.4+0.6*grain) confirmed the shader itself is live
+    // and correctly wired. Flagging, not silently fixing: these original
+    // 15%/8% amplitudes were already suspected to be too subtle once bloom
+    // smooths them -- that's a separate, still-open tuning question for a
+    // later round, not something to guess a new number for in the middle
+    // of this cleanup pass.
     // Scrolls up the node's own local height; speeds up when this node is
     // the one actively being interacted with (hovered or expanded) -- a
     // real, legible "this one is active" signal beyond just brighter idle

@@ -24,7 +24,12 @@ import NodeLabel from "./NodeLabel";
 // constants live here instead.
 const EXTERNAL_SIZE = 0.46;
 const EXTERNAL_COLOR = 0xd68c4a;
-const EXTERNAL_OPACITY = 0.36;
+// Raised from 0.36 -- same uniform-fill-opacity issue as org nodes (see
+// orgTree.js's place() for the full rationale): the fill has no fresnel
+// weighting of its own, so a low flat value here just reads as "barely
+// there" rather than "hologram." The already-fresnel-weighted rim shell
+// below carries the edge glow/fade; this fill's job is a legible body.
+const EXTERNAL_OPACITY = 0.9;
 
 // Deterministic per-node phase, same char-code-sum trick as Node.jsx/
 // ConnectionLines.jsx, keyed on the node's own stable id.
@@ -83,6 +88,7 @@ const RIM_FRAGMENT_SHADER = /* glsl */ `
   void main() {
     float fresnel = pow(1.0 - clamp(dot(normalize(vNormal), normalize(vViewDir)), 0.0, 1.0), power);
 
+    // Restored to the round-1 amplitudes -- see Node.jsx's matching comment.
     float scanSpeed = mix(0.6, 1.8, signal);
     float scan = sin(vLocalPos.y * 18.0 - time * scanSpeed) * 0.5 + 0.5;
     float scanline = 0.85 + 0.15 * scan;

@@ -27,15 +27,18 @@ export default function PostFX({ strength = 0.8, radius = 0.22, threshold = 0.32
 
   const ssaoPass = useMemo(() => {
     const pass = new SSAOPass(scene, camera, size.width, size.height);
-    // Defaults (kernelRadius 8, minDistance 0.005, maxDistance 0.1) are
-    // tuned for typical unit-scale meshes; this scene's node sizes
-    // (0.19-0.75) and spacing (tier1 ~6.5 units apart) run larger, so these
-    // are a first real guess, not a verified value -- needs real eyes to
-    // confirm AO reads as depth rather than muddying the smallest function
-    // nodes.
+    // A diagnostic pass (kernelRadius 40, near-zero minDistance, output
+    // forced to the raw grayscale buffer) briefly replaced this to prove AO
+    // was live after it turned out to be washing the whole viewport into a
+    // grey blob -- root cause was the raw-buffer output mode, not these
+    // values. Restored to the real, tasteful settings: this scene's node
+    // sizes (0.19-0.75) and spacing are much smaller than the SSAOPass
+    // defaults assume, so kernelRadius/min/maxDistance are tuned down from
+    // stock, not left at either extreme.
     pass.kernelRadius = 10;
     pass.minDistance = 0.002;
     pass.maxDistance = 0.15;
+    pass.output = SSAOPass.OUTPUT.Default;
     return pass;
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [scene, camera]);

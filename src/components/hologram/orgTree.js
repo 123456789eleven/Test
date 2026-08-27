@@ -441,7 +441,16 @@ export function computeVisibleNodes(sceneState, expandedTier1, expandedTier2, pe
     const isCluster = !!item.isCluster;
     const size = tier === 1 ? RADIUS.division : tier === 2 ? RADIUS.vertical : RADIUS.function;
     const { color } = colorAndConnected(sceneState, tier, item, isPerson);
-    const opacity = tier === 1 ? 0.3 : tier === 2 ? 0.34 : 0.38;
+    // Raised from 0.3/0.34/0.38 -- that low, and uniform across the whole
+    // mesh (meshBasicMaterial's opacity has no fresnel/edge weighting of
+    // its own), meant every node's body read as barely-there, especially
+    // once idle breathing multiplied it down further (as low as ~0.26 at
+    // the low point of the cycle). The hologram "glow and fade" effect
+    // already lives in the separate, correctly fresnel-weighted rim shell
+    // (Node.jsx's additive rim shader) -- this fill's only job is a
+    // legible, solid-reading body, so it now stays high and stable instead
+    // of competing with the rim for the same visual effect.
+    const opacity = tier === 1 ? 0.85 : tier === 2 ? 0.88 : 0.92;
     // A synthetic cluster ("Individual Contributors (N)") gets its own kind
     // rather than "person" -- HoverLabel's EDIT_KIND/addKindFor only
     // recognize known kind strings, so this alone keeps the Edit/+Add

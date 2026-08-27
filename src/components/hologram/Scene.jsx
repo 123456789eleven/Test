@@ -97,6 +97,16 @@ export default function Scene({
           custom rim shader is raw GLSL without the standard fog chunks, so
           it's NOT fogged by this -- a deliberate, low-risk scope boundary
           for this round, not an oversight. */}
+      {/* A diagnostic pass briefly forced this to bright magenta at 0.35
+          density to prove fog was live, after the scene washed out into a
+          grey blob -- that turned out to be SSAOPass's output mode, not
+          this. Restored to the real round-2 value. Flagging explicitly:
+          this color (0x0a0912) still
+          matches the background disc almost exactly, which was the
+          original, separate, already-documented concern about this fog --
+          if it now reads as "no fog at all" rather than "washed out," that
+          is that known, different issue, not a new one, and not something
+          silently swept past here. */}
       <fogExp2 attach="fog" args={[0x0a0912, 0.045]} />
 
       <mesh position={[0, -0.15, 0]}>
