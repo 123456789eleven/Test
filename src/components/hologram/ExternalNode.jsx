@@ -128,7 +128,11 @@ export default function ExternalNode({ node, hoveredId, onHover, onUnhover, onMo
     const elapsed = performance.now() - mountedAtRef.current;
     const growIn = Math.min(1, elapsed / 260);
     const eased = 1 - Math.pow(1 - growIn, 3);
-    const hoverScale = isHovered ? 1.12 : 1;
+    // No scale-bump on hover, unlike Node.jsx -- these nodes are purely
+    // decorative (no click behavior at all, see the comment below), so a
+    // "this is a button" scale reaction would be actively misleading. The
+    // quieter opacity/rim acknowledgment below still confirms you're
+    // pointing at something real, without implying you can press it.
     const flatOpacity = isHovered ? Math.min(1, EXTERNAL_OPACITY + 0.25) : EXTERNAL_OPACITY;
     const rimBase = isHovered ? 1.35 : 1;
 
@@ -138,7 +142,7 @@ export default function ExternalNode({ node, hoveredId, onHover, onUnhover, onMo
     const s = reduceMotion ? 0 : Math.sin(performance.now() * 0.001 * BREATH_SPEED + phase);
     const pulse = 0.5 + 0.5 * s;
 
-    const target = eased * hoverScale * (1 + BREATH_SCALE_AMOUNT * s);
+    const target = eased * (1 + BREATH_SCALE_AMOUNT * s);
     const next = g.scale.x + (target - g.scale.x) * 0.25;
     g.scale.set(next, next, next);
 

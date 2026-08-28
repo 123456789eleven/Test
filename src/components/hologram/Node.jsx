@@ -1,5 +1,6 @@
 import { useMemo, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
+import { useCursor } from "@react-three/drei";
 import * as THREE from "three";
 import NodeLabel from "./NodeLabel";
 
@@ -124,6 +125,11 @@ export default function Node({ node, hoveredId, onHover, onUnhover, onMove, onCl
   if (mountedAtRef.current === null) mountedAtRef.current = performance.now();
   const isHovered = hoveredId === id;
   const isDepartment = kind === "vertical";
+  // Every Node.jsx-rendered node does something on click (expand, drill,
+  // open a card/panel) -- unlike ExternalNode.jsx, which is purely
+  // decorative -- so the pointer cursor is unconditional here, no
+  // per-node gating needed.
+  useCursor(isHovered);
 
   // Departments (verticals) get a distinct box shape -- previously identical
   // to every other node (an octahedron), which is exactly why a division's
