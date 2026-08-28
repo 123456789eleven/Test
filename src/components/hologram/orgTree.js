@@ -422,6 +422,14 @@ function personItem(p, reportsByManagerId) {
   return {
     id: p.id, name: p.name, isPerson: true, managerId: p.managerId, isCluster: !!p.isCluster,
     hasReports: (reportsByManagerId.get(p.id) || []).length > 0,
+    // Real title/rank for the card-format label (Node.jsx resolves titleId
+    // -> a rank label via a titlesById map passed in from the rendering
+    // layer -- orgTree.js stays free of that lookup, just carries the raw
+    // id through). Undefined for a synthetic cluster (p.title/titleId never
+    // set on one) -- rendered as an honest no-title-line state, never a
+    // fabricated rank.
+    title: p.title || null,
+    titleId: p.titleId || null,
   };
 }
 
@@ -469,6 +477,8 @@ export function computeVisibleNodes(sceneState, expandedTier1, expandedTier2, pe
       id: item.id, name: item.name, tier, kind, isPerson, isCluster, parentId,
       angle, radius, y, position: [x, y, z], size, color, opacity, expandable, expanded, showLabel,
       managerId: isPerson ? item.managerId || null : null,
+      title: isPerson ? item.title || null : null,
+      titleId: isPerson ? item.titleId || null : null,
     };
     nodesById.set(item.id, node);
     allNodes.push(node);

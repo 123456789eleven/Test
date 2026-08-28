@@ -108,8 +108,16 @@ const RIM_FRAGMENT_SHADER = /* glsl */ `
 // reduceMotion is set — breathes gently at rest, all via simple per-frame
 // lerps/sines instead of a tween library, none of it touching the
 // interaction model (still the same click → toggle/detail routing).
-export default function Node({ node, hoveredId, onHover, onUnhover, onMove, onClick, reduceMotion = false }) {
-  const { id, size, color, opacity, position, name, tier, isPerson, kind, showLabel = true } = node;
+export default function Node({ node, hoveredId, onHover, onUnhover, onMove, onClick, reduceMotion = false, titlesById }) {
+  const { id, size, color, opacity, position, name, tier, isPerson, isCluster, kind, showLabel = true, title, titleId } = node;
+  // Card-format label content: only for a real person with a real,
+  // resolved rank -- never for a synthetic "Individual Contributors"
+  // cluster (no titleId ever set on one) and never a fabricated rank if
+  // titleId doesn't resolve in titlesById for some reason. No title/rank
+  // data means the plain one-line pill, same as before this feature.
+  const rankInfo = isPerson && !isCluster && titleId ? titlesById?.get(titleId) : null;
+  const cardSubtitle = rankInfo && title ? title : null;
+  const cardRank = rankInfo ? rankInfo.rank : null;
   const groupRef = useRef(null);
   const matRef = useRef(null);
   const mountedAtRef = useRef(null);
@@ -226,6 +234,8 @@ export default function Node({ node, hoveredId, onHover, onUnhover, onMove, onCl
           tier={isPerson ? 2 : tier}
           dim={isHovered}
           variant={isDepartment ? "department" : "default"}
+          subtitle={cardSubtitle}
+          rank={cardRank}
         />
       ) : null}
     </>

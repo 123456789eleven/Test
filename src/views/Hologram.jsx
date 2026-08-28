@@ -282,6 +282,7 @@ export default function Hologram() {
                 expandedTier2={expandedTier2}
                 personPath={personPath}
                 showManagerLines={showManagerLines}
+                titlesById={titlesById}
               />
             </Canvas>
             <HoverLabel hovered={hovered} isSignedIn={isSignedIn} onEdit={openEdit} onAdd={openAdd} onViewProfile={setDetailPerson} />

@@ -28,6 +28,21 @@
   border-radius: var(--radius-sm); border-color: rgba(139,124,240,0.35);
   background: rgba(20,17,31,0.82);
 }
+/* Card-format label (leadership tier, first pass) -- same pill chrome as
+   every other label, just a two-line layout when a real title exists.
+   Never a new panel style: still the identical background/border/blur as
+   the plain one-line label, only the internal layout grows. */
+.holo-node-label-card {
+  display: flex; flex-direction: column; align-items: flex-start; gap: 1px;
+  padding: 4px 10px; white-space: normal;
+}
+.holo-node-label-row { display: flex; align-items: center; gap: 5px; white-space: nowrap; }
+/* Rank dot -- amber (--manager), the same hierarchy/emphasis family already
+   used for manager-lines and decision-point badges elsewhere in this scene.
+   Size/opacity (not hue) carries seniority, set inline per-node from the
+   real org_titles.rank value. */
+.holo-node-label-dot { border-radius: 50%; background: var(--manager); flex: none; }
+.holo-node-label-title { font-weight: 500; font-size: 0.85em; color: var(--ink-soft); }
 
 .holo-page { position: relative; }
 .holo-header {

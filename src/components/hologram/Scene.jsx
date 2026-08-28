@@ -28,7 +28,7 @@ export default function Scene({
   stakeholders, simulation, sceneState, nodesById, externalNodesById, tasksById,
   showFullPath, workflowSteps, workflowTransitions,
   expandedTier1, expandedTier2, personPath,
-  showManagerLines,
+  showManagerLines, titlesById,
 }) {
   // Shared clock for the connection lines' breathing glow (also drove the
   // sonar ScanRing, removed -- its vertical sweep was the actual "pane
@@ -139,7 +139,7 @@ export default function Scene({
       <Particles count={particleCount} reduceMotion={reduceMotion} />
 
       {nodes.map((n) => (
-        <Node key={n.id} node={n} hoveredId={hoveredId} onHover={onHover} onUnhover={onUnhover} onMove={onMove} onClick={onClick} reduceMotion={reduceMotion} />
+        <Node key={n.id} node={n} hoveredId={hoveredId} onHover={onHover} onUnhover={onUnhover} onMove={onMove} onClick={onClick} reduceMotion={reduceMotion} titlesById={titlesById} />
       ))}
       <ConnectionLines lines={lines} hoveredId={hoveredId} reduceMotion={reduceMotion} scanT={scanT} />
       {nodesById ? <ManagerLines nodesById={nodesById} hoveredId={hoveredId} enabled={!!showManagerLines} /> : null}
