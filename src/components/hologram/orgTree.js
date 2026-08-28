@@ -44,7 +44,16 @@ const SECTOR_GAP = 0.75;
 // = ~1.257 rad apart). Once even this capped wedge can't honor the minimum
 // gap, SPIRAL_THRESHOLD below hands off to the phyllotaxis spiral instead,
 // which is already proven to space an arbitrary count without overlap.
-const MIN_PERSON_ANGLE_STEP = 0.16;
+// Retuned for the card-format labels (2 lines + a rank dot -- meaningfully
+// bigger than the 1-line pill this was originally sized against). Real
+// case: Strategies has exactly 2 entry points, so personWedge(2) was
+// literally just this one constant (MIN_STEP * (2-1)) -- there was no
+// larger formula masking it. Chose a systematic retune (this constant +
+// SPIRAL_THRESHOLD below) over nudging the two colliding nodes by hand,
+// since a one-off nudge wouldn't hold as more tiers get the card treatment
+// and every other division with a small entry-point count hits the exact
+// same formula.
+const MIN_PERSON_ANGLE_STEP = 0.3;
 const MAX_PERSON_WEDGE = 1.05;
 function personWedge(count) {
   return Math.min(MAX_PERSON_WEDGE, MIN_PERSON_ANGLE_STEP * Math.max(1, count - 1));
@@ -62,14 +71,16 @@ export function distributeAngles(centerAngle, count, totalWedge) {
 }
 
 // Beyond this many children, even personWedge()'s adaptive, capped wedge
-// can no longer honor its own guaranteed minimum gap (the math: at
-// MAX_PERSON_WEDGE=1.05 and MIN_PERSON_ANGLE_STEP=0.16, that starts around
-// 8 siblings) — spiralPositions() below is the more robust choice past that
-// point, a phyllotaxis spiral that's already proven to space an arbitrary
-// count (verified up to Corporate Functions' full 132-person roster before
-// entry-point filtering existed) without overlap. Every other expansion in
-// the scene (division wedge, vertical->function wedge) is untouched.
-const SPIRAL_THRESHOLD = 8;
+// can no longer honor its own guaranteed minimum gap -- at the new, bigger
+// MIN_PERSON_ANGLE_STEP (0.3), that's counts of 5+ (0.3*4=1.2 > the 1.05
+// cap), so this is lowered from 8 to keep the wedge branch's own promise
+// intact for its whole real range (1-4) rather than let it silently
+// compress again right where the last fix left off. spiralPositions()
+// below is the more robust choice past that point, a phyllotaxis spiral
+// that's already proven to space an arbitrary count without overlap.
+// Every other expansion in the scene (division wedge, vertical->function
+// wedge) is untouched.
+const SPIRAL_THRESHOLD = 5;
 // Beyond this many siblings in a single batch, the always-on floating
 // NodeLabel gets suppressed (hover still shows the name either way) -- the
 // real fix for "Corporate Functions reads as a wall of clutter": 132
@@ -78,18 +89,16 @@ const SPIRAL_THRESHOLD = 8;
 // app's visual feedback has resolved every other time.
 const LABEL_DENSE_THRESHOLD = 10;
 const GOLDEN_ANGLE = Math.PI * (3 - Math.sqrt(5)); // ~2.39996 rad (~137.5deg) -- the standard phyllotaxis/"sunflower" stepping angle that spaces an arbitrary number of points with no two ever radiating along the same line
-// radius-per-sqrt(index) growth. The old value (0.24) was tuned by eye
-// against corpfn's full 130-person spiral and never actually checked
-// against node size -- a golden-angle spiral's real minimum nearest-
-// neighbor spacing works out to roughly SPIRAL_STEP*1.2, which at 0.24 is
-// ~0.29 units, well under a tier2 node's 0.68-unit diameter (guaranteed
-// overlap, independent of count). Since entry-point clustering (see
-// groupEntryPoints) keeps any single batch that still needs the spiral
-// down to a realistic max of ~20 (one manager's real direct reports, the
-// largest in the live data), 0.5 is sized against THAT ceiling instead:
-// spacing ~0.6, radius at 20 points ~2.2 -- comfortably inside the ~6.5
-// units between neighboring divisions.
-const SPIRAL_STEP = 0.5;
+// radius-per-sqrt(index) growth. Bumped again (0.5 -> 0.65) alongside the
+// SPIRAL_THRESHOLD drop above -- counts 5-8 (e.g. Advantage's real 8-node
+// mixed batch) now land in the spiral instead of the wedge, and those
+// counts are squarely inside where the card-format label actually renders
+// (LABEL_DENSE_THRESHOLD is 10), so this range needs real card-sized
+// spacing, not just bare-geometry spacing. Real minimum nearest-neighbor
+// spacing is roughly SPIRAL_STEP*1.2 -- ~0.78 units at 0.65, up from ~0.6.
+// Still comfortably inside the ~6.5 units between neighboring divisions
+// even at the largest real count this spiral handles (~20).
+const SPIRAL_STEP = 0.65;
 
 // A phyllotaxis spiral centered on a world position at the parent's own
 // radius but (optionally) a different angle -- not the scene origin --
@@ -141,7 +150,14 @@ export function resolveVisible(functionId, sceneState, nodesById) {
 }
 
 export const EXTERNAL_STAKEHOLDER_IDS = ["stake-client", "stake-beneficiary", "stake-carrier", "stake-broker"];
-const EXTERNAL_RADIUS = 9.6, EXTERNAL_Y = 0.4;
+// Pushed out from 9.6 -- only 1.0 unit past the base disc's own 8.6-unit
+// edge, which left little real clearance from a deeply-drilled org chain's
+// own outward growth (a person-tier card was reported sitting directly
+// against the Client/Employer node). This is a genuine cross-system gap:
+// the org accordion and the external-stakeholder ring were never designed
+// with each other's on-screen footprint in mind, so more radial buffer is
+// the direct fix rather than trying to cap how far org chains can grow.
+const EXTERNAL_RADIUS = 11.5, EXTERNAL_Y = 0.4;
 
 // External stakeholders (client, qualified beneficiary, carrier, broker) sit
 // on a fixed ring just outside the base disc (radius 8.6, see Scene.jsx) --
