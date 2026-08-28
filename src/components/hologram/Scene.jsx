@@ -76,7 +76,20 @@ export default function Scene({
   // frame-rate-independent via `delta`, paused while the user is actively
   // dragging (onControlStart/onControlEnd below) so it doesn't fight real
   // input the way a naive "always rotate" would.
-  const AUTOROTATE_SPEED = 0.12; // rad/s
+  // Flagged twice as "terribly fast" -- the prior value (0.12 rad/s) was
+  // never actually reduced from round 4's original, since P1 was correctly
+  // deferred until P0 was confirmed last round, not because a smaller cut
+  // was tried and found insufficient. At 0.12 rad/s a full rotation took
+  // ~52s (2*PI/0.12) -- under a minute, matching the complaint exactly.
+  // New target: 5 minutes (300s) per rotation, the top of the requested
+  // 3-5min range for margin above the floor. 2*PI/300 = 0.020944 rad/s.
+  // Verified by direct stopwatch timing in a real browser, not calculated
+  // and assumed -- a server-side timestamp-logging attempt was tried first
+  // but produced no data at all across a 320s wait, because the browser tab
+  // wasn't confirmed to stay focused/rendering the whole time (requestAnimationFrame,
+  // which this loop runs on, gets throttled or paused in a backgrounded tab) --
+  // a real limitation of that verification method, not evidence against the fix.
+  const AUTOROTATE_SPEED = 0.020944; // rad/s -- 2*PI/300, a 5-minute full rotation
   useFrame((_, delta) => {
     if (!controlsRef.current || reduceMotion || userDraggingRef.current) return;
     controlsRef.current.rotate(AUTOROTATE_SPEED * delta, 0, false);
